@@ -1,0 +1,24 @@
+html.light {
+  --menuBg: #fff !important;
+  --menuText: #51599b !important;
+
+  --menuHover: #fff !important;
+
+  --subMenuBg: #fff !important;
+  --subMenuActiveText: var(--el-color-primary) !important;
+  --subMenuHover: #fff !important;
+  --sidebarLogo: #fff !important;
+  --subMenuHoverText: var(--el-color-primary) !important;
+  --menuActiveText: var(--el-color-primary) !important;
+
+  .el-menu {
+    --el-menu-hover-bg-color: #fff !important;
+    // --el-menu-active-text-color: #5c6299 !important;
+  }
+  .el-menu--horizontal {
+    --subActiveText: var(--el-color-primary) !important;
+  }
+  .el-menu--horizontal.el-menu--popup-container{
+    --subActiveText:#fff !important;
+  }
+}
