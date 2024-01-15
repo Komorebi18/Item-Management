@@ -19,7 +19,7 @@ function changeForm(val: boolean) {
       <div class="right-area">
         <div class="logo">
           <img src="@/assets/logo.png" alt="" class="logo-img" />
-          <p class="logo-font">XIAOADMIN</p>
+          <p class="logo-font">SHUZHI</p>
         </div>
         <div class="form">
           <LoginForm v-if="isForm" @change-form="changeForm"></LoginForm>

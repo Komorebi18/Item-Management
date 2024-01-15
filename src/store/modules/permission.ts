@@ -16,6 +16,7 @@ const Layout = () => import('@/layout/index.vue')
 // hasPermission() 返回一个布尔值 判断 是否有该角色 ，超级管理员有所有权限 ，其他角色需要 判断 roles 中的角色 是否该路由的 route.meta.roles 中存在 存在有权限访问该路由，不存在则无权
 const hasPermission = (roles: string[], route: RouteRecordRaw) => {
   if (route.meta && route.meta.roles) {
+    console.log(route.meta.roles)
     // 角色【超级管理员】拥有所有权限，忽略校验
     if (roles.includes('ROOT')) {
       return true
@@ -41,7 +42,6 @@ const filterAsyncRoutes = (routes: RouteRecordRaw[], roles: string[]) => {
 
   routes.forEach((route) => {
     const tmpRoute = { ...route } // ES6扩展运算符复制新对象
-    console.log(tmpRoute)
     // 判断用户(角色)是否有该路由的访问权限  hasPermission() 判断当前角色是否有该路由权限 有返回true 没有false
     if (hasPermission(roles, tmpRoute)) {
       if (tmpRoute.component?.toString() == 'Layout') {
@@ -79,7 +79,6 @@ export const usePermissionStore = defineStore('permission', () => {
   // actions // 拼接动态路由和静态路由
   function setRoutes(newRoutes: RouteRecordRaw[]) {
     routes.value = constantRoutes.concat(newRoutes)
-    console.log(routes.value)
   }
   /**
    * 生成动态路由
@@ -92,7 +91,6 @@ export const usePermissionStore = defineStore('permission', () => {
       // 接口获取所有路由
       getAsyncRoutes()
         .then(({ data: asyncRoutes }) => {
-          console.log(asyncRoutes)
           hasRouter.value = asyncRoutes
           // 根据角色获取有访问权限的路由
           const accessedRoutes = filterAsyncRoutes(asyncRoutes, roles)

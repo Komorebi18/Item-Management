@@ -17,12 +17,12 @@ const logo = ref(new URL(`../../../assets/logo.png`, import.meta.url).href);
     <transition name="sidebarLogoFade">
       <router-link v-if="collapse" key="collapse" class="h-full w-full flex items-center justify-center" to="/">
         <img v-if="settingsStore.sidebarLogo" :src="logo" />
-        <span v-else class="sidebar-title">XiaoAdmin</span>
+        <span v-else class="sidebar-title">ItemManagement</span>
       </router-link>
 
       <router-link v-else key="expand" class="h-full w-full flex items-center justify-center" to="/">
         <img :src="logo" />
-        <span class="sidebar-title">XiaoAdmin</span>
+        <span class="sidebar-title">ItemManagement</span>
       </router-link>
     </transition>
   </div>
@@ -51,13 +51,13 @@ img {
 .sidebar-title {
   height: 32px;
   line-height: 32px;
-  margin: 2px 10px 0 20px;
+  margin: 2px 10px 0 15px;
   color: $subMenuActiveText;
   display: inline-block;
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 600;
 }
 </style>
