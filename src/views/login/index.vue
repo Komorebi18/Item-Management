@@ -23,7 +23,7 @@ function changeForm(val: boolean) {
         </div>
         <div class="form">
           <LoginForm v-if="isForm" @change-form="changeForm"></LoginForm>
-          <RegisterForm v-else @change-form="changeForm"></RegisterForm>
+          <!-- <RegisterForm v-else @change-form="changeForm"></RegisterForm> -->
         </div>
       </div>
     </div>
