@@ -1,28 +1,28 @@
-import vue from '@vitejs/plugin-vue'
+import vue from "@vitejs/plugin-vue";
 
-import { UserConfig, ConfigEnv, loadEnv, defineConfig } from 'vite'
+import { UserConfig, ConfigEnv, loadEnv, defineConfig } from "vite";
 
-import AutoImport from 'unplugin-auto-import/vite'
-import Components from 'unplugin-vue-components/vite'
-import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
+import AutoImport from "unplugin-auto-import/vite";
+import Components from "unplugin-vue-components/vite";
+import { ElementPlusResolver } from "unplugin-vue-components/resolvers";
 
-import Icons from 'unplugin-icons/vite'
-import IconsResolver from 'unplugin-icons/resolver'
-import svgLoader from 'vite-svg-loader'
+import Icons from "unplugin-icons/vite";
+import IconsResolver from "unplugin-icons/resolver";
+import svgLoader from "vite-svg-loader";
 
-import { createSvgIconsPlugin } from 'vite-plugin-svg-icons'
-import UnoCSS from 'unocss/vite'
+import { createSvgIconsPlugin } from "vite-plugin-svg-icons";
+import UnoCSS from "unocss/vite";
 
-import path from 'path'
-const pathSrc = path.resolve(__dirname, 'src')
+import path from "path";
+const pathSrc = path.resolve(__dirname, "src");
 
 export default defineConfig(({ command, mode }: ConfigEnv): UserConfig => {
-  const env = loadEnv(mode, process.cwd())
+  const env = loadEnv(mode, process.cwd());
   return {
     resolve: {
       alias: {
-        '@': pathSrc,
-        'vue-i18n': 'vue-i18n/dist/vue-i18n.cjs.js'
+        "@": pathSrc,
+        "vue-i18n": "vue-i18n/dist/vue-i18n.cjs.js"
       }
     },
     css: {
@@ -38,16 +38,17 @@ export default defineConfig(({ command, mode }: ConfigEnv): UserConfig => {
       }
     },
     server: {
-      host: '0.0.0.0',
+      host: "0.0.0.0",
       port: Number(env.VITE_APP_PORT),
       open: true,
       // 反向代理解决跨域
       proxy: {
         [env.VITE_APP_BASE_API]: {
           // 线上接口API地址
-          target: 'http://www.shkmzzh.com',
+          target: " http://jwb6k6.natappfree.cc",
           changeOrigin: true,
-          rewrite: path => path.replace(new RegExp('^' + env.VITE_APP_BASE_API), '')
+          rewrite: path =>
+            path.replace(new RegExp("^" + env.VITE_APP_BASE_API), "")
         }
       }
     },
@@ -58,10 +59,10 @@ export default defineConfig(({ command, mode }: ConfigEnv): UserConfig => {
       svgLoader(),
       AutoImport({
         // 自动导入 Vue 相关函数，如：ref, reactive, toRef 等
-        imports: ['vue', '@vueuse/core'],
+        imports: ["vue", "@vueuse/core"],
         eslintrc: {
           enabled: false, //  Default `false`
-          filepath: './.eslintrc-auto-import.json', // Default `./.eslintrc-auto-import.json`
+          filepath: "./.eslintrc-auto-import.json", // Default `./.eslintrc-auto-import.json`
           globalsPropValue: true // Default `true`, (true | false | 'readonly' | 'readable' | 'writable' | 'writeable')
         },
         resolvers: [
@@ -71,19 +72,19 @@ export default defineConfig(({ command, mode }: ConfigEnv): UserConfig => {
           IconsResolver({})
         ],
         vueTemplate: true, // 是否在 vue 模板中自动导入
-        dts: path.resolve(pathSrc, 'types', 'auto-imports.d.ts') //  自动导入组件类型声明文件位置，默认根目录; false 关闭自动生成
+        dts: path.resolve(pathSrc, "types", "auto-imports.d.ts") //  自动导入组件类型声明文件位置，默认根目录; false 关闭自动生成
       }),
 
       Components({
         resolvers: [
           // 自动注册图标组件
           IconsResolver({
-            enabledCollections: ['ep'] //@iconify-json/ep 是 Element Plus 的图标库
+            enabledCollections: ["ep"] //@iconify-json/ep 是 Element Plus 的图标库
           }),
           // 自动导入 Element Plus 组件
           ElementPlusResolver()
         ],
-        dts: path.resolve(pathSrc, 'types', 'components.d.ts') //  自动导入组件类型声明文件位置，默认根目录; false 关闭自动生成
+        dts: path.resolve(pathSrc, "types", "components.d.ts") //  自动导入组件类型声明文件位置，默认根目录; false 关闭自动生成
       }),
 
       Icons({
@@ -93,76 +94,76 @@ export default defineConfig(({ command, mode }: ConfigEnv): UserConfig => {
 
       createSvgIconsPlugin({
         // 指定需要缓存的图标文件夹
-        iconDirs: [path.resolve(pathSrc, 'assets/icons')],
+        iconDirs: [path.resolve(pathSrc, "assets/icons")],
         // 指定symbolId格式
-        symbolId: 'icon-[dir]-[name]'
+        symbolId: "icon-[dir]-[name]"
       })
     ],
     build: {
-      outDir: 'dist', // 打包后的文件输出目录
-      assetsDir: 'static', // 存放静态资源的目录
+      outDir: "dist", // 打包后的文件输出目录
+      assetsDir: "static", // 存放静态资源的目录
       rollupOptions: {
         input: {
-          index: 'index.html' // 打包入口文件路径
+          index: "index.html" // 打包入口文件路径
         },
         output: {
-          chunkFileNames: 'static/js/[name]-[hash].js', // Chunk 文件名格式
-          entryFileNames: 'static/js/[name]-[hash].js', // 入口文件名格式
-          assetFileNames: 'static/[ext]/[name]-[hash].[ext]' // 资源文件名格式
+          chunkFileNames: "static/js/[name]-[hash].js", // Chunk 文件名格式
+          entryFileNames: "static/js/[name]-[hash].js", // 入口文件名格式
+          assetFileNames: "static/[ext]/[name]-[hash].[ext]" // 资源文件名格式
         }
       }
     },
     optimizeDeps: {
       include: [
-        'vue',
-        'vue-router',
-        'pinia',
-        'axios',
-        'element-plus/es/components/form/style/css',
-        'element-plus/es/components/form-item/style/css',
-        'element-plus/es/components/button/style/css',
-        'element-plus/es/components/input/style/css',
-        'element-plus/es/components/input-number/style/css',
-        'element-plus/es/components/switch/style/css',
-        'element-plus/es/components/upload/style/css',
-        'element-plus/es/components/menu/style/css',
-        'element-plus/es/components/col/style/css',
-        'element-plus/es/components/icon/style/css',
-        'element-plus/es/components/row/style/css',
-        'element-plus/es/components/tag/style/css',
-        'element-plus/es/components/dialog/style/css',
-        'element-plus/es/components/loading/style/css',
-        'element-plus/es/components/radio/style/css',
-        'element-plus/es/components/radio-group/style/css',
-        'element-plus/es/components/popover/style/css',
-        'element-plus/es/components/scrollbar/style/css',
-        'element-plus/es/components/tooltip/style/css',
-        'element-plus/es/components/dropdown/style/css',
-        'element-plus/es/components/dropdown-menu/style/css',
-        'element-plus/es/components/dropdown-item/style/css',
-        'element-plus/es/components/sub-menu/style/css',
-        'element-plus/es/components/menu-item/style/css',
-        'element-plus/es/components/divider/style/css',
-        'element-plus/es/components/card/style/css',
-        'element-plus/es/components/link/style/css',
-        'element-plus/es/components/breadcrumb/style/css',
-        'element-plus/es/components/breadcrumb-item/style/css',
-        'element-plus/es/components/table/style/css',
-        'element-plus/es/components/tree-select/style/css',
-        'element-plus/es/components/table-column/style/css',
-        'element-plus/es/components/select/style/css',
-        'element-plus/es/components/option/style/css',
-        'element-plus/es/components/pagination/style/css',
-        'element-plus/es/components/tree/style/css',
-        'element-plus/es/components/alert/style/css',
-        '@vueuse/core',
+        "vue",
+        "vue-router",
+        "pinia",
+        "axios",
+        "element-plus/es/components/form/style/css",
+        "element-plus/es/components/form-item/style/css",
+        "element-plus/es/components/button/style/css",
+        "element-plus/es/components/input/style/css",
+        "element-plus/es/components/input-number/style/css",
+        "element-plus/es/components/switch/style/css",
+        "element-plus/es/components/upload/style/css",
+        "element-plus/es/components/menu/style/css",
+        "element-plus/es/components/col/style/css",
+        "element-plus/es/components/icon/style/css",
+        "element-plus/es/components/row/style/css",
+        "element-plus/es/components/tag/style/css",
+        "element-plus/es/components/dialog/style/css",
+        "element-plus/es/components/loading/style/css",
+        "element-plus/es/components/radio/style/css",
+        "element-plus/es/components/radio-group/style/css",
+        "element-plus/es/components/popover/style/css",
+        "element-plus/es/components/scrollbar/style/css",
+        "element-plus/es/components/tooltip/style/css",
+        "element-plus/es/components/dropdown/style/css",
+        "element-plus/es/components/dropdown-menu/style/css",
+        "element-plus/es/components/dropdown-item/style/css",
+        "element-plus/es/components/sub-menu/style/css",
+        "element-plus/es/components/menu-item/style/css",
+        "element-plus/es/components/divider/style/css",
+        "element-plus/es/components/card/style/css",
+        "element-plus/es/components/link/style/css",
+        "element-plus/es/components/breadcrumb/style/css",
+        "element-plus/es/components/breadcrumb-item/style/css",
+        "element-plus/es/components/table/style/css",
+        "element-plus/es/components/tree-select/style/css",
+        "element-plus/es/components/table-column/style/css",
+        "element-plus/es/components/select/style/css",
+        "element-plus/es/components/option/style/css",
+        "element-plus/es/components/pagination/style/css",
+        "element-plus/es/components/tree/style/css",
+        "element-plus/es/components/alert/style/css",
+        "@vueuse/core",
 
-        'path-to-regexp',
-        'echarts',
-        '@wangeditor/editor',
-        '@wangeditor/editor-for-vue',
-        'vue-i18n'
+        "path-to-regexp",
+        "echarts",
+        "@wangeditor/editor",
+        "@wangeditor/editor-for-vue",
+        "vue-i18n"
       ]
     }
-  }
-})
+  };
+});
