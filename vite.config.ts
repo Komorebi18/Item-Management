@@ -42,15 +42,15 @@ export default defineConfig(({ command, mode }: ConfigEnv): UserConfig => {
       port: Number(env.VITE_APP_PORT),
       open: true,
       // 反向代理解决跨域
-      proxy: {
-        [env.VITE_APP_BASE_API]: {
-          // 线上接口API地址
-          target: " http://jwb6k6.natappfree.cc",
-          changeOrigin: true,
-          rewrite: path =>
-            path.replace(new RegExp("^" + env.VITE_APP_BASE_API), "")
-        }
-      }
+      // proxy: {
+      //   [env.VITE_APP_BASE_API]: {
+      //     // 线上接口API地址
+      //     target: env.VITE_APP_BASE_API,
+      //     changeOrigin: true,
+      //     rewrite: path =>
+      //       path.replace(new RegExp("^" + env.VITE_APP_BASE_API), "")
+      //   }
+      // }
     },
 
     plugins: [

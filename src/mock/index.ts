@@ -56,44 +56,6 @@ Mock.mock('/test', 'get', {
   code: 200,
   message: '操作成功',
   data: [
-    // {
-    //   path: '/demo',
-    //   component: 'Layout',
-    //   meta: {
-    //     title: '组件封装',
-    //     icon: 'menu',
-    //     roles: ['ROOT'],
-    //     hidden: false,
-    //     keepAlive: true
-    //   },
-
-    //   children: [
-    //     {
-    //       path: 'emoji',
-    //       component: 'demo/emoji/index',
-    //       name: 'Emoji',
-    //       meta: { title: '聊天框', icon: '', hidden: false, keepAlive: true, roles: ['ROOT'] }
-    //     },
-    //     {
-    //       path: 'waterfall',
-    //       component: 'demo/waterfall/index',
-    //       name: 'Waterfall',
-    //       meta: { title: '瀑布流', icon: '', hidden: false, keepAlive: true, roles: ['ROOT'] }
-    //     },
-    //     {
-    //       path: 'upload',
-    //       component: 'demo/upload/index',
-    //       name: 'Upload',
-    //       meta: { title: '文件上传', icon: '', roles: ['ROOT'], hidden: false, keepAlive: true }
-    //     },
-    //     {
-    //       path: 'test',
-    //       component: 'demo/test',
-    //       name: 'Test',
-    //       meta: { title: '测试', icon: '', roles: ['ROOT'], hidden: false, keepAlive: true }
-    //     },
-    //   ]
-    // },
     {
       path: '/item',
       component: 'Layout',
@@ -101,22 +63,22 @@ Mock.mock('/test', 'get', {
       meta: {
         title: '物品管理',
         icon: 'menu',
-        roles: ['ROOT','ITEM'],
+        roles: ['ITEM_INFO','ITEM_RELATIONSHIPS'],
         hidden: false,
         keepAlive: true
       },
       children: [
         {
-          path: 'item1',
-          name: 'item1',
+          path: 'item-info',
+          name: 'item-info',
           component: 'itemMessage/message',
-          meta: {  title: '物品信息', icon: '', hidden: false, keepAlive: true, roles: ['ROOT','ITEM1']  }
+          meta: {  title: '物品信息', icon: '', hidden: false, keepAlive: true, roles: ['ITEM_INFO']  }
         },
         {
-          path: 'item2',
-          name: 'item2',
+          path: 'relationships',
+          name: 'relationships',
           component: 'itemMessage/relationships',
-          meta: {  title: '层级关系', icon: '', hidden: false, keepAlive: true, roles: ['ROOT','ITEM2']  }
+          meta: {  title: '层级关系', icon: '', hidden: false, keepAlive: true, roles: ['ITEM_RELATIONSHIPS']  }
         }
       ]
     },
@@ -126,23 +88,23 @@ Mock.mock('/test', 'get', {
       name: 'userMessage',
       meta: {
         title: '用户管理',
-        icon: 'menu',
-        roles: ['ROOT'],
+        icon: 'user',
+        roles: ['USER_INFO','USER_BLACKLIST'],
         hidden: false,
         keepAlive: true
       },
       children: [
         {
-          path: 'user1',
-          name: 'user1',
+          path: 'user-info',
+          name: 'user-info',
           component: 'userMessage/userMessage',
-          meta: {  title: '用户信息', icon: '', hidden: false, keepAlive: true, roles: ['ROOT']  }
+          meta: {  title: '用户信息', icon: '', hidden: false, keepAlive: true, roles: ['USER_INFO']  }
         },
         {
-          path: 'user2',
-          name: 'user2',
+          path: 'blacklist',
+          name: 'blacklist',
           component: 'userMessage/blacklist',
-          meta: {  title: '用户黑名单', icon: '', hidden: false, keepAlive: true, roles: ['ROOT']  }
+          meta: {  title: '用户黑名单', icon: '', hidden: false, keepAlive: true, roles: ['USER_BLACKLIST']  }
         }
       ]
     },
@@ -152,23 +114,23 @@ Mock.mock('/test', 'get', {
       name: 'acl',
       meta: {
         title: '权限管理',
-        icon: 'menu',
-        roles: ['ROOT'],
+        icon: 'acl',
+        roles: ['ADMIN_INFO','ADMIN_MANAGEMENT'],
         hidden: false,
         keepAlive: true
       },
       children: [
         {
-          path: 'acl1',
-          name: 'acl1',
+          path: 'admin-info',
+          name: 'admin-info',
           component: 'acl/adminMessage',
-          meta: {  title: '管理员信息', icon: '', hidden: false, keepAlive: true, roles: ['ROOT']  }
+          meta: {  title: '管理员信息', icon: '', hidden: false, keepAlive: true, roles: ['ADMIN_INFO']  }
         },
         {
-          path: 'acl2',
-          name: 'acl2',
+          path: 'management',
+          name: 'management',
           component: 'acl/powerManagement',
-          meta: {  title: '权限分配', icon: '', hidden: false, keepAlive: true, roles: ['ROOT']  }
+          meta: {  title: '权限分配', icon: '', hidden: false, keepAlive: true, roles: ['ADMIN_MANAGEMENT']  }
         }
       ]
     },
@@ -178,23 +140,23 @@ Mock.mock('/test', 'get', {
       name: 'system',
       meta: {
         title: '系统通知',
-        icon: 'menu',
-        roles: ['ROOT'],
+        icon: 'message',
+        roles: ['SYSTEM_DELIVER','SYSTEM_DELIVER'],
         hidden: false,
         keepAlive: true
       },
       children: [
         {
-          path: 'system1',
-          name: 'system1',
+          path: 'deliver-info',
+          name: 'deliver-info',
           component: 'systemMessage/deliverMessage',
-          meta: {  title: '发布通知', icon: '', hidden: false, keepAlive: true, roles: ['ROOT']  }
+          meta: {  title: '发布通知', icon: '', hidden: false, keepAlive: true, roles: ['SYSTEM_DELIVER']  }
         },
         {
-          path: 'system2',
-          name: 'system2',
+          path: 'view-info',
+          name: 'view-info',
           component: 'systemMessage/viewMessage',
-          meta: {  title: '所有通知', icon: '', hidden: false, keepAlive: true, roles: ['ROOT']  }
+          meta: {  title: '所有通知', icon: '', hidden: false, keepAlive: true, roles: ['SYSTEM_DELIVER']  }
         }
       ]
     },
@@ -203,7 +165,8 @@ Mock.mock('/test', 'get', {
       component: 'Layout',
       name: 'feedback',
       meta: {
-        roles: ['ROOT'],
+        title: '用户反馈',
+        roles: ['FEEDBACK'],
         hidden: false,
         keepAlive: true
       },
@@ -211,7 +174,7 @@ Mock.mock('/test', 'get', {
         {
           path: '',
           component: 'feedback/feedback',
-          meta: {  title: '用户反馈', icon: 'menu', hidden: false, keepAlive: true, roles: ['ROOT']  }
+          meta: {  title: '用户反馈', icon: 'feedback', hidden: false, keepAlive: true, roles: ['FEEDBACK']  }
         },
       ]
     },

@@ -16,7 +16,6 @@ const Layout = () => import('@/layout/index.vue')
 // hasPermission() 返回一个布尔值 判断 是否有该角色 ，超级管理员有所有权限 ，其他角色需要 判断 roles 中的角色 是否该路由的 route.meta.roles 中存在 存在有权限访问该路由，不存在则无权
 const hasPermission = (roles: string[], route: RouteRecordRaw) => {
   if (route.meta && route.meta.roles) {
-    console.log(route.meta.roles)
     // 角色【超级管理员】拥有所有权限，忽略校验
     if (roles.includes('ROOT')) {
       return true
