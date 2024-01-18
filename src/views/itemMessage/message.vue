@@ -36,24 +36,14 @@
       <el-table-column label="Name" prop="name" />
       <el-table-column fixed="right" label="Operations" width="120">
         <template #default="props">
-          <el-button
-            link
-            type="primary"
-            size="small"
-            @click="viewItemLogo(props.$index)"
-          >
+          <el-button link type="primary" size="small" @click="viewItemLogo(props.$index)">
             <!-- props.$index: 序号, props.row：当前行的信息 -->
             查看日志
           </el-button>
         </template>
       </el-table-column>
     </el-table>
-    <pagination
-      :total="100"
-      :page="currentPage"
-      :limit="pageLimit"
-      @pagination="handleChange"
-    />
+    <pagination :total="100" :page="currentPage" :limit="pageLimit" @pagination="handleChange" />
     <!-- 日志弹出框 -->
     <el-dialog v-model="visible" :show-close="false">
       <div class="my-header">
@@ -69,60 +59,60 @@
 </template>
 
 <script lang="ts" setup>
-import pagination from "@/components/Pagination/index.vue";
-import type { pageInfo } from "@/types/pageMessage";
+import pagination from '@/components/Pagination/index.vue'
+import type { pageInfo } from '@/types/pageMessage'
 // 控制日志弹窗
-let visible = ref(false);
+let visible = ref(false)
 
 // 临时变量
 
 // 控制页码
-let currentPage = ref(1);
+let currentPage = ref(1)
 // 单次展示条数
-let pageLimit = ref(20);
+let pageLimit = ref(20)
 
 const tableData = [
   {
-    date: "2016-05-03",
-    name: "Tom",
-    state: "California",
-    city: "San Francisco",
-    address: "3650 21st St, San Francisco",
-    zip: "CA 94114",
+    date: '2016-05-03',
+    name: 'Tom',
+    state: 'California',
+    city: 'San Francisco',
+    address: '3650 21st St, San Francisco',
+    zip: 'CA 94114',
     family: [
       {
-        name: "Jerry",
-        state: "California",
-        city: "San Francisco",
-        address: "3650 21st St, San Francisco",
-        zip: "CA 94114"
+        name: 'Jerry',
+        state: 'California',
+        city: 'San Francisco',
+        address: '3650 21st St, San Francisco',
+        zip: 'CA 94114'
       },
       {
-        name: "Spike",
-        state: "California",
-        city: "San Francisco",
-        address: "3650 21st St, San Francisco",
-        zip: "CA 94114"
+        name: 'Spike',
+        state: 'California',
+        city: 'San Francisco',
+        address: '3650 21st St, San Francisco',
+        zip: 'CA 94114'
       }
     ]
   }
-];
+]
 const viewItemLogo = (index: number) => {
   // 打开日志弹窗
-  visible.value = true;
+  visible.value = true
   // 拿到对应物品的id
-  console.log(index);
+  console.log(index)
   // 利用物品id发送请求获取对应日志
-};
+}
 
 // 更新页面展示信息
 const handleChange = (pageMessage: pageInfo) => {
   // 更新页面信息
-  currentPage.value = pageMessage.currentPage;
-  pageLimit.value = pageMessage.pageLimit;
+  currentPage.value = pageMessage.currentPage
+  pageLimit.value = pageMessage.pageLimit
   // 发送请求获取新数据
-  console.log("发送请求");
-};
+  console.log('发送请求')
+}
 </script>
 
 <style lang="scss" scoped>

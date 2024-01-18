@@ -5,7 +5,7 @@ export interface pageInfo {
   /**
    * 当前页码
    */
-  currentPage: number;
+  currentPage: number
   /**
    * 每页显示数量
    */

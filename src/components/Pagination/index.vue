@@ -14,8 +14,8 @@
 </template>
 
 <script setup lang="ts">
-import { computed, PropType } from 'vue';
-import { scrollTo } from '@/utils/scroll-to';
+import { computed, PropType } from 'vue'
+import { scrollTo } from '@/utils/scroll-to'
 
 const props = defineProps({
   total: {
@@ -34,7 +34,7 @@ const props = defineProps({
   pageSizes: {
     type: Array as PropType<number[]>,
     default() {
-      return [10, 20, 30, 50];
+      return [10, 20, 30, 50]
     }
   },
   layout: {
@@ -53,38 +53,38 @@ const props = defineProps({
     type: Boolean,
     default: false
   }
-});
+})
 
-const emit = defineEmits(['updatePage', 'updateLimit', 'pagination']);
+const emit = defineEmits(['updatePage', 'updateLimit', 'pagination'])
 
 const currentPage = computed<number | undefined>({
   get: () => props.page,
-  set: value => {
-    emit('updatePage', value);
+  set: (value) => {
+    emit('updatePage', value)
   }
-});
+})
 
 const pageSize = computed<number | undefined>({
   get() {
-    return props.limit;
+    return props.limit
   },
   set(val) {
-    emit('updateLimit', val);
+    emit('updateLimit', val)
   }
-});
+})
 
 function handleSizeChange(val: number) {
-  emit('pagination', { currentPage: props.page, pageLimit: val });
+  emit('pagination', { currentPage: props.page, pageLimit: val })
   if (props.autoScroll) {
-    scrollTo(0, 800);
+    scrollTo(0, 800)
   }
 }
 
 function handleCurrentChange(val: number) {
-  currentPage.value = val;
-  emit('pagination', { currentPage: val, pageLimit: props.limit });
+  currentPage.value = val
+  emit('pagination', { currentPage: val, pageLimit: props.limit })
   if (props.autoScroll) {
-    scrollTo(0, 800);
+    scrollTo(0, 800)
   }
 }
 </script>

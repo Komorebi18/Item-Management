@@ -1,5 +1,4 @@
-<script setup lang="ts">
-</script>
+<script setup lang="ts"></script>
 
 <template>
   <div>
@@ -8,8 +7,7 @@
 </template>
 
 <style scoped lang="scss">
-h1{
+h1 {
   color: var(--el-color-primary);
 }
-
 </style>

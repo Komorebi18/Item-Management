@@ -19,4 +19,4 @@ export default {
     document: '项目文档',
     gitee: '码云'
   }
-};
+}

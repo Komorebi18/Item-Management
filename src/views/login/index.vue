@@ -36,7 +36,7 @@ function changeForm(val: boolean) {
   height: 100%;
   background-color: #fff;
 }
-.right-setting{
+.right-setting {
   position: fixed;
   top: 10px;
   right: 25px;
@@ -74,7 +74,6 @@ function changeForm(val: boolean) {
       font: 700 200% Consolas, Monaco, monospace;
       margin: 15px 0;
       text-transform: uppercase;
-      
     }
     .logo-img {
       height: 10em;

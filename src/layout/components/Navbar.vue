@@ -20,16 +20,14 @@ const settingsStore = useSettingsStore()
 const appStore = useAppStore()
 const userStore = useUserStore()
 
-
 const { device } = storeToRefs(appStore) // 设备类型：desktop-宽屏设备 || mobile-窄屏设备
-
 
 // 设置面板
 const show = ref(false)
 </script>
 
 <template>
-  <div class="navbar" :class="{ isTop: settingsStore.layout !=='left' }">
+  <div class="navbar" :class="{ isTop: settingsStore.layout !== 'left' }">
     <slot name="logo"></slot>
     <div class="flex items-center zzh">
       <slot name="layout"></slot>
@@ -40,7 +38,7 @@ const show = ref(false)
         <!-- <el-tooltip content="布局大小" effect="dark" placement="bottom">
           <size-select class="navbar-setting-item" />
         </el-tooltip> -->
-      
+
         <lang-select class="navbar-setting-item" />
         <el-dropdown trigger="click" class="dropdown">
           <span class="el-dropdown-link navbar-bg-hover select-none">
@@ -131,25 +129,26 @@ const show = ref(false)
     }
   }
 }
-.isTop{
+.isTop {
   background-color: var(--menuBg);
   color: #fff;
   overflow: hidden;
 
-  .screenfull ,.navbar-setting-item,.setting{
+  .screenfull,
+  .navbar-setting-item,
+  .setting {
     min-width: 45px;
     color: #fff;
     &:hover {
       background: var(--el-color-primary-light-1);
     }
   }
-  .el-dropdown-link{
+  .el-dropdown-link {
     &:hover {
       background: var(--el-color-primary-light-1);
     }
 
     p {
-     
       color: #fff;
     }
   }

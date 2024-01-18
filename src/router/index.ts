@@ -23,7 +23,7 @@ export const constantRoutes: RouteRecordRaw[] = [
       title: '404',
       icon: 'error',
       hidden: true
-    },
+    }
   },
   {
     //403
@@ -34,7 +34,7 @@ export const constantRoutes: RouteRecordRaw[] = [
       title: '403',
       icon: 'error',
       hidden: true
-    },
+    }
   },
   {
     path: '/login',
@@ -51,10 +51,10 @@ export const constantRoutes: RouteRecordRaw[] = [
         path: 'dashboard',
         component: () => import('@/views/dashboard/index.vue'),
         name: 'dashboard',
-        meta: { title: '首页', icon: 'home', affix: true ,keepAlive: true,}
-      },
+        meta: { title: '首页', icon: 'home', affix: true, keepAlive: true }
+      }
     ]
-  },
+  }
 ]
 
 /**

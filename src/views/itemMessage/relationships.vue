@@ -1,6 +1,11 @@
 <template>
   <div>
-    <el-table :data="tableData" :border="true" :header-cell-style="headerCellStyle" :cell-style="cellStyle">
+    <el-table
+      :data="tableData"
+      :border="true"
+      :header-cell-style="headerCellStyle"
+      :cell-style="cellStyle"
+    >
       <!-- 表格列定义 -->
     </el-table>
     <el-pagination
@@ -27,14 +32,14 @@ export default {
         backgroundColor: '#fff',
         color: '#666'
       }
-    };
+    }
   },
   methods: {
     handleCurrentChange(val) {
-      this.currentPage = val;
+      this.currentPage = val
     }
   }
-};
+}
 </script>
 
 <!-- <template>
