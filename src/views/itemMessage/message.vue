@@ -51,10 +51,8 @@
     <pagination
       :total="100"
       :page="currentPage"
-      :limit="20"
-      @update-page="updatePage"
-      @update-limit="updateLimit"
-      @pagination="handlChange"
+      :limit="pageLimit"
+      @pagination="handleChange"
     />
     <!-- 日志弹出框 -->
     <el-dialog v-model="visible" :show-close="false">
@@ -72,7 +70,7 @@
 
 <script lang="ts" setup>
 import pagination from "@/components/Pagination/index.vue";
-import type { pageInfo } from '@/types/pageMessage'
+import type { pageInfo } from "@/types/pageMessage";
 // 控制日志弹窗
 let visible = ref(false);
 
@@ -117,22 +115,14 @@ const viewItemLogo = (index: number) => {
   // 利用物品id发送请求获取对应日志
 };
 
-// 更新页码
-const updatePage = (page: number) => {
-  currentPage.value = page;
-};
-// 更新页面信息展示条数
-const updateLimit = (limit: number) => {
-  pageLimit.value = limit;
-};
 // 更新页面展示信息
-const handlChange = (pageMessage: pageInfo) => {
+const handleChange = (pageMessage: pageInfo) => {
   // 更新页面信息
-  currentPage.value = pageMessage.currentPage
-  pageLimit.value = pageMessage.pageSize
+  currentPage.value = pageMessage.currentPage;
+  pageLimit.value = pageMessage.pageLimit;
   // 发送请求获取新数据
-}
-
+  console.log("发送请求");
+};
 </script>
 
 <style lang="scss" scoped>

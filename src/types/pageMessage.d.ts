@@ -9,5 +9,5 @@ export interface pageInfo {
   /**
    * 每页显示数量
    */
-  pageSize: number
+  pageLimit: number
 }
