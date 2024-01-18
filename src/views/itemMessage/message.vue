@@ -72,6 +72,7 @@
 
 <script lang="ts" setup>
 import pagination from "@/components/Pagination/index.vue";
+import type { pageInfo } from '@/types/pageMessage'
 // 控制日志弹窗
 let visible = ref(false);
 
@@ -125,11 +126,10 @@ const updateLimit = (limit: number) => {
   pageLimit.value = limit;
 };
 // 更新页面展示信息
-const handlChange = (page: number, limit: number) => {
+const handlChange = (pageMessage: pageInfo) => {
   // 更新页面信息
-  currentPage.value = page
-  pageLimit.value = limit
-  console.log('准备发送请求');
+  currentPage.value = pageMessage.currentPage
+  pageLimit.value = pageMessage.pageSize
   // 发送请求获取新数据
 }
 
