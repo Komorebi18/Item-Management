@@ -48,7 +48,14 @@
         </template>
       </el-table-column>
     </el-table>
-    <pagination :total="100" :page="1" :limit="20" />
+    <pagination
+      :total="100"
+      :page="currentPage"
+      :limit="20"
+      @update-page="updatePage"
+      @update-limit="updateLimit"
+      @pagination="handlChange"
+    />
     <!-- 日志弹出框 -->
     <el-dialog v-model="visible" :show-close="false">
       <div class="my-header">
@@ -67,6 +74,14 @@
 import pagination from "@/components/Pagination/index.vue";
 // 控制日志弹窗
 let visible = ref(false);
+
+// 临时变量
+
+// 控制页码
+let currentPage = ref(1);
+// 单次展示条数
+let pageLimit = ref(20);
+
 const tableData = [
   {
     date: "2016-05-03",
@@ -100,6 +115,24 @@ const viewItemLogo = (index: number) => {
   console.log(index);
   // 利用物品id发送请求获取对应日志
 };
+
+// 更新页码
+const updatePage = (page: number) => {
+  currentPage.value = page;
+};
+// 更新页面信息展示条数
+const updateLimit = (limit: number) => {
+  pageLimit.value = limit;
+};
+// 更新页面展示信息
+const handlChange = (page: number, limit: number) => {
+  // 更新页面信息
+  currentPage.value = page
+  pageLimit.value = limit
+  console.log('准备发送请求');
+  // 发送请求获取新数据
+}
+
 </script>
 
 <style lang="scss" scoped>
