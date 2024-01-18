@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { onBeforeUnmount, onMounted, ref, watch} from 'vue'
+import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
 
 import { addClass, removeClass } from '@/utils/index'
 const props = defineProps<{
@@ -8,7 +8,7 @@ const props = defineProps<{
 const emit = defineEmits(['update:show'])
 watch(
   () => props.show,
-  value => {
+  (value) => {
     if (value) {
       addEventClick()
     }

@@ -3,7 +3,9 @@ import Mock from 'mockjs'
 // 注册
 const USERS_KEY = 'users'
 // 从本地存储中加载注册数据
-const users: { username: string; password: string }[] = JSON.parse(localStorage.getItem(USERS_KEY) || '[]')
+const users: { username: string; password: string }[] = JSON.parse(
+  localStorage.getItem(USERS_KEY) || '[]'
+)
 
 Mock.mock('/register', 'post', (options: any) => {
   const body = JSON.parse(options.body)
@@ -72,13 +74,13 @@ Mock.mock('/test', 'get', {
           path: 'item-info',
           name: 'item-info',
           component: 'itemMessage/message',
-          meta: {  title: '物品信息', icon: '', hidden: false, keepAlive: true, roles: ['ITEM']  }
+          meta: { title: '物品信息', icon: '', hidden: false, keepAlive: true, roles: ['ITEM'] }
         },
         {
           path: 'relationships',
           name: 'relationships',
           component: 'itemMessage/relationships',
-          meta: {  title: '层级关系', icon: '', hidden: false, keepAlive: true, roles: ['ITEM']  }
+          meta: { title: '层级关系', icon: '', hidden: false, keepAlive: true, roles: ['ITEM'] }
         }
       ]
     },
@@ -98,13 +100,13 @@ Mock.mock('/test', 'get', {
           path: 'user-info',
           name: 'user-info',
           component: 'userMessage/userMessage',
-          meta: {  title: '用户信息', icon: '', hidden: false, keepAlive: true, roles: ['USER']  }
+          meta: { title: '用户信息', icon: '', hidden: false, keepAlive: true, roles: ['USER'] }
         },
         {
           path: 'blacklist',
           name: 'blacklist',
           component: 'userMessage/blacklist',
-          meta: {  title: '用户黑名单', icon: '', hidden: false, keepAlive: true, roles: ['USER']  }
+          meta: { title: '用户黑名单', icon: '', hidden: false, keepAlive: true, roles: ['USER'] }
         }
       ]
     },
@@ -124,13 +126,13 @@ Mock.mock('/test', 'get', {
           path: 'admin-info',
           name: 'admin-info',
           component: 'acl/adminMessage',
-          meta: {  title: '管理员信息', icon: '', hidden: false, keepAlive: true, roles: ['ROOT']  }
+          meta: { title: '管理员信息', icon: '', hidden: false, keepAlive: true, roles: ['ROOT'] }
         },
         {
           path: 'management',
           name: 'management',
           component: 'acl/powerManagement',
-          meta: {  title: '权限分配', icon: '', hidden: false, keepAlive: true, roles: ['ROOT']  }
+          meta: { title: '权限分配', icon: '', hidden: false, keepAlive: true, roles: ['ROOT'] }
         }
       ]
     },
@@ -150,13 +152,13 @@ Mock.mock('/test', 'get', {
           path: 'deliver-info',
           name: 'deliver-info',
           component: 'systemMessage/deliverMessage',
-          meta: {  title: '发布通知', icon: '', hidden: false, keepAlive: true, roles: ['NOTICE']  }
+          meta: { title: '发布通知', icon: '', hidden: false, keepAlive: true, roles: ['NOTICE'] }
         },
         {
           path: 'view-info',
           name: 'view-info',
           component: 'systemMessage/viewMessage',
-          meta: {  title: '所有通知', icon: '', hidden: false, keepAlive: true, roles: ['NOTICE']  }
+          meta: { title: '所有通知', icon: '', hidden: false, keepAlive: true, roles: ['NOTICE'] }
         }
       ]
     },
@@ -165,7 +167,6 @@ Mock.mock('/test', 'get', {
       component: 'Layout',
       name: 'feedback',
       meta: {
-        title: '用户反馈',
         roles: ['FEEDBACK'],
         hidden: false,
         keepAlive: true
@@ -175,9 +176,15 @@ Mock.mock('/test', 'get', {
           path: '',
           name: ' childFeedback',
           component: 'feedback/feedback',
-          meta: {  title: '用户反馈', icon: 'feedback', hidden: false, keepAlive: true, roles: ['FEEDBACK']  }
-        },
+          meta: {
+            title: '用户反馈',
+            icon: 'feedback',
+            hidden: false,
+            keepAlive: true,
+            roles: ['FEEDBACK']
+          }
+        }
       ]
-    },
+    }
   ]
 })

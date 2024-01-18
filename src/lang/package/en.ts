@@ -10,7 +10,7 @@ export default {
     username: 'Username',
     password: 'Password',
     login: 'Login',
-    verifyCode: 'Verify Code',
+    verifyCode: 'Verify Code'
   },
   // 导航栏国际化
   navbar: {
@@ -19,4 +19,4 @@ export default {
     document: 'Document',
     gitee: 'Gitee'
   }
-};
+}

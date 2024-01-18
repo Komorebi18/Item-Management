@@ -9,12 +9,11 @@ NProgress.configure({ showSpinner: false }) // 进度条
 
 const permissionStore = usePermissionStore(pinia)
 
-const  userStore = useUserStore()
+const userStore = useUserStore()
 // 白名单路由
 const whiteList = ['/login']
 const roles = ['ROOT']
 router.beforeEach(async (to, from, next) => {
-
   NProgress.start()
   if (userStore.token) {
     if (to.path === '/login') {
@@ -34,7 +33,7 @@ router.beforeEach(async (to, from, next) => {
         try {
           // const { roles } = await userStore.getInfo()
           const accessRoutes = await permissionStore.generateRoutes(['ROOT'])
-          accessRoutes.forEach(route => {
+          accessRoutes.forEach((route) => {
             router.addRoute(route)
           })
           next({ ...to, replace: true })

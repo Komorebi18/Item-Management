@@ -1,4 +1,3 @@
-
 html.dark {
   --menuBg: #141414 !important;
   --menuText: rgb(254 254 254 / 65.1%) !important;
@@ -12,19 +11,21 @@ html.dark {
   .navbar {
     background-color: var(--el-bg-color);
     color: var(--el-text-color-regular);
-    .navbar-setting-item,.setting ,.el-dropdown-link{
+    .navbar-setting-item,
+    .setting,
+    .el-dropdown-link {
       &:hover {
         background: var(--el-fill-color-light);
       }
     }
-    .setting,.screenfull{
+    .setting,
+    .screenfull {
       color: var(--el-text-color-regular);
     }
-    .dropdown{
-      
-     .out{
-      color: var(--el-text-color-regular);
-     }
+    .dropdown {
+      .out {
+        color: var(--el-text-color-regular);
+      }
     }
   }
 
@@ -41,7 +42,7 @@ html.dark {
       fill: #fff;
     }
   }
-  .login{
+  .login {
     background-color: #000 !important;
   }
 }

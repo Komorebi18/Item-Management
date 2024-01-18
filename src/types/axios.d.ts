@@ -1,8 +1,7 @@
-import { AxiosRequestConfig } from "axios";
- 
-declare module 'axios'{
-  interface AxiosInstance{
-    (config:AxiosRequestConfig):Promise<any>
-  }
+import { AxiosRequestConfig } from 'axios'
 
+declare module 'axios' {
+  interface AxiosInstance {
+    (config: AxiosRequestConfig): Promise<any>
+  }
 }
