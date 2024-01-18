@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { useTagsViewStore, TagView } from '@/store/modules/tagsView'
 
 const tagAndTagSpacing = ref(4)
