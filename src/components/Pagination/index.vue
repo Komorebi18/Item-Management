@@ -55,12 +55,12 @@ const props = defineProps({
   }
 });
 
-const emit = defineEmits(['update:page', 'update:limit', 'pagination']);
+const emit = defineEmits(['updatePage', 'updateLimit', 'pagination']);
 
 const currentPage = computed<number | undefined>({
   get: () => props.page,
   set: value => {
-    emit('update:page', value);
+    emit('updatePage', value);
   }
 });
 
@@ -69,12 +69,12 @@ const pageSize = computed<number | undefined>({
     return props.limit;
   },
   set(val) {
-    emit('update:limit', val);
+    emit('updateLimit', val);
   }
 });
 
 function handleSizeChange(val: number) {
-  emit('pagination', { page: currentPage, limit: val });
+  emit('pagination', { currentPage: props.page, pageLimit: val });
   if (props.autoScroll) {
     scrollTo(0, 800);
   }
@@ -82,7 +82,7 @@ function handleSizeChange(val: number) {
 
 function handleCurrentChange(val: number) {
   currentPage.value = val;
-  emit('pagination', { page: val, limit: props.limit });
+  emit('pagination', { currentPage: val, pageLimit: props.limit });
   if (props.autoScroll) {
     scrollTo(0, 800);
   }

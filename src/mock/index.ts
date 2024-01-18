@@ -63,7 +63,7 @@ Mock.mock('/test', 'get', {
       meta: {
         title: '物品管理',
         icon: 'menu',
-        roles: ['ITEM_INFO','ITEM_RELATIONSHIPS'],
+        roles: ['ITEM'],
         hidden: false,
         keepAlive: true
       },
@@ -72,13 +72,13 @@ Mock.mock('/test', 'get', {
           path: 'item-info',
           name: 'item-info',
           component: 'itemMessage/message',
-          meta: {  title: '物品信息', icon: '', hidden: false, keepAlive: true, roles: ['ITEM_INFO']  }
+          meta: {  title: '物品信息', icon: '', hidden: false, keepAlive: true, roles: ['ITEM']  }
         },
         {
           path: 'relationships',
           name: 'relationships',
           component: 'itemMessage/relationships',
-          meta: {  title: '层级关系', icon: '', hidden: false, keepAlive: true, roles: ['ITEM_RELATIONSHIPS']  }
+          meta: {  title: '层级关系', icon: '', hidden: false, keepAlive: true, roles: ['ITEM']  }
         }
       ]
     },
@@ -89,7 +89,7 @@ Mock.mock('/test', 'get', {
       meta: {
         title: '用户管理',
         icon: 'user',
-        roles: ['USER_INFO','USER_BLACKLIST'],
+        roles: ['USER'],
         hidden: false,
         keepAlive: true
       },
@@ -98,13 +98,13 @@ Mock.mock('/test', 'get', {
           path: 'user-info',
           name: 'user-info',
           component: 'userMessage/userMessage',
-          meta: {  title: '用户信息', icon: '', hidden: false, keepAlive: true, roles: ['USER_INFO']  }
+          meta: {  title: '用户信息', icon: '', hidden: false, keepAlive: true, roles: ['USER']  }
         },
         {
           path: 'blacklist',
           name: 'blacklist',
           component: 'userMessage/blacklist',
-          meta: {  title: '用户黑名单', icon: '', hidden: false, keepAlive: true, roles: ['USER_BLACKLIST']  }
+          meta: {  title: '用户黑名单', icon: '', hidden: false, keepAlive: true, roles: ['USER']  }
         }
       ]
     },
@@ -115,7 +115,7 @@ Mock.mock('/test', 'get', {
       meta: {
         title: '权限管理',
         icon: 'acl',
-        roles: ['ADMIN_INFO','ADMIN_MANAGEMENT'],
+        roles: ['ROOT'],
         hidden: false,
         keepAlive: true
       },
@@ -124,13 +124,13 @@ Mock.mock('/test', 'get', {
           path: 'admin-info',
           name: 'admin-info',
           component: 'acl/adminMessage',
-          meta: {  title: '管理员信息', icon: '', hidden: false, keepAlive: true, roles: ['ADMIN_INFO']  }
+          meta: {  title: '管理员信息', icon: '', hidden: false, keepAlive: true, roles: ['ROOT']  }
         },
         {
           path: 'management',
           name: 'management',
           component: 'acl/powerManagement',
-          meta: {  title: '权限分配', icon: '', hidden: false, keepAlive: true, roles: ['ADMIN_MANAGEMENT']  }
+          meta: {  title: '权限分配', icon: '', hidden: false, keepAlive: true, roles: ['ROOT']  }
         }
       ]
     },
@@ -141,7 +141,7 @@ Mock.mock('/test', 'get', {
       meta: {
         title: '系统通知',
         icon: 'message',
-        roles: ['SYSTEM_DELIVER','SYSTEM_DELIVER'],
+        roles: ['NOTICE'],
         hidden: false,
         keepAlive: true
       },
@@ -150,13 +150,13 @@ Mock.mock('/test', 'get', {
           path: 'deliver-info',
           name: 'deliver-info',
           component: 'systemMessage/deliverMessage',
-          meta: {  title: '发布通知', icon: '', hidden: false, keepAlive: true, roles: ['SYSTEM_DELIVER']  }
+          meta: {  title: '发布通知', icon: '', hidden: false, keepAlive: true, roles: ['NOTICE']  }
         },
         {
           path: 'view-info',
           name: 'view-info',
           component: 'systemMessage/viewMessage',
-          meta: {  title: '所有通知', icon: '', hidden: false, keepAlive: true, roles: ['SYSTEM_DELIVER']  }
+          meta: {  title: '所有通知', icon: '', hidden: false, keepAlive: true, roles: ['NOTICE']  }
         }
       ]
     },
@@ -173,6 +173,7 @@ Mock.mock('/test', 'get', {
       children: [
         {
           path: '',
+          name: ' childFeedback',
           component: 'feedback/feedback',
           meta: {  title: '用户反馈', icon: 'feedback', hidden: false, keepAlive: true, roles: ['FEEDBACK']  }
         },

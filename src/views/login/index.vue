@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import LoginForm from './components/loginform.vue'
-import RegisterForm from './components/registerform.vue'
 import RightSet from './components/rightset.vue'
+
+// import RegisterForm from './components/registerform.vue'
 const isForm = ref(true)
 function changeForm(val: boolean) {
   isForm.value = val
