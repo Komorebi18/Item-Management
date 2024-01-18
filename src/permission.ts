@@ -1,7 +1,7 @@
 import router from '@/router'
 import pinia from '@/store'
 import { usePermissionStore } from '@/store/modules/permission'
-import { useUserStore } from '@/store'
+import { useUserStore } from '@/store/modules/user'
 
 import NProgress from 'nprogress'
 import 'nprogress/nprogress.css'
@@ -12,7 +12,7 @@ const permissionStore = usePermissionStore(pinia)
 const userStore = useUserStore()
 // 白名单路由
 const whiteList = ['/login']
-const roles = ['ROOT']
+
 router.beforeEach(async (to, from, next) => {
   NProgress.start()
   if (userStore.token) {
@@ -32,7 +32,7 @@ router.beforeEach(async (to, from, next) => {
       } else {
         try {
           // const { roles } = await userStore.getInfo()
-          const accessRoutes = await permissionStore.generateRoutes(['ROOT'])
+          const accessRoutes = await permissionStore.generateRoutes(userStore.userInfo.roles)
           accessRoutes.forEach((route) => {
             router.addRoute(route)
           })

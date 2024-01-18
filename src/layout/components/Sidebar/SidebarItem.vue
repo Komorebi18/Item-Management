@@ -1,6 +1,7 @@
 <script setup lang="ts">
 // vite 在浏览器中打包构建 没有 node.js 环境的path模块，通过 path-browserify插件 来解决
 import path from 'path-browserify'
+import { ref } from 'vue'
 import { isExternal } from '@/utils/index'
 import AppLink from './Link.vue'
 

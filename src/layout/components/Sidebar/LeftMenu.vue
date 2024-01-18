@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useRoute } from 'vue-router'
 import { isExternal } from '@/utils/index'
+import { computed } from 'vue'
 import SidebarItem from './SidebarItem.vue'
 import Logo from './Logo.vue'
 import path from 'path-browserify'
