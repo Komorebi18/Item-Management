@@ -10,7 +10,9 @@ export const useUserStore = defineStore('user', () => {
     adminId: 0,
     roles: [],
     route: '',
-    token: '',
+    accessToken: '',
+    refreshToken: '',
+    expiredTime: '',
     username: ''
   })
   const token = useStorage<string>('token', '')
@@ -23,8 +25,10 @@ export const useUserStore = defineStore('user', () => {
     userInfo.value.roles = res.data.roles
     userInfo.value.route = res.data.route
     userInfo.value.username = res.data.username
-    userInfo.value.token = res.data.token
-    token.value = res.data.token
+    userInfo.value.accessToken = res.data.accessToken
+    userInfo.value.refreshToken = res.data.refreshToken
+    userInfo.value.expiredTime = res.data.expiredTime
+    token.value = res.data.accessToken
   }
 
   // 退出登录
