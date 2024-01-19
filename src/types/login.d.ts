@@ -13,6 +13,8 @@ export interface userInformation {
   adminId: number
   username: string
   roles: string[]
-  token: string
+  accessToken: string
+  refreshToken: string
+  expiredTime: string
   route: string
 }
