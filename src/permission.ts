@@ -41,7 +41,7 @@ router.beforeEach(async (to, from, next) => {
           next({ ...to, replace: true })
         } catch (error) {
           // 移除 token 并跳转登录页
-          await userStore.outLogin()
+          await userStore.outLogin(false)
           NProgress.done()
         }
       }

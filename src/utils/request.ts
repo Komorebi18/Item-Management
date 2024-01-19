@@ -50,48 +50,64 @@ http.interceptors.request.use(
 )
 
 // 响应拦截器
-http.interceptors.response.use(
-  (response: AxiosResponse) => {
-    // 初始化useUserStore实例
-    const userStore = useUserStore()
-    // 获取accessToken状态，1表示未过期，0表示已过期
-    const accessTokenState = useStorage<number>('accessTokenState', 0)
-    // 获取refreshToken状态，1表示未过期，0表示已过期
-    const refreshTokenState = useStorage<number>('refreshTokenState', 0)
-    if (response.data) {
-      switch (response.data.code) {
-        case 200:
-          return response.data
-        case 101:
-          if (refreshTokenState.value === 1) {
-            // 将accessTokenState置零
-            accessTokenState.value = 0
-            // refreshToken未被判断情况(首先判断accessToken，accessToken过期进入此逻辑，但是refreshToken是否过期未知)
-            // 暂时将refreshTokenState置0，若refreshToken未过期，将其重新置1
-            refreshTokenState.value = 0
-            // 刷新token---accessToken过期，被动更新token
-            userStore.updateToken()
-          } else {
-            // refreshToken过期情况
-            userStore.outLogin()
-          }
-      }
+http.interceptors.response.use((response: AxiosResponse) => {
+  // 初始化useUserStore实例
+  const userStore = useUserStore()
+  // 获取accessToken状态，1表示未过期，0表示已过期
+  const accessTokenState = useStorage<number>('accessTokenState', 0)
+  // 获取refreshToken状态，1表示未过期，0表示已过期
+  const refreshTokenState = useStorage<number>('refreshTokenState', 0)
+  if (response.data) {
+    switch (response.data.code) {
+      case 200:
+        return response.data
+      case 101:
+        if (refreshTokenState.value === 1) {
+          // 将accessTokenState置零
+          accessTokenState.value = 0
+          // refreshToken未被判断情况(首先判断accessToken，accessToken过期进入此逻辑，但是refreshToken是否过期未知)
+          // 暂时将refreshTokenState置0，若refreshToken未过期，将其重新置1
+          refreshTokenState.value = 0
+          // 刷新token---accessToken过期，被动更新token
+          userStore.updateToken()
+        } else {
+          // refreshToken过期情况
+          userStore.outLogin(true)
+        }
+        break
+      case 400:
+        ElMessage({
+          message: '客户端异常',
+          type: 'error'
+        })
+        break
+      case 401:
+        ElMessage({
+          message: '账号或密码错误',
+          type: 'error'
+        })
+        break
+      case 403:
+        ElMessage({
+          message: '权限不足,无法访问',
+          type: 'error'
+        })
+        break
+      case 404:
+        ElMessage({
+          message: '您访问资源不存在',
+          type: 'error'
+        })
+        break
+      case 500:
+        ElMessage({
+          message: '服务端异常',
+          type: 'error'
+        })
+        break
     }
-
-    if ((response.data && response.data.code === 102) || response.data.code === 201) {
-      ElMessage({
-        message: response.data.msg,
-        type: 'error'
-      })
-      return Promise.reject(new Error(response.data.msg))
-    }
-    ElMessage.success(response.data.msg)
-    return response.data
-  },
-  (error: any) => {
-    return Promise.reject(error.message)
   }
-)
+})
 
 // 导出 axios 实例
 export default http

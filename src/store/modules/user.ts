@@ -50,9 +50,18 @@ export const useUserStore = defineStore('user', () => {
   }
 
   // 退出登录
-  const outLogin = async () => {
-    // 发送请求告知后台
-    await outLog()
+  const outLogin = async (isTokenExpired: boolean) => {
+    if (isTokenExpired) {
+      // token过期导致的退出
+      ElMessage({
+        message: '登录信息过期,请重新登录',
+        type: 'error'
+      })
+    } else {
+      // 正常退出需要发送请求告知后台
+      await outLog()
+    }
+
     // 移除本地存储相关用户信息
     roles.value = null
     token.value = null
