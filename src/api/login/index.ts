@@ -15,13 +15,22 @@
 //   })
 // }
 import http from '@/utils/request'
-import { userInformation } from '@/types/login'
+import { userInformation, tokenType } from '@/types/login'
 
+// 登录获取信息
 export const getLogin = (data: object) => {
   return http<userInformation>({
     method: 'POST',
     url: '/admin/login',
     data: data
+  })
+}
+
+// 登录获取信息
+export const fetchToken = () => {
+  return http<tokenType>({
+    method: 'GET',
+    url: '/admin/refresh'
   })
 }
 

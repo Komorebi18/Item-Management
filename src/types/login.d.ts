@@ -18,3 +18,12 @@ export interface userInformation {
   expiredTime: string
   route: string
 }
+
+/**
+ * token相关信息
+ */
+export interface tokenType {
+  accessToken: string
+  refreshToken: string
+  expiredTime: string
+}
