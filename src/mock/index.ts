@@ -159,6 +159,11 @@ Mock.mock('/test', 'get', {
           name: 'view-info',
           component: 'systemMessage/viewMessage',
           meta: { title: '所有通知', icon: '', hidden: false, keepAlive: true, roles: ['NOTICE'] }
+        },
+        {
+          path: 'edit',
+          component: 'systemMessage/editMessage',
+          meta: { title: '编辑通知', icon: '', hidden: true, keepAlive: true, roles: ['NOTICE'] }
         }
       ]
     },
