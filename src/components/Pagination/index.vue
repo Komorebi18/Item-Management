@@ -1,6 +1,7 @@
 <template>
   <div :class="'pagination ' + { hidden: hidden }">
     <el-pagination
+      class="custom-pagination"
       :background="background"
       v-model:current-page="currentPage"
       v-model:page-size="pageSize"
@@ -95,5 +96,9 @@ function handleCurrentChange(val: number) {
   &.hidden {
     display: none;
   }
+}
+
+.custom-pagination {
+  color: #2f3367;
 }
 </style>

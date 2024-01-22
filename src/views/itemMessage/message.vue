@@ -60,6 +60,7 @@
 
 <script lang="ts" setup>
 import pagination from '@/components/Pagination/index.vue'
+import { ref } from 'vue'
 import type { pageInfo } from '@/types/pageMessage'
 // 控制日志弹窗
 let visible = ref(false)
