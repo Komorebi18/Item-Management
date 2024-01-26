@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import { getLogin, outLog, fetchToken } from '@/api/login'
+import { getLoginAPI, outLoginAPI, fetchTokenAPI } from '@/api/login'
 import { useStorage } from '@vueuse/core'
 import router from '@/router'
 import { userInformation, tokenType } from '@/types/login'
@@ -31,7 +31,7 @@ export const useUserStore = defineStore('user', () => {
 
   // 登录，初始化信息
   const setLogin = async (data: object) => {
-    const res = await getLogin(data)
+    const res = await getLoginAPI(data)
     // 储存接口响应信息
     userInfo.value.adminId = res.data.adminId
     userInfo.value.roles = res.data.roles
@@ -59,7 +59,7 @@ export const useUserStore = defineStore('user', () => {
       })
     } else {
       // 正常退出需要发送请求告知后台
-      await outLog()
+      await outLoginAPI()
     }
 
     // 移除本地存储相关用户信息
@@ -75,7 +75,7 @@ export const useUserStore = defineStore('user', () => {
   // 更新token
   const updateToken = async () => {
     // 获取新token
-    const res = await fetchToken()
+    const res = await fetchTokenAPI()
     // 存储新token
     // 更新userInfo内的token
     userInfo.value.accessToken = res.data.accessToken

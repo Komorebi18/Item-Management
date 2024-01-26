@@ -6,41 +6,39 @@
         <div class="left-header">
           <el-button
             type="primary"
-            :icon="isDelect === true ? '' : EditPen"
+            :icon="isDelete === true ? '' : EditPen"
             class="button-deliver"
             color="#2F3367"
-            @click="isDelect = !isDelect"
+            @click="isDelete = !isDelete"
           >
-            {{ isDelect === true ? '取消' : '删除通知' }}
+            {{ isDelete === true ? '取消' : '删除通知' }}
           </el-button>
           <div class="select-box">
             <el-select
               v-model="timeLimit"
-              class="time-select"
               placeholder="全部"
               style="width: 88px; margin: 5px 0 0"
+              @change="handleTimeLimit"
             >
-              <el-option key="4" label="全部" value="item4" />
-              <el-option key="1" label="近三天" value="item1" />
-              <el-option key="2" label="近一周" value="item2" />
-              <el-option key="3" label="近一月" value="item3" />
+              <el-option key="4" label="全部" value="all" />
+              <el-option key="1" label="近三天" value="day" />
+              <el-option key="2" label="近一周" value="week" />
+              <el-option key="3" label="近一月" value="month" />
             </el-select>
-            <el-select
-              v-model="userLimit"
-              class="time-select"
-              placeholder="全部"
-              style="width: 100px; margin: 5px 0 0"
-            >
-              <el-option key="1" label="个人用户" value="item1" />
-              <el-option key="2" label="分组用户" value="item2" />
-              <el-option key="3" label="所有用户" value="item3" />
-              <el-option key="4" label="所有类型" value="item4" />
+            <el-select v-model="userLimit" placeholder="全部" style="width: 100px; margin: 5px 0 0">
+              <el-option
+                v-for="tag in noticeStore.noticeTypeList"
+                :key="tag.typeId"
+                :label="tag.typeName"
+                :value="tag.typeId"
+              />
+              <el-option key="0" label="所有类型" value="0" />
             </el-select>
           </div>
         </div>
         <div class="search-box">
           <el-input v-model="input" placeholder="请输入关键词" />
-          <el-button color="#2F3367">
+          <el-button color="#2F3367" @click="searchNotice">
             <el-icon style="vertical-align: middle">
               <Search />
             </el-icon>
@@ -48,24 +46,28 @@
         </div>
       </div>
       <!-- 页面主要内容展示 -->
-      <el-main style="padding: 0 20px 0 20px">
+      <el-main style="padding: 0 10px 0 20px">
         <!-- 通知展示表格 -->
-        <div class="message-box">
-          <div v-for="item in items" :key="item.id">
-            <el-row class="single-message" @click="handleMessage(item.id)">
+        <el-scrollbar class="message-box">
+          <div v-for="notice in noticeStore.allNoticeList.records" :key="notice.noticeId">
+            <el-row
+              class="single-message"
+              @click="handleMessage(notice.noticeId as number, notice.title as string)"
+              :class="{ activeClass: notice.noticeId === noticeDetail.noticeId }"
+            >
               <div class="content-box">
                 <div style="display: flex; align-items: center">
-                  <div class="delect-icon" v-if="isDelect">
+                  <div class="delete-icon" v-if="isDelete">
                     <img src="../../assets/icons/delete-message.svg" alt="删除通知" />
                   </div>
                   <div>
                     <div class="title">
-                      <el-icon v-if="!item.toAll"><User /></el-icon>
-                      <span>关于小程序更新至2.0版本的通知</span>
+                      <el-icon v-if="notice.userId !== 0"><User /></el-icon>
+                      <span>{{ notice.title }}</span>
                     </div>
                     <div class="content">
                       <el-text class="w-90% mb-2" truncated>
-                        亲爱的用户,您好,小程序已经更新至2.0版本aaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                        {{ notice.content }}
                       </el-text>
                     </div>
                   </div>
@@ -75,140 +77,174 @@
               <div class="info">
                 <div class="info-deliver">
                   <el-icon style="font-size: 1.5em"><UserFilled /></el-icon>
-                  <span style="padding-left: 2px">发布者:管理员1</span>
+                  <span style="padding-left: 2px">发布者:{{ notice.adminName }}</span>
                 </div>
                 <div class="info-pageview">
-                  <div class="to-all" v-if="item.toAll">
+                  <div class="to-all" v-if="notice.userId === 0">
                     <el-icon style="font-size: 1.5em"><View /></el-icon>
-                    <span style="padding-left: 2px">浏览:1000</span>
+                    <span style="padding-left: 5px">浏览:{{ notice.browse }}</span>
                   </div>
-                  <div class="to-one" v-if="!item.toAll">
-                    <span style="padding-left: 2px">用户ID: 1100</span>
+                  <div class="to-one" v-if="notice.userId !== 0">
+                    <span style="padding-left: 5px">{{ notice.username }}</span>
                   </div>
                 </div>
               </div>
-              <div class="date">2024-01-01 18:00</div>
+              <div class="date">{{ notice.publishTime }}</div>
             </el-row>
           </div>
-        </div>
+        </el-scrollbar>
       </el-main>
       <!-- 分页按钮 -->
-      <pagination :total="100" :page="1" @pagination="handleChange" />
+      <pagination
+        :total="noticeStore.allNoticeList.total"
+        :page="noticeStore.allNoticeList.current"
+        :limit="noticeStore.allNoticeList.size"
+        @pagination="handlePageChange"
+      />
     </div>
     <!-- 右边盒子 -->
-    <div class="right-box" v-show="!isDelect">
-      <div class="detail-title">关于小程序更新至2.0版本的通知</div>
+    <div class="right-box" v-show="!isDelete">
+      <div class="detail-title">{{ noticeDetail.title }}</div>
       <div class="detail-info">
         <div class="detail-info-deliver">
           <el-icon style="font-size: 1.5em"><UserFilled /></el-icon>
-          <span>发布者:管理员1</span>
+          <span>发布者:{{ noticeDetail.adminName }}</span>
         </div>
-        <div class="detail-info-date">2024-01-01 18:00</div>
+        <div class="detail-info-date">{{ noticeDetail.publishTime }}</div>
       </div>
       <div class="detail-content">
         <el-text class="mx-1" type="info">
-          亲爱的用户,您好,小程序已更新至1.15版我们将给您带来更加优异完善的功能，祝您本，使用愉快!
-          若在使用过程中有如何问题或建议，欢迎您的反馈 !
+          {{ noticeDetail.content }}
         </el-text>
       </div>
       <div class="detail-pageview">
         <el-icon style="font-size: 1.5em"><View /></el-icon>
-        <span style="padding-left: 2px">浏览:1000</span>
+        <span style="padding-left: 2px">浏览:{{ noticeDetail.browse }}</span>
       </div>
     </div>
     <!-- 对话框 -->
-    <el-dialog v-model="showDelectBox" width="30%" center>
+    <el-dialog v-model="showDeleteBox" width="30%" center>
       <div>
-        <div class="delectWaing-icon">
-          <img src="../../assets/icons/delect-waring.svg" alt="" />
+        <div class="deleteWaing-icon">
+          <img src="../../assets/icons/delete-waring.svg" alt="" />
           <span> 是否确认将此通知删除？ </span>
         </div>
       </div>
       <p>删除后无法恢复。</p>
       <template #footer>
         <span class="dialog-footer">
-          <el-button @click="showDelectBox = false">取消</el-button>
-          <el-button type="primary" @click="handleDelect"> 确认 </el-button>
+          <el-button @click="showDeleteBox = false">取消</el-button>
+          <el-button type="primary" @click="handleDelete"> 确认 </el-button>
         </span>
       </template>
     </el-dialog>
-    <div class="alertBox" v-show="showAlertBox">
+    <div class="alert-box" v-show="showAlertBox">
       <div class="content">
         <p>已删除此通知</p>
-        <img src="../../assets/icons/delect-confirm.svg" alt="" />
+        <img src="../../assets/icons/delete-confirm.svg" alt="" />
       </div>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import {
-  EditPen,
-  Search,
-  UserFilled,
-  View,
-  User,
-  WarnTriangleFilled
-} from '@element-plus/icons-vue'
-import pagination from '@/components/Pagination/index.vue'
-import { ref } from 'vue'
+import { EditPen, Search, UserFilled, View, User } from '@element-plus/icons-vue'
+import { ref, onMounted } from 'vue'
+import type { NoticeItem } from '@/types/notice'
+import type { pageInfo } from '@/types/pageMessage'
+import { useNoticeStore } from '@/store/modules/notice'
 // 搜索框内容
 let input = ref('')
-// 当前页签
-let activeName = ref('first')
+
 // 通知时间限制
-let timeLimit = ref('全部')
+let timeLimit = ref('all')
+
 // 用户限制
 let userLimit = ref('所有类型')
+
 // 是否处于删除状态
-let isDelect = ref(false)
+let isDelete = ref(false)
+
 // 控制删除信息对话框显示
-let showDelectBox = ref(false)
+let showDeleteBox = ref(false)
+
 // 控制提示框显示
 let showAlertBox = ref(false)
+
 // 待删除的通知Id
-let delectMessageId = ref(0)
+let deleteMessageId = ref(0)
 
-// tab页签点击触发
-const handleClick = () => {
-  console.log('点击了tab页签')
+// 待删除的通知标题
+let deleteMessageTitle = ref('')
+
+// store数据
+const noticeStore = useNoticeStore()
+
+// 通知数据
+let noticeList = ref<NoticeItem[]>([])
+
+// 当前选中通知的详细内容
+let noticeDetail = ref<NoticeItem>({
+  noticeId: 0,
+  title: '',
+  content: '',
+  userId: 0,
+  username: '',
+  adminName: '',
+  publishTime: '',
+  browse: 0,
+  state: 0,
+  comment: ''
+})
+
+onMounted(async () => {
+  // 重置页面页码
+  noticeStore.allNoticeList.current = 1
+  // 获取所有通知的类型
+  // 获取该管理员所有通知
+  await Promise.all([
+    noticeStore.getAllNoticeType(),
+    noticeStore.getAllNoticeList('3', '', timeLimit.value, 0)
+  ])
+  noticeList.value = noticeStore.allNoticeList.records as NoticeItem[]
+  noticeDetail.value = noticeList.value[0]
+})
+
+// 更新页面展示信息
+const handlePageChange = (pageMessage: pageInfo) => {
+  // 更新页面信息
+  noticeStore.allNoticeList.current = pageMessage.currentPage
+  noticeStore.allNoticeList.size = pageMessage.pageLimit
+  // 发送请求获取新数据
+  noticeStore.getAllNoticeList('3', '', timeLimit.value, 0)
 }
-
-// 点击icon图标
-const handleIconClick = () => {
-  console.log('点击了icon')
-}
-
-// 分页按钮点击触发
-const handleChange = () => {
-  console.log('点击了页码')
-}
-
-// 模拟系统信息数据
-const items = [
-  { id: 1, name: 'Item 1', toAll: true },
-  { id: 2, name: 'Item 2', toAll: true },
-  { id: 3, name: 'Item 3', toAll: false },
-  { id: 4, name: 'Item 4', toAll: true },
-  { id: 5, name: 'Item 5', toAll: false },
-  { id: 6, name: 'Item 6', toAll: true }
-]
 
 // 点击通知
-const handleMessage = (messageId: number) => {
-  // 当前通知的Id
-  delectMessageId.value = messageId
-  // 删除状态下点击
-  if (isDelect.value) {
-    // 打开确认弹窗
-    showDelectBox.value = true
+const handleMessage = (messageId: number, messageTitle: string) => {
+  // 判断当前是否处于删除状态
+  if (isDelete.value === true) {
+    // 处在删除状态--打开确认删除弹窗
+    showDeleteBox.value = true
+    // 记录当前通知的Id和标题
+    deleteMessageId.value = messageId
+    deleteMessageTitle.value = messageTitle
+  } else {
+    // 不处在删除状态--更新选中消息的详细信息
+    noticeList.value.forEach((element) => {
+      if (element.noticeId === messageId) {
+        noticeDetail.value = element
+      }
+    })
   }
 }
 
 // 删除通知
-const handleDelect = () => {
-  showDelectBox.value = false
+const handleDelete = async () => {
+  showDeleteBox.value = false
   // 拿到待删除的通知Id发送请求
+  await noticeStore.deleteAnyNotice(deleteMessageTitle.value, deleteMessageId.value)
+  // 发送请求获取新数据
+  await noticeStore.getAllNoticeList('3', '', timeLimit.value, 0)
   // 展示提示信息
   showAlertBox.value = true
   // 3s后关闭提示窗
@@ -216,28 +252,44 @@ const handleDelect = () => {
     showAlertBox.value = false
   }, 1500)
 }
+
+// 搜索框筛选通知
+const searchNotice = () => {
+  // 重置页面页码
+  noticeStore.allNoticeList.current = 1
+  // 发送请求更新数据
+  noticeStore.getAllNoticeList('3', input.value, timeLimit.value, 0)
+}
+
+// 根据时间筛选通知
+const handleTimeLimit = () => {
+  console.log(timeLimit.value)
+  // 携带新的时间限制参数重新发送请求，更新数据
+  noticeStore.getAllNoticeList('3', input.value, timeLimit.value, 0)
+}
 </script>
 
 <style scoped lang="scss">
 .box {
   position: relative;
   display: flex;
-  justify-content: flex-start;
-  gap: 18px;
+  justify-content: space-between;
+  gap: 10px;
   margin: 15px 0 0 15px;
 }
 
 .left-box {
-  width: 55vw;
+  width: 52vw;
   background-color: #fff;
 }
 
 .right-box {
-  width: 27vw;
+  width: 30vw;
   background-color: #fff;
   padding: 30px 25px;
   gap: 10px;
 }
+
 .button-deliver {
   display: flex;
   height: 38px;
@@ -257,11 +309,11 @@ const handleDelect = () => {
 .select-box {
   display: flex;
   justify-content: space-between;
-  width: 40vh;
+  width: 15vw;
   border: none;
 }
 
-:deep(.el-select__placeholder) {
+:deep(.select-box .el-select__placeholder) {
   color: #2f3367;
   font-weight: 600;
 }
@@ -278,14 +330,14 @@ const handleDelect = () => {
 }
 
 .message-box {
-  height: 63vh;
+  height: 64vh;
   margin-top: 20px;
 }
 
 .single-message {
   position: relative;
-  height: 15vh;
-  padding: 12px 5px;
+  height: 120px;
+  margin-right: 15px;
 
   border-top: 1px solid #e4e7ed;
   border-bottom: 1px solid #e4e7ed;
@@ -298,7 +350,7 @@ const handleDelect = () => {
 
 .content-box {
   position: absolute;
-  top: 15px;
+  top: 20px;
   left: 5px;
 }
 
@@ -325,7 +377,7 @@ const handleDelect = () => {
 
 .date {
   position: absolute;
-  top: 15px;
+  top: 20px;
   right: 5px;
   color: var(--8A8EA8, #8a8ea8);
   font-family: Inter;
@@ -363,6 +415,7 @@ const handleDelect = () => {
   display: flex;
   justify-content: center;
   align-items: center;
+  padding: 0 6px;
   gap: 2px;
 
   color: var(--8A8EA8, #8a8ea8);
@@ -378,12 +431,12 @@ const handleDelect = () => {
 .detail-title {
   padding: 20px;
   color: var(--2F3367, #2f3367);
-  font-family: Inter;
   font-size: 1rem;
   font-style: normal;
   font-weight: 600;
-  line-height: normal;
+  line-height: 1rem;
   letter-spacing: 1.6px;
+  text-align: center;
 }
 .detail-info {
   display: flex;
@@ -457,7 +510,7 @@ const handleDelect = () => {
   align-items: center;
 }
 
-.delect-icon {
+.delete-icon {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -471,23 +524,23 @@ const handleDelect = () => {
   box-shadow: 2px 3px 4px 1px rgba(142, 142, 142, 0.17);
 }
 
-.delectWaing-icon {
+.deleteWaing-icon {
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
-.delectWaing-icon img {
+.deleteWaing-icon img {
   display: inline-block;
   margin-right: 12px;
   width: 32px;
   height: 32px;
 }
 
-:deep(.el-select__wrapper) {
+:deep(.select-box .el-select__wrapper) {
   box-shadow: none !important;
 }
-.el-select .el-input.is-focus .el-input__inner {
+.select-box .el-select .el-input.is-focus .el-input__inner {
   color: #fff;
   background-color: #2f3367;
 }
@@ -528,7 +581,7 @@ const handleDelect = () => {
 }
 
 // 消息提示框
-.alertBox {
+.alert-box {
   position: absolute;
   top: 30%;
   left: 30%;
@@ -539,13 +592,13 @@ const handleDelect = () => {
   box-shadow: 0px 2px 8.1px 6px rgba(161, 166, 201, 0.35);
   background-color: #2f3367;
 }
-.alertBox .content {
+.alert-box .content {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
 }
-.alertBox p {
+.alert-box p {
   margin: 16px;
   color: #fff;
   font-family: Inter;
@@ -554,5 +607,9 @@ const handleDelect = () => {
   font-weight: 500;
   line-height: normal;
   letter-spacing: 1.28px;
+}
+
+.activeClass {
+  background-color: #fafafa;
 }
 </style>

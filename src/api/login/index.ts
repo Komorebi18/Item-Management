@@ -18,7 +18,7 @@ import http from '@/utils/request'
 import { userInformation, tokenType } from '@/types/login'
 
 // 登录获取信息
-export const getLogin = (data: object) => {
+export const getLoginAPI = (data: object) => {
   return http<userInformation>({
     method: 'POST',
     url: '/admin/login',
@@ -27,7 +27,7 @@ export const getLogin = (data: object) => {
 }
 
 // 登录获取信息
-export const fetchToken = () => {
+export const fetchTokenAPI = () => {
   return http<tokenType>({
     method: 'GET',
     url: '/admin/refresh'
@@ -35,7 +35,7 @@ export const fetchToken = () => {
 }
 
 // 退出登录
-export const outLog = () => {
+export const outLoginAPI = () => {
   return http({
     method: 'POST',
     url: '/admin/logout'
