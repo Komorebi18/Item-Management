@@ -24,7 +24,7 @@
     <el-main style="padding-top: 0; overflow: hidden">
       <!-- 通知展示表格 -->
       <el-tabs v-model="activeName" class="tabs" @tab-click="handleClick">
-        <div class="pane-content">
+        <el-scrollbar class="pane-content">
           <el-tab-pane label="全部" name="first">
             <div v-for="item in items" :key="item.id">
               <el-row :gutter="20" class="singleMessage">
@@ -65,7 +65,7 @@
           <el-tab-pane label="编辑中" name="second">编辑中</el-tab-pane>
           <el-tab-pane label="审核中" name="third">审核中</el-tab-pane>
           <el-tab-pane label="已审核" name="fourth">已审核</el-tab-pane>
-        </div>
+        </el-scrollbar>
       </el-tabs>
     </el-main>
     <!-- 分页按钮 -->
@@ -77,11 +77,19 @@
 import { Delete, Search, Promotion, Plus } from '@element-plus/icons-vue'
 import pagination from '@/components/Pagination/index.vue'
 import router from '@/router'
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
+import { useNoticeStore } from '@/store/modules/notice'
 // 搜索框内容
 let input = ref('')
 // 当前页签
 let activeName = ref('first')
+// store数据
+const noticeStore = useNoticeStore()
+
+onMounted(() => {
+  // 获取该管理员所有通知
+  noticeStore.getSingleAdminNoticeList('3', '', 0)
+})
 
 // tab页签点击触发
 const handleClick = () => {
@@ -151,11 +159,11 @@ const deliverMessage = () => {
 
 .tabs {
   position: relative;
-  height: 65vh;
+  height: 67vh;
 }
 
 .pane-content {
-  height: 60vh;
+  height: 62vh;
   overflow: auto;
 }
 

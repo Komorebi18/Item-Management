@@ -19,19 +19,23 @@ import { computed, PropType } from 'vue'
 import { scrollTo } from '@/utils/scroll-to'
 
 const props = defineProps({
+  // 总条数
   total: {
     required: true,
     type: Number as PropType<number>,
     default: 0
   },
+  // 当前页码
   page: {
     type: Number,
     default: 1
   },
+  // 每页呈现数据的条数
   limit: {
     type: Number,
     default: 20
   },
+  // 可供选择的limit
   pageSizes: {
     type: Array as PropType<number[]>,
     default() {
@@ -42,6 +46,7 @@ const props = defineProps({
     type: String,
     default: 'total, sizes, prev, pager, next, jumper'
   },
+  // 背景颜色
   background: {
     type: Boolean,
     default: true
