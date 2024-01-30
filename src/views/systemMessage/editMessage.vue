@@ -34,7 +34,7 @@
             {{ isDeliverAlert ? '请等待管理员审核' : '已保存草稿' }}
           </p>
         </div>
-        <img src="../../assets/icons/delect-confirm.svg" />
+        <img src="../../assets/icons/delete-confirm.svg" />
       </div>
     </div>
     <!-- 发布对话框 -->
@@ -135,17 +135,17 @@ let showAlertBox = ref(false)
 let showDeliverBox = ref(false)
 // 变量--发送用户
 // 是否发送给所有人
-let isDeliverAll = ref(false)
+let isDeliverAll = ref(true)
 // 是否发送给分组用户
 let isDeliverGroup = ref(false)
 // 是否发送给个人
 let isDeliverOne = ref(false)
 // 发送的标签分组
-let tagLimit = ref('1')
+let tagLimit = ref('标签分组')
 // 发送的黑名单分组
-let blacklistUserLimit = ref('1')
+let blacklistUserLimit = ref('黑名单分组')
 // 发送的用户Id
-let userIdLimit = ref('1')
+let userIdLimit = ref('用户')
 // 搜索内容
 let searchText = ref('')
 // 是否为发送成功提醒
