@@ -35,3 +35,27 @@ export const changeStateAPI = (feedbackId: number, state: number) => {
     }
   })
 }
+
+export const replyUserAPI = (
+  title: string,
+  content: string,
+  userId: number,
+  groupId: number,
+  typeId: number,
+  state = 1
+) => {
+  return http({
+    url: `/notice/sys?`,
+    method: 'POST',
+    params: {
+      state
+    },
+    data: {
+      title,
+      content,
+      userId,
+      groupId,
+      typeId
+    }
+  })
+}
