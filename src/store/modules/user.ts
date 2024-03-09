@@ -59,7 +59,7 @@ export const useUserStore = defineStore('user', () => {
       })
     } else {
       // 正常退出需要发送请求告知后台
-      await outLoginAPI()
+      // await outLoginAPI()
     }
 
     // 移除本地存储相关用户信息

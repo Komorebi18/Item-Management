@@ -78,7 +78,18 @@ export interface FeedBackInfo {
    */
   state: string
   /**
-   * 版本好
+   * 版本号
    */
   version: string
+}
+
+/**
+ * 回复类型
+ */
+export interface ReplyInfo {
+  title: string
+  content: string
+  userId: number
+  groupId: number
+  typeId: number
 }
