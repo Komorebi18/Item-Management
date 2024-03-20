@@ -24,8 +24,6 @@ export const useUserStore = defineStore('user', () => {
   const refreshTime = useStorage<string>('refreshTime', '')
   // 初始化accessToken状态，1表示未过期，0表示已过期
   const accessTokenState = useStorage<number>('accessTokenState', 0)
-  // 初始化refreshToken状态，1表示未过期，0表示已过期
-  const refreshTokenState = useStorage<number>('refreshTokenState', 0)
   // 初始化用户权限
   const roles = useStorage<string[]>('roles', [])
 
@@ -42,7 +40,6 @@ export const useUserStore = defineStore('user', () => {
     userInfo.value.expiredTime = res.data.expiredTime
     // 本地存储赋值
     accessTokenState.value = 1
-    refreshTokenState.value = 1
     token.value = res.data.accessToken
     refreshToken.value = res.data.refreshToken
     refreshTime.value = res.data.expiredTime
@@ -66,12 +63,12 @@ export const useUserStore = defineStore('user', () => {
     roles.value = null
     token.value = null
     accessTokenState.value = null
-    refreshTokenState.value = null
     refreshToken.value = null
     refreshTime.value = null
     // 重置路由
     router.replace({ path: '/login' })
   }
+
   // 更新token
   const updateToken = async () => {
     // 获取新token
@@ -83,7 +80,6 @@ export const useUserStore = defineStore('user', () => {
     userInfo.value.expiredTime = res.data.expiredTime
     // 更新本地存储的token
     accessTokenState.value = 1
-    refreshTokenState.value = 1
     token.value = res.data.accessToken
     refreshToken.value = res.data.refreshToken
     refreshTime.value = res.data.expiredTime

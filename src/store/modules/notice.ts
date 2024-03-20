@@ -34,28 +34,42 @@ export const useNoticeStore = defineStore('notice', () => {
   const noticeTypeList = ref<NoticeType[]>([])
 
   // 获取管理员个人通知
-  const getSingleAdminNoticeList = async (state: string, content: string, type: number) => {
+  const getSingleAdminNoticeList = async (
+    state: string,
+    content: string,
+    type: number,
+    dataType: number
+  ) => {
     // 调用接口获取数据
     const res = await getSingleAdminNoticeAPI(
       state,
       singleAdminNoticeList.current as number,
       singleAdminNoticeList.size as number,
       content,
-      type
+      type,
+      dataType
     )
     singleAdminNoticeList.current = res.data.current
     singleAdminNoticeList.size = res.data.size
     singleAdminNoticeList.total = res.data.total
     singleAdminNoticeList.pages = res.data.pages
     singleAdminNoticeList.records = res.data.records
+    // 重置信息列表的内容,直接复制可能不会覆盖原先存放的内容
+    singleAdminNoticeList.records = []
+    Array.prototype.push.apply(singleAdminNoticeList.records, res.data.records as NoticeList[])
+    // 移除发布时间字符串中的T
+    singleAdminNoticeList.records.map((notice) => {
+      notice.publishTime = (notice.publishTime as string).replace('T', ' ')
+      return notice
+    })
   }
 
   // 获取所有已发布通知
   const getAllNoticeList = async (
     state: string,
     content: string,
-    timeLimit: string,
-    type: number
+    type: number,
+    dataType: number
   ) => {
     // 调用接口获取数据
     const res = await getAllNoticeAPI(
@@ -63,7 +77,8 @@ export const useNoticeStore = defineStore('notice', () => {
       allNoticeList.current as number,
       allNoticeList.size as number,
       content,
-      type
+      type,
+      dataType
     )
     allNoticeList.current = res.data.current
     allNoticeList.size = res.data.size
@@ -71,28 +86,12 @@ export const useNoticeStore = defineStore('notice', () => {
     allNoticeList.pages = res.data.pages
     // 重置信息列表的内容,直接复制可能不会覆盖原先存放的内容
     allNoticeList.records = []
-    // 对数据进行筛选--以timeLimit为标准,筛选近三天，近一周，近一月的通知
-    const temNoticeList = res.data.records?.filter((element) => {
-      // 获取当前时间的时间戳
-      const currentTime = new Date()
-      const currentTimeStamp = currentTime.getTime()
-      // 获取当前一条通知的发布时间
-      const publishTime = new Date(element.publishTime as string)
-      const publishTimeStamp = publishTime.getTime()
-      if (timeLimit === 'day') {
-        // 限制条件为三天内
-        return currentTimeStamp - publishTimeStamp < 259200000
-      } else if (timeLimit === 'week') {
-        // 限制条件为一周内
-        return currentTimeStamp - publishTimeStamp < 604800000
-      } else if (timeLimit === 'month') {
-        // 限制条件为一个月内
-        return currentTimeStamp - publishTimeStamp < 2592000000
-      } else {
-        return true
-      }
+    Array.prototype.push.apply(allNoticeList.records, res.data.records as NoticeList[])
+    // 移除发布时间字符串中的T
+    allNoticeList.records.map((notice) => {
+      notice.publishTime = (notice.publishTime as string).replace('T', ' ')
+      return notice
     })
-    Array.prototype.push.apply(allNoticeList.records, temNoticeList as NoticeItem[])
   }
 
   // 更新通知内容

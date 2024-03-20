@@ -4,7 +4,8 @@
       <div class="content">
         <el-input
           placeholder="请在这里输入标题"
-          :disabled="true"
+          v-model="messageTitle"
+          type="text"
           style="font-size: 1.3rem; margin-bottom: 5px"
         />
         <p style="height: 1px; width: 100%; background-color: #d9d9d9; margin-bottom: 15px"></p>
@@ -13,11 +14,11 @@
           placeholder="请在这里输入正文"
           type="textarea"
           :resize="'none'"
-          class="mainText"
+          class="main-text"
         />
       </div>
       <div class="footer">
-        <p style="margin: 20px 36px">正文共 {{ messageText.length }}字</p>
+        <p style="margin: 20px 36px">正文共 {{ messageText.length }} 字</p>
         <div class="button">
           <el-button @click="setDraft">保存为草稿</el-button>
           <el-button @click="showDeliverBox = true">发布</el-button>
@@ -125,29 +126,42 @@
 </template>
 <script setup lang="ts">
 import router from '@/router'
-import { ref } from 'vue'
+import { ref, watchEffect } from 'vue'
 import { Search } from '@element-plus/icons-vue'
 // 通知正文
 let messageText = ref('')
+
+// 通知标题
+let messageTitle = ref('')
+
 // 暂存提示框显示
 let showAlertBox = ref(false)
+
 // 发布通知对话框显示
 let showDeliverBox = ref(false)
+
 // 变量--发送用户
 // 是否发送给所有人
 let isDeliverAll = ref(true)
+
 // 是否发送给分组用户
 let isDeliverGroup = ref(false)
+
 // 是否发送给个人
 let isDeliverOne = ref(false)
+
 // 发送的标签分组
 let tagLimit = ref('标签分组')
+
 // 发送的黑名单分组
 let blacklistUserLimit = ref('黑名单分组')
+
 // 发送的用户Id
 let userIdLimit = ref('用户')
+
 // 搜索内容
 let searchText = ref('')
+
 // 是否为发送成功提醒
 let isDeliverAlert = ref(false)
 
@@ -174,6 +188,15 @@ const options = [
     label: 'Option5'
   }
 ]
+
+// 选择发送按钮
+watchEffect(() => {
+  if (isDeliverGroup.value === true || isDeliverOne.value === true) {
+    isDeliverAll.value = false
+  } else {
+    isDeliverAll.value = true
+  }
+})
 
 // 点击保存为草稿触发
 const setDraft = (event: any) => {
@@ -232,7 +255,7 @@ const confirmDeliver = () => {
   height: 50vh;
 }
 
-.mainText {
+.main-text {
   flex: 5;
   color: var(--8A8EA8, #8a8ea8);
   font-family: Inter;

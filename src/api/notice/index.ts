@@ -8,6 +8,7 @@ import { NoticeList, NoticeType } from '@/types/notice'
  * @param limit 每页大小
  * @param content 搜索内容
  * @param type 搜索内容通知类型，0查询全部，其它查询对应的类型
+ * @param dateType 时间范围类型，1为近3天，2为近一周，3为近一月，其它为全部
  * @returns 系统通知中每条通知的具体参数
  */
 export const getSingleAdminNoticeAPI = (
@@ -15,10 +16,11 @@ export const getSingleAdminNoticeAPI = (
   offset: number,
   limit: number,
   content: string,
-  type: number
+  type: number,
+  dateType: number
 ) => {
   return http<NoticeList>({
-    url: `/notice/sys/${state}?offset=${offset}&limit=${limit}&content=${content}&type=${type}`,
+    url: `/notice/sys/${state}?offset=${offset}&limit=${limit}&content=${content}&type=${type}&dateType=${dateType}`,
     method: 'GET'
   })
 }
@@ -30,6 +32,7 @@ export const getSingleAdminNoticeAPI = (
  * @param limit 每页大小
  * @param content 搜索内容
  * @param type 搜索内容通知类型，0查询全部，其它查询对应的类型
+ * @param dateType 时间范围类型，1为近3天，2为近一周，3为近一月，其它为全部
  * @returns 所有的系统通知
  */
 export const getAllNoticeAPI = (
@@ -37,10 +40,11 @@ export const getAllNoticeAPI = (
   offset: number,
   limit: number,
   content: string,
-  type: number
+  type: number,
+  dateType: number
 ) => {
   return http<NoticeList>({
-    url: `/notice/sys/all/${state}?offset=${offset}&limit=${limit}&content=${content}&type=${type}`,
+    url: `/notice/sys/all/${state}?offset=${offset}&limit=${limit}&content=${content}&type=${type}&dateType=${dateType}`,
     method: 'GET'
   })
 }
