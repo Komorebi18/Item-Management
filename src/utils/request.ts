@@ -38,8 +38,11 @@ http.interceptors.request.use(
     const givenTime = new Date(refreshTime.value)
     const currentTimeStamp = currentTime.getTime()
     const givenTimeStamp = givenTime.getTime()
-    if (givenTimeStamp - currentTimeStamp < 86400000) {
+    if (givenTimeStamp - currentTimeStamp < 86400000 && accessTokenState.value === 1) {
       // 刷新token
+      // 将accessTokenState置零--标记为过期
+      accessTokenState.value = 0
+      // 发送请求获取新token
       userStore.updateToken()
     }
     return config
@@ -53,27 +56,13 @@ http.interceptors.request.use(
 http.interceptors.response.use((response: AxiosResponse) => {
   // 初始化useUserStore实例
   const userStore = useUserStore()
-  // 获取accessToken状态，1表示未过期，0表示已过期
-  const accessTokenState = useStorage<number>('accessTokenState', 0)
-  // 获取refreshToken状态，1表示未过期，0表示已过期
-  const refreshTokenState = useStorage<number>('refreshTokenState', 0)
   if (response.data) {
     switch (response.data.code) {
       case 200:
         return response.data
       case 101:
-        if (refreshTokenState.value === 1) {
-          // 将accessTokenState置零
-          accessTokenState.value = 0
-          // refreshToken未被判断情况(首先判断accessToken，accessToken过期进入此逻辑，但是refreshToken是否过期未知)
-          // 暂时将refreshTokenState置0，若refreshToken未过期，将其重新置1
-          refreshTokenState.value = 0
-          // 刷新token---accessToken过期，被动更新token
-          userStore.updateToken()
-        } else {
-          // refreshToken过期情况
-          userStore.outLogin(true)
-        }
+        // 请求拦截器会确保在accessToken过期时发送请求更新token，只有当获取新token的请求也失败时才会进入此逻辑
+        userStore.outLogin(true)
         break
       case 400:
         ElMessage({

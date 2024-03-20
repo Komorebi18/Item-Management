@@ -20,14 +20,15 @@
               style="width: 88px; margin: 5px 0 0"
               @change="handleTimeLimit"
             >
-              <el-option key="4" label="全部" value="all" />
-              <el-option key="1" label="近三天" value="day" />
-              <el-option key="2" label="近一周" value="week" />
-              <el-option key="3" label="近一月" value="month" />
+              <el-option key="4" label="全部" value="0" />
+              <el-option key="1" label="近三天" value="1" />
+              <el-option key="2" label="近一周" value="2" />
+              <el-option key="3" label="近一月" value="3" />
             </el-select>
             <el-select v-model="userLimit" placeholder="全部" style="width: 100px; margin: 5px 0 0">
               <el-option
                 v-for="tag in noticeStore.noticeTypeList"
+                v-model="tagId"
                 :key="tag.typeId"
                 :label="tag.typeName"
                 :value="tag.typeId"
@@ -37,7 +38,7 @@
           </div>
         </div>
         <div class="search-box">
-          <el-input v-model="input" placeholder="请输入关键词" />
+          <el-input v-model="input" placeholder="请输入关键词" @keydown.enter="searchNotice" />
           <el-button color="#2F3367" @click="searchNotice">
             <el-icon style="vertical-align: middle">
               <Search />
@@ -47,8 +48,12 @@
       </div>
       <!-- 页面主要内容展示 -->
       <el-main style="padding: 0 10px 0 20px">
+        <!-- 没有数据时展示的内容 -->
+        <template v-if="!noticeDetail">
+          <p>暂无消息</p>
+        </template>
         <!-- 通知展示表格 -->
-        <el-scrollbar class="message-box">
+        <el-scrollbar class="message-box" ref="scrollbarRef">
           <div v-for="notice in noticeStore.allNoticeList.records" :key="notice.noticeId">
             <el-row
               class="single-message"
@@ -104,23 +109,28 @@
     </div>
     <!-- 右边盒子 -->
     <div class="right-box" v-show="!isDelete">
-      <div class="detail-title">{{ noticeDetail.title }}</div>
-      <div class="detail-info">
-        <div class="detail-info-deliver">
-          <el-icon style="font-size: 1.5em"><UserFilled /></el-icon>
-          <span>发布者:{{ noticeDetail.adminName }}</span>
+      <template v-if="noticeDetail">
+        <div class="detail-title">{{ noticeDetail.title }}</div>
+        <div class="detail-info">
+          <div class="detail-info-deliver">
+            <el-icon style="font-size: 1.5em"><UserFilled /></el-icon>
+            <span>发布者:{{ noticeDetail.adminName }}</span>
+          </div>
+          <div class="detail-info-date">{{ noticeDetail.publishTime }}</div>
         </div>
-        <div class="detail-info-date">{{ noticeDetail.publishTime }}</div>
-      </div>
-      <div class="detail-content">
-        <el-text class="mx-1" type="info">
-          {{ noticeDetail.content }}
-        </el-text>
-      </div>
-      <div class="detail-pageview">
-        <el-icon style="font-size: 1.5em"><View /></el-icon>
-        <span style="padding-left: 2px">浏览:{{ noticeDetail.browse }}</span>
-      </div>
+        <div class="detail-content">
+          <el-text class="mx-1" type="info">
+            {{ noticeDetail.content }}
+          </el-text>
+        </div>
+        <div class="detail-pageview">
+          <el-icon style="font-size: 1.5em"><View /></el-icon>
+          <span style="padding-left: 2px">浏览:{{ noticeDetail.browse }}</span>
+        </div>
+      </template>
+      <template v-if="!noticeDetail">
+        <p>暂无消息</p>
+      </template>
     </div>
     <!-- 对话框 -->
     <el-dialog v-model="showDeleteBox" width="30%" center>
@@ -149,15 +159,12 @@
 
 <script lang="ts" setup>
 import { EditPen, Search, UserFilled, View, User } from '@element-plus/icons-vue'
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import type { NoticeItem } from '@/types/notice'
 import type { pageInfo } from '@/types/pageMessage'
 import { useNoticeStore } from '@/store/modules/notice'
 // 搜索框内容
 let input = ref('')
-
-// 通知时间限制
-let timeLimit = ref('all')
 
 // 用户限制
 let userLimit = ref('所有类型')
@@ -183,6 +190,15 @@ const noticeStore = useNoticeStore()
 // 通知数据
 let noticeList = ref<NoticeItem[]>([])
 
+// 待绑定滚动条组件
+const scrollbarRef = ref<HTMLElement | null>(null)
+
+// 通知时间限制
+let timeLimit = ref('0')
+
+// 通知类型的ID
+let tagId = ref(0)
+
 // 当前选中通知的详细内容
 let noticeDetail = ref<NoticeItem>({
   noticeId: 0,
@@ -204,19 +220,25 @@ onMounted(async () => {
   // 获取该管理员所有通知
   await Promise.all([
     noticeStore.getAllNoticeType(),
-    noticeStore.getAllNoticeList('3', '', timeLimit.value, 0)
+    noticeStore.getAllNoticeList('3', '', 0, parseInt(timeLimit.value))
   ])
+  // 初始化盒子右侧详细信息
   noticeList.value = noticeStore.allNoticeList.records as NoticeItem[]
   noticeDetail.value = noticeList.value[0]
 })
 
 // 更新页面展示信息
-const handlePageChange = (pageMessage: pageInfo) => {
+const handlePageChange = async (pageMessage: pageInfo) => {
   // 更新页面信息
   noticeStore.allNoticeList.current = pageMessage.currentPage
   noticeStore.allNoticeList.size = pageMessage.pageLimit
   // 发送请求获取新数据
-  noticeStore.getAllNoticeList('3', '', timeLimit.value, 0)
+  await noticeStore.getAllNoticeList('3', input.value, 0, parseInt(timeLimit.value))
+  // 更新盒子右侧详细信息
+  noticeList.value = noticeStore.allNoticeList.records as NoticeItem[]
+  noticeDetail.value = noticeList.value[0]
+  // 滚动条回滚到顶端
+  scrollbarRef.value?.scrollTo(0, 0)
 }
 
 // 点击通知
@@ -244,7 +266,10 @@ const handleDelete = async () => {
   // 拿到待删除的通知Id发送请求
   await noticeStore.deleteAnyNotice(deleteMessageTitle.value, deleteMessageId.value)
   // 发送请求获取新数据
-  await noticeStore.getAllNoticeList('3', '', timeLimit.value, 0)
+  await noticeStore.getAllNoticeList('3', input.value, 0, parseInt(timeLimit.value))
+  // 更新盒子右侧详细信息
+  noticeList.value = noticeStore.allNoticeList.records as NoticeItem[]
+  noticeDetail.value = noticeList.value[0]
   // 展示提示信息
   showAlertBox.value = true
   // 3s后关闭提示窗
@@ -254,18 +279,23 @@ const handleDelete = async () => {
 }
 
 // 搜索框筛选通知
-const searchNotice = () => {
+const searchNotice = async () => {
   // 重置页面页码
   noticeStore.allNoticeList.current = 1
   // 发送请求更新数据
-  noticeStore.getAllNoticeList('3', input.value, timeLimit.value, 0)
+  await noticeStore.getAllNoticeList('3', input.value, 0, parseInt(timeLimit.value))
+  // 更新盒子右侧详细信息
+  noticeList.value = noticeStore.allNoticeList.records as NoticeItem[]
+  noticeDetail.value = noticeList.value[0]
 }
 
 // 根据时间筛选通知
-const handleTimeLimit = () => {
-  console.log(timeLimit.value)
+const handleTimeLimit = async () => {
   // 携带新的时间限制参数重新发送请求，更新数据
-  noticeStore.getAllNoticeList('3', input.value, timeLimit.value, 0)
+  await noticeStore.getAllNoticeList('3', input.value, 0, parseInt(timeLimit.value))
+  // 更新盒子右侧详细信息
+  noticeList.value = noticeStore.allNoticeList.records as NoticeItem[]
+  noticeDetail.value = noticeList.value[0]
 }
 </script>
 
