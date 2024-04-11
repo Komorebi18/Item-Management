@@ -371,8 +371,8 @@ const clickToUnRead = async (pageMessage: pageInfo) => {
   height: 200px;
 }
 .card_btn {
-  margin-top: 10px;
-  margin-left: 450px;
+  float: right;
+  margin: 10px 30px;
 }
 .card-header {
   color: #000;
