@@ -35,7 +35,7 @@ export interface NoticeItem {
   /**
    * 浏览量
    */
-  browse?: null | number
+  browse?: number | null
   /**
    * 审核意见
    */
@@ -45,29 +45,46 @@ export interface NoticeItem {
    */
   content?: null | string
   /**
-   * 系统通知ID
+   * 通知发送的用户分组id
    */
-  noticeId?: number
+  groupId?: number | null
+  /**
+   * 分组名称
+   */
+  groupName?: null | string
+  /**
+   * 通知的id
+   */
+  noticeId?: number | null
   /**
    * 通知发布时间
    */
   publishTime?: null | string
   /**
-   * 发布状态，1为未发送，2为待审核，3为审核通过，4为审核未通过
+   * 发布状态，1为未发送，2为待审核，3为审核通过，4为审核未通过，5为正式发布给用户
    */
-  state?: number
+  state?: number | null
   /**
    * 系统通知标题
    */
   title?: null | string
   /**
+   * 通知类型id
+   */
+  typeId?: number | null
+  /**
    * 私发通知的目标用户id(广播通知为0)
    */
-  userId?: null | number
+  userId?: number | null
   /**
-   * 用户名
+   * 发送的用户id列表
    */
-  username?: null | string
+  userIds?: number[] | null
+  /**
+   * 用户名列表，userid=1时有效
+   */
+  usernames?: string[] | null
+  [property: string]: any
 }
 
 /**

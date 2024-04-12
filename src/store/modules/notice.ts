@@ -3,17 +3,29 @@ import type { NoticeList, NoticeItem, NoticeType } from '@/types/notice'
 import {
   getSingleAdminNoticeAPI,
   getAllNoticeAPI,
+  getPendingAuditNoticeAPI,
   updateNoticeContentAPI,
   updateNoticeStateToCheckAPI,
   updateNoticeStateToPassAPI,
+  publishNoticeToUserAPI,
   rejectNoticeAPI,
   deleteOwnNoticeAPI,
   deleteAnyNoticeAPI,
-  allNoticeType
+  allNoticeTypeAPI,
+  addNewNoticeAPI
 } from '@/api/notice'
 export const useNoticeStore = defineStore('notice', () => {
   // 管理员个人通知参数--发布通知界面
   const singleAdminNoticeList = reactive<NoticeList>({
+    current: 1,
+    size: 10,
+    total: 0,
+    pages: 0,
+    records: []
+  })
+
+  // 全部待审核通知参数--审核通知界面
+  const allPendingAuditNoticeList = reactive<NoticeList>({
     current: 1,
     size: 10,
     total: 0,
@@ -65,15 +77,9 @@ export const useNoticeStore = defineStore('notice', () => {
   }
 
   // 获取所有已发布通知
-  const getAllNoticeList = async (
-    state: string,
-    content: string,
-    type: number,
-    dataType: number
-  ) => {
+  const getAllNoticeList = async (content: string, type: number, dataType: number) => {
     // 调用接口获取数据
     const res = await getAllNoticeAPI(
-      state,
       allNoticeList.current as number,
       allNoticeList.size as number,
       content,
@@ -89,6 +95,30 @@ export const useNoticeStore = defineStore('notice', () => {
     Array.prototype.push.apply(allNoticeList.records, res.data.records as NoticeList[])
     // 移除发布时间字符串中的T
     allNoticeList.records.map((notice) => {
+      notice.publishTime = (notice.publishTime as string).replace('T', ' ')
+      return notice
+    })
+  }
+
+  // 获取待审核的通知
+  const getAllPendingAuditNoticeList = async (content: string, type: number, dataType: number) => {
+    // 调用接口获取数据
+    const res = await getPendingAuditNoticeAPI(
+      allPendingAuditNoticeList.current as number,
+      allPendingAuditNoticeList.size as number,
+      content,
+      type,
+      dataType
+    )
+    allPendingAuditNoticeList.current = res.data.current
+    allPendingAuditNoticeList.size = res.data.size
+    allPendingAuditNoticeList.total = res.data.total
+    allPendingAuditNoticeList.pages = res.data.pages
+    // 重置信息列表的内容,直接复制可能不会覆盖原先存放的内容
+    allPendingAuditNoticeList.records = []
+    Array.prototype.push.apply(allPendingAuditNoticeList.records, res.data.records as NoticeList[])
+    // 移除发布时间字符串中的T
+    allPendingAuditNoticeList.records.map((notice) => {
       notice.publishTime = (notice.publishTime as string).replace('T', ' ')
       return notice
     })
@@ -114,6 +144,11 @@ export const useNoticeStore = defineStore('notice', () => {
     await updateNoticeStateToPassAPI(title, noticeId)
   }
 
+  // 正式发布通知给用户
+  const publishNoticeToUser = async (title: string, noticeId: number) => {
+    await publishNoticeToUserAPI(title, noticeId)
+  }
+
   // 驳回通知
   const rejectNotice = async (comment: string, title: string, noticeId: number) => {
     await rejectNoticeAPI(comment, title, noticeId)
@@ -131,22 +166,38 @@ export const useNoticeStore = defineStore('notice', () => {
 
   // 获取所有通知
   const getAllNoticeType = async () => {
-    const res = await allNoticeType()
+    const res = await allNoticeTypeAPI()
     noticeTypeList.value = res.data
+  }
+
+  // 添加新通知
+  const addNewNotice = async (
+    state: number,
+    title: string,
+    content: string,
+    userId: number,
+    groupId: number,
+    typeId: number
+  ) => {
+    await addNewNoticeAPI(state, title, content, userId, groupId, typeId)
   }
 
   return {
     noticeTypeList,
     allNoticeList,
+    allPendingAuditNoticeList,
     singleAdminNoticeList,
     getAllNoticeList,
+    getAllPendingAuditNoticeList,
     getSingleAdminNoticeList,
     updateNoticeContent,
     updateNoticeStateToCheck,
     updateNoticeStateToPass,
+    publishNoticeToUser,
     rejectNotice,
     deleteOwnNotice,
     deleteAnyNotice,
-    getAllNoticeType
+    getAllNoticeType,
+    addNewNotice
   }
 })

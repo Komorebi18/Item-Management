@@ -161,9 +161,16 @@ Mock.mock('/test', 'get', {
           meta: { title: '所有通知', icon: '', hidden: false, keepAlive: true, roles: ['NOTICE'] }
         },
         {
+          path: 'audit-info',
+          name: 'audit-info',
+          component: 'systemMessage/auditMessage',
+          meta: { title: '审核通知', icon: '', hidden: false, keepAlive: true, roles: ['NOTICE'] }
+        },
+        {
           path: 'edit',
+          name: 'edit-info',
           component: 'systemMessage/editMessage',
-          meta: { title: '编辑通知', icon: '', hidden: true, keepAlive: true, roles: ['NOTICE'] }
+          meta: { title: '编辑通知', icon: '', hidden: true, keepAlive: false, roles: ['NOTICE'] }
         }
       ]
     },

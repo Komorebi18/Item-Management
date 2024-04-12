@@ -6,6 +6,7 @@
           placeholder="请在这里输入标题"
           v-model="messageTitle"
           type="text"
+          :disabled="state === '1'"
           style="font-size: 1.3rem; margin-bottom: 5px"
         />
         <p style="height: 1px; width: 100%; background-color: #d9d9d9; margin-bottom: 15px"></p>
@@ -13,6 +14,7 @@
           v-model="messageText"
           placeholder="请在这里输入正文"
           type="textarea"
+          :disabled="state === '1'"
           :resize="'none'"
           class="main-text"
         />
@@ -20,8 +22,8 @@
       <div class="footer">
         <p style="margin: 20px 36px">正文共 {{ messageText.length }} 字</p>
         <div class="button">
-          <el-button @click="setDraft">保存为草稿</el-button>
-          <el-button @click="showDeliverBox = true">发布</el-button>
+          <el-button @click="setDraft" v-if="state !== '1'">保存为草稿</el-button>
+          <el-button @click="showDeliverBox = true" v-if="state !== '1'">发布</el-button>
         </div>
       </div>
     </div>
@@ -87,8 +89,21 @@
             style="--el-switch-on-color: #2f3367; --el-switch-off-color: #8a8ea8"
           />
         </div>
-        <div v-if="isDeliverOne">
-          <el-select v-model="userIdLimit" placeholder="Select" style="width: 100px">
+        <div v-if="isDeliverOne" class="deliver-one">
+          <div class="selected-box" v-for="user in selectedList" :key="user.userId as number">
+            <div class="selected-one">
+              <i style="margin-right: 5px">{{ user.name }}</i>
+              <el-icon class="delete-icon" @click="deleteSelectUser(user.userId as number)"
+                ><Close
+              /></el-icon>
+            </div>
+          </div>
+          <el-select
+            v-model="userDeliverLimit"
+            placeholder="Select"
+            @change="handleSelectionChange"
+            style="width: 100px"
+          >
             <div class="select-header">
               <div class="search-box">
                 <el-input v-model="searchText" placeholder="请输入用户名或ID" />
@@ -105,9 +120,9 @@
             </div>
             <el-option
               v-for="item in options"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value"
+              :key="item.userId"
+              :label="item.userId"
+              :value="item.name"
             >
               <div class="select-option">
                 <span>王明</span>
@@ -125,14 +140,28 @@
   </div>
 </template>
 <script setup lang="ts">
-import router from '@/router'
-import { ref, watchEffect } from 'vue'
-import { Search } from '@element-plus/icons-vue'
+import { useRouter, useRoute } from 'vue-router'
+import { ref, reactive, watchEffect } from 'vue'
+import { Search, Close } from '@element-plus/icons-vue'
+import { useNoticeStore } from '@/store/modules/notice'
+import type { userInformation } from '@/types/user'
+// 初始化路由实例
+const router = useRouter()
+
+// 初始化路由对象
+const route = useRoute()
+
+// store数据
+const noticeStore = useNoticeStore()
+
 // 通知正文
-let messageText = ref('')
+let messageText = ref((route.query.content as string) || '')
 
 // 通知标题
-let messageTitle = ref('')
+let messageTitle = ref((route.query.title as string) || '')
+
+// 进入编辑界面的状态：1为点击查看icon跳转进入本页面，2为点击编辑按钮，0为用户主动点击进入编辑页面
+let state = ref((route.query.state as string) || '0')
 
 // 暂存提示框显示
 let showAlertBox = ref(false)
@@ -156,8 +185,8 @@ let tagLimit = ref('标签分组')
 // 发送的黑名单分组
 let blacklistUserLimit = ref('黑名单分组')
 
-// 发送的用户Id
-let userIdLimit = ref('用户')
+// 发送的用户
+let userDeliverLimit = ref('选择用户')
 
 // 搜索内容
 let searchText = ref('')
@@ -165,32 +194,42 @@ let searchText = ref('')
 // 是否为发送成功提醒
 let isDeliverAlert = ref(false)
 
+// 收集被选中的用户信息
+let selectedList = reactive<userInformation[]>([])
+
+// 收集被选中的用户Id
+let selectedIdList: number[] = []
+
 // 模拟数据
 const options = [
   {
-    value: 'Option1',
-    label: 'Option1'
+    userId: 1,
+    name: 'O1'
   },
   {
-    value: 'Option2',
-    label: 'Option2'
+    userId: 2,
+    name: 'O2'
   },
   {
-    value: 'Option3',
-    label: 'Option3'
+    userId: 3,
+    name: 'O3'
   },
   {
-    value: 'Option4',
-    label: 'Option4'
+    userId: 4,
+    name: 'O4'
   },
   {
-    value: 'Option5',
-    label: 'Option5'
+    userId: 5,
+    name: 'O5'
+  },
+  {
+    userId: 6,
+    name: 'O6'
   }
 ]
 
-// 选择发送按钮
 watchEffect(() => {
+  // 选择发送按钮
   if (isDeliverGroup.value === true || isDeliverOne.value === true) {
     isDeliverAll.value = false
   } else {
@@ -200,6 +239,15 @@ watchEffect(() => {
 
 // 点击保存为草稿触发
 const setDraft = (event: any) => {
+  console.log(messageTitle.value)
+  if (state.value === '0') {
+    // 新增通知
+    noticeStore.addNewNotice(1, messageTitle.value, messageText.value, -1, 0, 0)
+  } else {
+    // 在已有通知的基础上修改
+    // 待完成
+    // noticeStore.updateNoticeContent()
+  }
   event.target.blur()
   isDeliverAlert.value = false
   showAlertBox.value = true
@@ -220,6 +268,33 @@ const confirmDeliver = () => {
     showAlertBox.value = false
     router.replace({ path: '/system/deliver-info' })
   }, 1000)
+}
+
+// 单个用户发送-选中用户时触发逻辑
+const handleSelectionChange = () => {
+  // 查找选中用户的用户名和Id
+  let selectedOption = options.find((option) => option.name === userDeliverLimit.value)
+  // 如果用户先前没有被选中，添加改用户信息
+  if (!selectedList.some((user) => user.userId === selectedOption?.userId)) {
+    // 添加到选中用户信息数组
+    selectedList.push(selectedOption as userInformation)
+    // 收集选中用户Id，用于发请求
+    selectedIdList.push(selectedOption?.userId as number)
+  }
+  // 将选中值清空
+  userDeliverLimit.value = '选择用户'
+}
+
+// 点击icon,将选中的单个用户删除
+const deleteSelectUser = (userId: number) => {
+  // 将目标用户从选中用户信息数组中删除,使用filter会暂时丢失响应式
+  selectedList.splice(
+    selectedList.findIndex((user) => user.userId === userId),
+    1
+  )
+  console.log(selectedList)
+  // 将目标用户Id从收集选中用户Id的数组中移除
+  selectedIdList = selectedIdList.filter((id) => id !== userId)
 }
 </script>
 <style lang="scss" scoped>
@@ -431,6 +506,7 @@ const confirmDeliver = () => {
   width: 100%;
   height: 52px;
 }
+
 .select-header-title {
   display: flex;
   justify-content: space-around;
@@ -459,5 +535,28 @@ const confirmDeliver = () => {
 
 .activeFont {
   color: var(--2F3367, #2f3367);
+}
+
+.deliver-one {
+  display: flex;
+  justify-content: flex-start !important;
+  flex-wrap: wrap;
+  gap: 10px;
+  width: 100%;
+}
+
+.selected-one {
+  display: flex;
+  align-items: center;
+  padding: 3px 5px 3px 12px;
+  border-radius: 5px;
+  text-align: center;
+  color: #fff;
+  font-weight: 100;
+  background-color: #8a8ea8;
+}
+
+.delete-icon:hover {
+  color: #000;
 }
 </style>

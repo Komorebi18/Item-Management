@@ -26,18 +26,40 @@
       <el-tabs v-model="activeName" class="tabs" @tab-change="handleTabChange">
         <el-scrollbar class="pane-content" ref="scrollbarRef">
           <el-tab-pane label="全部" name="0">
-            <div v-for="notice in noticeStore.singleAdminNoticeList.records" :key="notice.noticeId">
+            <div
+              v-for="notice in noticeStore.singleAdminNoticeList.records"
+              :key="notice.noticeId as number"
+            >
               <el-row :gutter="20" class="single-message">
                 <el-col :span="9">
                   <div class="title">
                     <img
+                      v-if="notice.state === 1"
+                      src="../../assets/icons/editing.svg"
+                      alt=""
+                      style="width: 1em; height: 1em; margin: 5px"
+                    />
+                    <img
+                      v-if="notice.state === 2"
+                      src="../../assets/icons/under-review.svg"
+                      alt=""
+                      style="width: 1em; height: 1em; margin: 5px"
+                    />
+                    <img
+                      v-if="notice.state === 3"
                       src="../../assets/icons/info-success.svg"
+                      alt=""
+                      style="width: 1em; height: 1em; margin: 5px"
+                    />
+                    <img
+                      v-if="notice.state === 4"
+                      src="../../assets/icons/fail-the-audit.svg"
                       alt=""
                       style="width: 1em; height: 1em; margin: 5px"
                     />
                     <h3>{{ notice.title }}</h3>
                   </div>
-                  <el-text class="w-150px mb-2" truncated style="color: #8a8ea8; margin-left: 2em">
+                  <el-text class="w-400px mb-2" truncated style="color: #8a8ea8; margin-left: 2em">
                     {{ notice.content }}
                   </el-text>
                 </el-col>
@@ -49,7 +71,17 @@
                 </el-col>
                 <el-col :span="3" style="display: flex; justify-content: space-between">
                   <el-tooltip effect="dark" content="查看" placement="top">
-                    <el-icon color="#2F3367">
+                    <el-icon
+                      color="#2F3367"
+                      @click="
+                        handleIconClick(
+                          'view',
+                          notice.title as string,
+                          notice.noticeId as number,
+                          notice.content as string
+                        )
+                      "
+                    >
                       <View />
                     </el-icon>
                   </el-tooltip>
@@ -69,7 +101,17 @@
                     content="编辑"
                     placement="top"
                   >
-                    <el-icon color="#2F3367" @click="handleIconClick">
+                    <el-icon
+                      color="#2F3367"
+                      @click="
+                        handleIconClick(
+                          'edit',
+                          notice.title as string,
+                          notice.noticeId as number,
+                          notice.content as string
+                        )
+                      "
+                    >
                       <EditPen />
                     </el-icon>
                   </el-tooltip>
@@ -93,18 +135,21 @@
             </div>
           </el-tab-pane>
           <el-tab-pane label="编辑中" name="1">
-            <div v-for="notice in noticeStore.singleAdminNoticeList.records" :key="notice.noticeId">
+            <div
+              v-for="notice in noticeStore.singleAdminNoticeList.records"
+              :key="notice.noticeId as number"
+            >
               <el-row :gutter="20" class="single-message">
                 <el-col :span="9">
                   <div class="title">
                     <img
-                      src="../../assets/icons/info-success.svg"
+                      src="../../assets/icons/editing.svg"
                       alt=""
                       style="width: 1em; height: 1em; margin: 5px"
                     />
                     <h3>{{ notice.title }}</h3>
                   </div>
-                  <el-text class="w-150px mb-2" truncated style="color: #8a8ea8; margin-left: 2em">
+                  <el-text class="w-400px mb-2" truncated style="color: #8a8ea8; margin-left: 2em">
                     {{ notice.content }}
                   </el-text>
                 </el-col>
@@ -115,19 +160,49 @@
                   <span class="deliver">{{ notice.username }}</span>
                 </el-col>
                 <el-col :span="3" style="display: flex; justify-content: space-between">
-                  <el-tooltip effect="dark" content="发送" placement="top">
-                    <el-icon color="#2F3367" @click="handleIconClick">
-                      <Promotion />
+                  <el-tooltip effect="dark" content="查看" placement="top">
+                    <el-icon
+                      color="#2F3367"
+                      @click="
+                        handleIconClick(
+                          'view',
+                          notice.title as string,
+                          notice.noticeId as number,
+                          notice.content as string
+                        )
+                      "
+                    >
+                      <View />
+                    </el-icon>
+                  </el-tooltip>
+                  <el-tooltip
+                    v-if="notice.state === 1 || notice.state === 4"
+                    effect="dark"
+                    content="编辑"
+                    placement="top"
+                  >
+                    <el-icon
+                      color="#2F3367"
+                      @click="
+                        handleIconClick(
+                          'edit',
+                          notice.title as string,
+                          notice.noticeId as number,
+                          notice.content as string
+                        )
+                      "
+                    >
+                      <EditPen />
                     </el-icon>
                   </el-tooltip>
                   <el-tooltip effect="dark" content="删除" placement="top">
-                    <el-icon color="#2F3367">
+                    <el-icon
+                      color="#2F3367"
+                      @click="
+                        handleIconClick('delete', notice.title as string, notice.noticeId as number)
+                      "
+                    >
                       <Delete />
-                    </el-icon>
-                  </el-tooltip>
-                  <el-tooltip effect="dark" content="查看" placement="top">
-                    <el-icon color="#2F3367">
-                      <View />
                     </el-icon>
                   </el-tooltip>
                 </el-col>
@@ -135,18 +210,21 @@
             </div>
           </el-tab-pane>
           <el-tab-pane label="审核中" name="2">
-            <div v-for="notice in noticeStore.singleAdminNoticeList.records" :key="notice.noticeId">
+            <div
+              v-for="notice in noticeStore.singleAdminNoticeList.records"
+              :key="notice.noticeId as number"
+            >
               <el-row :gutter="20" class="single-message">
                 <el-col :span="9">
                   <div class="title">
                     <img
-                      src="../../assets/icons/info-success.svg"
+                      src="../../assets/icons/under-review.svg"
                       alt=""
                       style="width: 1em; height: 1em; margin: 5px"
                     />
                     <h3>{{ notice.title }}</h3>
                   </div>
-                  <el-text class="w-150px mb-2" truncated style="color: #8a8ea8; margin-left: 2em">
+                  <el-text class="w-400px mb-2" truncated style="color: #8a8ea8; margin-left: 2em">
                     {{ notice.content }}
                   </el-text>
                 </el-col>
@@ -157,38 +235,53 @@
                   <span class="deliver">{{ notice.username }}</span>
                 </el-col>
                 <el-col :span="3" style="display: flex; justify-content: space-between">
-                  <el-tooltip effect="dark" content="发送" placement="top">
-                    <el-icon color="#2F3367" @click="handleIconClick">
-                      <Promotion />
-                    </el-icon>
-                  </el-tooltip>
-                  <el-tooltip effect="dark" content="删除" placement="top">
-                    <el-icon color="#2F3367">
-                      <Delete />
-                    </el-icon>
-                  </el-tooltip>
                   <el-tooltip effect="dark" content="查看" placement="top">
-                    <el-icon color="#2F3367">
+                    <el-icon
+                      color="#2F3367"
+                      @click="
+                        handleIconClick(
+                          'view',
+                          notice.title as string,
+                          notice.noticeId as number,
+                          notice.content as string
+                        )
+                      "
+                    >
                       <View />
                     </el-icon>
                   </el-tooltip>
+                  <el-tooltip effect="dark" content="审核进程" placement="top">
+                    <el-icon color="#2F3367" @click="handleIconClick"><MoreFilled /></el-icon>
+                  </el-tooltip>
+                  <!-- 占位盒子 -->
+                  <el-icon></el-icon>
                 </el-col>
               </el-row>
             </div>
           </el-tab-pane>
           <el-tab-pane label="已审核" name="3">
-            <div v-for="notice in noticeStore.singleAdminNoticeList.records" :key="notice.noticeId">
+            <div
+              v-for="notice in noticeStore.singleAdminNoticeList.records"
+              :key="notice.noticeId as number"
+            >
               <el-row :gutter="20" class="single-message">
                 <el-col :span="9">
                   <div class="title">
                     <img
+                      v-if="notice.state === 3"
                       src="../../assets/icons/info-success.svg"
+                      alt=""
+                      style="width: 1em; height: 1em; margin: 5px"
+                    />
+                    <img
+                      v-if="notice.state === 4"
+                      src="../../assets/icons/fail-the-audit.svg"
                       alt=""
                       style="width: 1em; height: 1em; margin: 5px"
                     />
                     <h3>{{ notice.title }}</h3>
                   </div>
-                  <el-text class="w-150px mb-2" truncated style="color: #8a8ea8; margin-left: 2em">
+                  <el-text class="w-400px mb-2" truncated style="color: #8a8ea8; margin-left: 2em">
                     {{ notice.content }}
                   </el-text>
                 </el-col>
@@ -199,19 +292,75 @@
                   <span class="deliver">{{ notice.username }}</span>
                 </el-col>
                 <el-col :span="3" style="display: flex; justify-content: space-between">
-                  <el-tooltip effect="dark" content="发送" placement="top">
-                    <el-icon color="#2F3367" @click="handleIconClick">
+                  <el-tooltip effect="dark" content="查看" placement="top">
+                    <el-icon
+                      color="#2F3367"
+                      @click="
+                        handleIconClick(
+                          'view',
+                          notice.title as string,
+                          notice.noticeId as number,
+                          notice.content as string
+                        )
+                      "
+                    >
+                      <View />
+                    </el-icon>
+                  </el-tooltip>
+                  <el-tooltip
+                    v-if="notice.state === 3"
+                    effect="dark"
+                    content="发送"
+                    placement="top"
+                  >
+                    <el-icon
+                      color="#2F3367"
+                      @click="
+                        handleIconClick(
+                          'deliver',
+                          notice.title as string,
+                          notice.noticeId as number
+                        )
+                      "
+                    >
                       <Promotion />
                     </el-icon>
                   </el-tooltip>
-                  <el-tooltip effect="dark" content="删除" placement="top">
-                    <el-icon color="#2F3367">
-                      <Delete />
+                  <!-- 占位盒子 -->
+                  <el-icon v-if="notice.state === 3"></el-icon>
+                  <el-tooltip
+                    v-if="notice.state === 4"
+                    effect="dark"
+                    content="编辑"
+                    placement="top"
+                  >
+                    <el-icon
+                      color="#2F3367"
+                      @click="
+                        handleIconClick(
+                          'edit',
+                          notice.title as string,
+                          notice.noticeId as number,
+                          notice.content as string
+                        )
+                      "
+                    >
+                      <EditPen />
                     </el-icon>
                   </el-tooltip>
-                  <el-tooltip effect="dark" content="查看" placement="top">
-                    <el-icon color="#2F3367">
-                      <View />
+                  <el-tooltip
+                    v-if="notice.state === 4"
+                    effect="dark"
+                    content="删除"
+                    placement="top"
+                  >
+                    <el-icon
+                      color="#2F3367"
+                      @click="
+                        handleIconClick('delete', notice.title as string, notice.noticeId as number)
+                      "
+                    >
+                      <Delete />
                     </el-icon>
                   </el-tooltip>
                 </el-col>
@@ -246,7 +395,7 @@
     </el-dialog>
     <div class="alert-box" v-show="showAlertBox">
       <div class="content">
-        <p>已删除此通知</p>
+        <p>{{ state === '3' ? '已发布通知' : '已删除此通知' }}</p>
         <img src="../../assets/icons/delete-confirm.svg" alt="" />
       </div>
     </div>
@@ -254,13 +403,15 @@
 </template>
 <script setup lang="ts">
 // import header from '/components/header.vue'
-import { Delete, Search, Promotion, Plus, View, EditPen } from '@element-plus/icons-vue'
+import { Delete, Search, Promotion, Plus, View, EditPen, MoreFilled } from '@element-plus/icons-vue'
 import pagination from '@/components/Pagination/index.vue'
-import router from '@/router'
+import { useRouter } from 'vue-router'
 import { ref, onMounted } from 'vue'
 import { useNoticeStore } from '@/store/modules/notice'
 import type { pageInfo } from '@/types/pageMessage'
-import { tr } from 'element-plus/es/locale'
+// 初始化路由实例
+const router = useRouter()
+
 // 搜索框内容
 let searchInput = ref('')
 
@@ -278,6 +429,12 @@ let chooseMessageId = ref(0)
 
 // 选中的通知标题
 let chooseMessageTitle = ref('')
+
+// 选中的通知内容
+let chooseMessageContent = ref('')
+
+// 表示跳转编辑页的动机：1表示点击查看按钮跳转， 2表示点击编辑按钮跳转, 3表示点击发布按钮（用来展示弹窗提示信息）
+let state = ref('1')
 
 // store数据
 const noticeStore = useNoticeStore()
@@ -298,14 +455,34 @@ const handleTabChange = () => {
 }
 
 // 点击icon图标
-const handleIconClick = (type: string, title: string, noticeId: number) => {
+const handleIconClick = (type: string, title: string, noticeId: number, content?: string) => {
   // 获取当前选中通知的信息
   chooseMessageTitle.value = title
   chooseMessageId.value = noticeId
+  chooseMessageContent.value = content ? content : ''
+
   switch (type) {
     // 删除通知
     case 'delete':
+      state.value = '0'
       showDeleteBox.value = true
+      break
+    // 查看通知
+    case 'view':
+      state.value = '1'
+      router.push({ path: '/system/edit', query: { title, noticeId, content, state: state.value } })
+      break
+    // 编辑通知
+    case 'edit':
+      state.value = '2'
+      router.push({ path: '/system/edit', query: { title, noticeId, content, state: state.value } })
+      break
+    // 发布通知
+    case 'deliver':
+      // 修改state，达到修改弹窗文字效果
+      state.value = '3'
+      noticeStore.publishNoticeToUser(title, noticeId)
+      noticeStore.getSingleAdminNoticeList(activeName.value, searchInput.value, 0, 0)
       break
     default:
       console.log('点击icon的意外情况')
@@ -349,9 +526,10 @@ const handleDelete = async () => {
 // 发布通知
 const deliverMessage = () => {
   // 跳转到编辑页
-  router.replace({ path: '/system/edit' })
+  router.push({ path: '/system/edit' })
 }
 </script>
+
 <style lang="scss" scoped>
 .box {
   margin: 15px 0 0 15px;
@@ -368,6 +546,7 @@ const deliverMessage = () => {
   line-height: normal;
   letter-spacing: 1.44px;
 }
+// 页面头部样式
 .header {
   display: flex;
   padding: 10px;
@@ -385,6 +564,8 @@ const deliverMessage = () => {
   height: 38px;
   color: #2f3367;
 }
+
+// 页面主体内容样式
 
 .tabs {
   position: relative;
