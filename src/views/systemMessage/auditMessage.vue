@@ -117,8 +117,7 @@
     </div>
     <!-- 对话框 -->
     <!-- 打回通知依据对话框 -->
-    <el-dialog v-model="isRepulseNotice" width="30%" title="移入依据" class="basis-box">
-      <!-- <div class="title" style="text-align: center">移入依据</div> -->
+    <el-dialog v-model="repulseState" width="30%" title="移入依据" class="basis-box">
       <div class="line"></div>
       <div class="basis">
         <p>移入依据:</p>
@@ -141,7 +140,7 @@
       </div>
       <template #footer>
         <span class="dialog-footer">
-          <el-button @click="isRepulseNotice = false">取消</el-button>
+          <el-button @click="repulseState = false">取消</el-button>
           <el-button type="primary" @click="handleRepulseNotice"> 确认 </el-button>
         </span>
       </template>
@@ -151,7 +150,7 @@
       <div>
         <div class="deleteWaing-icon">
           <img src="../../assets/icons/delete-waring.svg" alt="" />
-          <span> 是否确认通过此通知？ </span>
+          <span>是否确认通过此通知？ </span>
         </div>
       </div>
       <template #footer>
@@ -163,7 +162,7 @@
     </el-dialog>
     <div class="alert-box" v-show="showAlertBox">
       <div class="content">
-        <p>已通过此通知</p>
+        <p>{{ isRepulseNotice ? '已打回此通知' : '已通过此通知' }}</p>
         <img src="../../assets/icons/delete-confirm.svg" alt="" />
       </div>
     </div>
@@ -198,11 +197,14 @@ let selectMessageId = ref(0)
 // 当前选中的通知标题
 let selectMessageTitle = ref('')
 
-// 是否打回通知
+// 是否打回通知，用来渲染 弹窗文字
 let isRepulseNotice = ref(false)
 
 // 打回通知的文字依据
 let textualBasis = ref('')
+
+// 判断是否是打回状态,用来控制 填写依据弹窗 的显示与关闭
+let repulseState = ref(false)
 
 // 待绑定滚动条组件
 const scrollbarRef = ref<HTMLElement | null>(null)
@@ -267,7 +269,17 @@ const handlePassNotice = async () => {
 }
 
 // 确认打回通知
-const handleRepulseNotice = () => {}
+const handleRepulseNotice = () => {
+  repulseState.value = false
+  // 展示提示信息
+  showAlertBox.value = true
+  // 3s后关闭提示窗
+  setTimeout(() => {
+    showAlertBox.value = false
+    // 取消打回状态
+    isRepulseNotice.value = false
+  }, 1500)
+}
 
 // 根据时间筛选通知
 const handleTimeLimit = async () => {

@@ -42,7 +42,7 @@ export const getAllNoticeAPI = (
   dateType: number
 ) => {
   return http<NoticeList>({
-    url: `/notice/publish/review`,
+    url: `/notice/sys/publish/review`,
     method: 'GET',
     params: {
       offset,

@@ -546,6 +546,7 @@ const deliverMessage = () => {
   line-height: normal;
   letter-spacing: 1.44px;
 }
+// 页面头部样式
 .header {
   display: flex;
   padding: 10px;
@@ -563,6 +564,8 @@ const deliverMessage = () => {
   height: 38px;
   color: #2f3367;
 }
+
+// 页面主体内容样式
 
 .tabs {
   position: relative;
