@@ -42,6 +42,7 @@ export const replyUserAPI = (
   userId: number,
   groupId: number,
   typeId: number,
+  userIds: number[],
   state = 1
 ) => {
   return http({
@@ -55,7 +56,8 @@ export const replyUserAPI = (
       content,
       userId,
       groupId,
-      typeId
+      typeId,
+      userIds
     }
   })
 }

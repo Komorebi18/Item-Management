@@ -91,11 +91,14 @@ export const useFeedBackStore = defineStore('feedback', () => {
     }
 
     const { title, content, userId, groupId, typeId } = replyMsg.value
+    console.log([userId])
 
     // 调用接口
-    const res = await replyUserAPI(title, content, userId, groupId, typeId)
+    const res = await replyUserAPI(title, content, 1, groupId, typeId, [userId])
+    console.log(res)
 
     // 状态更新
+
     if (res.code === 200) {
       ElMessage.success('回复成功')
     } else {

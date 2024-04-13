@@ -48,7 +48,7 @@
               <el-table-column class="btn_operation" label="操作" align="center" v-slot="scope">
                 <div class="details">
                   <el-button
-                    v-show="!replyStatus[scope.$index]"
+                    v-show="!(scope.row.state === '已回复')"
                     @click="handleCommand(scope.$index, scope.row.userId, scope.row.feedbackId)"
                     >快捷回复</el-button
                   >
@@ -81,7 +81,7 @@
               <el-table-column class="btn_operation" label="操作" align="center" v-slot="scope">
                 <div class="details">
                   <el-button
-                    v-show="!replyStatus[scope.$index]"
+                    v-show="!(scope.row.state === '已回复')"
                     @click="handleCommand(scope.$index, scope.row, scope.row.feedbackId)"
                     >快捷回复</el-button
                   >
@@ -291,7 +291,7 @@ const handleCommand = async (index: number, scope: any, feedbackId: number) => {
   await feedBackStore.getAllFeedBack(feedBackStore.allFeedBack.current, 10)
 }
 
-// 初次加载获取数据
+//初次加载获取数据
 // 获取已读数据
 feedBackStore.readInfo(0, 10)
 
