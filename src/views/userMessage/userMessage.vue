@@ -86,6 +86,14 @@
         </el-table>
       </div>
     </el-dialog>
+    <!-- 分页 -->
+    <Pagination
+      :total="Store.userMessage?.total"
+      :page="Store.userMessage?.current"
+      :limit="Store.userMessage?.size"
+      @pagination="clickToChange"
+      class="pagination_message"
+    />
   </div>
 </template>
 <script setup lang="ts">
@@ -96,6 +104,7 @@ import TableData from './components/TableData.vue'
 import LogData from './components/LogData.vue'
 import { getUserMessageAPI } from '@/api/userMessage/userMessage'
 import { userMessageStore } from '@/store/modules/userMessage'
+import { pageInfo } from '@/types/pageMessage'
 // 纪录某列状态
 const isShow = ref(false)
 
@@ -215,7 +224,16 @@ const friedDate = [
   }
 ]
 // 获取信息
-Store.getUserMessage()
+Store.getUserMessage(0, 5)
+
+// 分页逻辑
+const clickToChange = async (pageMessage: pageInfo) => {
+  //更改页面信息
+  Store.userMessage!.current = pageMessage.currentPage
+  Store.userMessage!.size = pageMessage.pageLimit
+  // 请求数据
+  await Store.getUserMessage(pageMessage.currentPage, pageMessage.pageLimit)
+}
 </script>
 <style lang="scss" scoped>
 .rough-userInfo {
@@ -302,5 +320,10 @@ Store.getUserMessage()
 
     font-size: 20px;
   }
+}
+.pagination_message {
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 </style>
