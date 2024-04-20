@@ -1,9 +1,5 @@
 <template>
-  <svg
-    aria-hidden="true"
-    class="svg-icon"
-    :style="'width:' + size + ';height:' + size"
-  >
+  <svg aria-hidden="true" class="svg-icon" :style="'width:' + size + ';height:' + size">
     <use :xlink:href="symbolId" :fill="color" />
   </svg>
 </template>
@@ -25,9 +21,9 @@ const props = defineProps({
     type: String,
     default: '1em'
   }
-});
+})
 
-const symbolId = computed(() => `#${props.prefix}-${props.iconClass}`);
+const symbolId = computed(() => `#${props.prefix}-${props.iconClass}`)
 </script>
 
 <style scoped>

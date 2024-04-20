@@ -45,9 +45,9 @@ export default defineConfig(({ command, mode }: ConfigEnv): UserConfig => {
       proxy: {
         [env.VITE_APP_BASE_API]: {
           // 线上接口API地址
-          target: 'http://www.shkmzzh.com',
+          target: env.VITE_APP_BASE_API,
           changeOrigin: true,
-          rewrite: path => path.replace(new RegExp('^' + env.VITE_APP_BASE_API), '')
+          rewrite: (path) => path.replace(new RegExp('^' + env.VITE_APP_BASE_API), '')
         }
       }
     },
@@ -68,7 +68,9 @@ export default defineConfig(({ command, mode }: ConfigEnv): UserConfig => {
           // 自动导入 Element Plus 相关函数，如：ElMessage, ElMessageBox... (带样式)
           ElementPlusResolver(),
           // 自动导入图标组件
-          IconsResolver({})
+          IconsResolver({
+            prefix: 'Icon',
+          }),
         ],
         vueTemplate: true, // 是否在 vue 模板中自动导入
         dts: path.resolve(pathSrc, 'types', 'auto-imports.d.ts') //  自动导入组件类型声明文件位置，默认根目录; false 关闭自动生成

@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { useRoute} from 'vue-router'
-import { isExternal } from "@/utils/index";
+import { useRoute } from 'vue-router'
+import { isExternal } from '@/utils/index'
+import { computed } from 'vue'
 import SidebarItem from './SidebarItem.vue'
 import Logo from './Logo.vue'
-import path from "path-browserify";
+import path from 'path-browserify'
 import { useSettingsStore } from '@/store/modules/settings'
 import { useAppStore } from '@/store/modules/app'
 import { storeToRefs } from 'pinia'
@@ -23,34 +24,33 @@ const props = defineProps({
   menuList: {
     required: true,
     default: () => {
-      return [];
+      return []
     },
-    type: Array<any>,
+    type: Array<any>
   },
   basePath: {
     type: String,
-    required: true,
-  },
-});
+    required: true
+  }
+})
 
 /**
  * 解析路径
  *
  * @param routePath 路由路径
  */
- function resolvePath(routePath: string) {
+function resolvePath(routePath: string) {
   if (isExternal(routePath)) {
-    return routePath;
+    return routePath
   }
   if (isExternal(props.basePath)) {
-    return props.basePath;
+    return props.basePath
   }
 
   // 完整路径 = 父级路径(/level/level_3) + 路由路径
-  const fullPath = path.resolve(props.basePath, routePath); // 相对路径 → 绝对路径
-  return fullPath;  
+  const fullPath = path.resolve(props.basePath, routePath) // 相对路径 → 绝对路径
+  return fullPath
 }
-
 </script>
 
 <template>

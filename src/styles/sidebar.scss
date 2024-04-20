@@ -229,13 +229,12 @@
     &:hover {
       // you can use $subMenuHover
       background-color: red;
-    
     }
   }
-  & >.el-menu-item.is-active{
+  & > .el-menu-item.is-active {
     border: 0 !important;
   }
-  &>.el-menu-item.is-active{
+  & > .el-menu-item.is-active {
     border: 0 !important;
   }
 }

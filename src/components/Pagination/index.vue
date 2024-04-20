@@ -1,6 +1,7 @@
 <template>
   <div :class="'pagination ' + { hidden: hidden }">
     <el-pagination
+      class="custom-pagination"
       :background="background"
       v-model:current-page="currentPage"
       v-model:page-size="pageSize"
@@ -14,33 +15,38 @@
 </template>
 
 <script setup lang="ts">
-import { computed, PropType } from 'vue';
-import { scrollTo } from '@/utils/scroll-to';
+import { computed, PropType } from 'vue'
+import { scrollTo } from '@/utils/scroll-to'
 
 const props = defineProps({
+  // 总条数
   total: {
     required: true,
     type: Number as PropType<number>,
     default: 0
   },
+  // 当前页码
   page: {
     type: Number,
     default: 1
   },
+  // 每页呈现数据的条数
   limit: {
     type: Number,
     default: 20
   },
+  // 可供选择的limit
   pageSizes: {
     type: Array as PropType<number[]>,
     default() {
-      return [10, 20, 30, 50];
+      return [5, 10, 20, 30, 50]
     }
   },
   layout: {
     type: String,
     default: 'total, sizes, prev, pager, next, jumper'
   },
+  // 背景颜色
   background: {
     type: Boolean,
     default: true
@@ -53,38 +59,38 @@ const props = defineProps({
     type: Boolean,
     default: false
   }
-});
+})
 
-const emit = defineEmits(['update:page', 'update:limit', 'pagination']);
+const emit = defineEmits(['updatePage', 'updateLimit', 'pagination'])
 
 const currentPage = computed<number | undefined>({
   get: () => props.page,
-  set: value => {
-    emit('update:page', value);
+  set: (value) => {
+    emit('updatePage', value)
   }
-});
+})
 
 const pageSize = computed<number | undefined>({
   get() {
-    return props.limit;
+    return props.limit
   },
   set(val) {
-    emit('update:limit', val);
+    emit('updateLimit', val)
   }
-});
+})
 
 function handleSizeChange(val: number) {
-  emit('pagination', { page: currentPage, limit: val });
+  emit('pagination', { currentPage: props.page, pageLimit: val })
   if (props.autoScroll) {
-    scrollTo(0, 800);
+    scrollTo(0, 800)
   }
 }
 
 function handleCurrentChange(val: number) {
-  currentPage.value = val;
-  emit('pagination', { page: val, limit: props.limit });
+  currentPage.value = val
+  emit('pagination', { currentPage: val, pageLimit: props.limit })
   if (props.autoScroll) {
-    scrollTo(0, 800);
+    scrollTo(0, 800)
   }
 }
 </script>
@@ -95,5 +101,9 @@ function handleCurrentChange(val: number) {
   &.hidden {
     display: none;
   }
+}
+
+.custom-pagination {
+  color: #2f3367;
 }
 </style>

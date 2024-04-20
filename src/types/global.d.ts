@@ -3,8 +3,8 @@ declare global {
    * 分页查询参数
    */
   interface PageQuery {
-    pageNum: number;
-    pageSize: number;
+    pageNum: number
+    pageSize: number
   }
 
   /**
@@ -14,11 +14,11 @@ declare global {
     /**
      * 数据列表
      */
-    list: T;
+    list: T
     /**
      * 数据总数
      */
-    total: number;
+    total: number
   }
 
   /**
@@ -28,11 +28,11 @@ declare global {
     /**
      * 弹窗标题
      */
-    title?: string;
+    title?: string
     /**
      * 是否显示
      */
-    visible: boolean;
+    visible: boolean
   }
   /**
    * 组件数据源
@@ -41,15 +41,15 @@ declare global {
     /**
      * 值
      */
-    value: number;
+    value: number
     /**
      * 文本
      */
-    label: string;
+    label: string
     /**
      * 子列表
      */
-    children?: OptionType[];
+    children?: OptionType[]
   }
 }
-export {};
+export {}

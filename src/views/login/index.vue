@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import LoginForm from './components/loginform.vue'
-import RegisterForm from './components/registerform.vue'
 import RightSet from './components/rightset.vue'
+
+// import RegisterForm from './components/registerform.vue'
 const isForm = ref(true)
 function changeForm(val: boolean) {
   isForm.value = val
@@ -19,11 +20,11 @@ function changeForm(val: boolean) {
       <div class="right-area">
         <div class="logo">
           <img src="@/assets/logo.png" alt="" class="logo-img" />
-          <p class="logo-font">XIAOADMIN</p>
+          <p class="logo-font">SHUZHI</p>
         </div>
         <div class="form">
           <LoginForm v-if="isForm" @change-form="changeForm"></LoginForm>
-          <RegisterForm v-else @change-form="changeForm"></RegisterForm>
+          <!-- <RegisterForm v-else @change-form="changeForm"></RegisterForm> -->
         </div>
       </div>
     </div>
@@ -35,7 +36,7 @@ function changeForm(val: boolean) {
   height: 100%;
   background-color: #fff;
 }
-.right-setting{
+.right-setting {
   position: fixed;
   top: 10px;
   right: 25px;
@@ -73,7 +74,6 @@ function changeForm(val: boolean) {
       font: 700 200% Consolas, Monaco, monospace;
       margin: 15px 0;
       text-transform: uppercase;
-      
     }
     .logo-img {
       height: 10em;

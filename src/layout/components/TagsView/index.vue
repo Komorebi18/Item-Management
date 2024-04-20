@@ -40,7 +40,7 @@ watch(
 )
 
 const tagMenuVisible = ref(false) // 标签操作菜单显示状态
-watch(tagMenuVisible, value => {
+watch(tagMenuVisible, (value) => {
   if (value) {
     document.body.addEventListener('click', closeTagMenu)
   } else {
@@ -51,7 +51,7 @@ watch(tagMenuVisible, value => {
 function filterAffixTags(routes: any[], basePath = '/') {
   let tags: TagView[] = []
 
-  routes.forEach(route => {
+  routes.forEach((route) => {
     if (route.meta && route.meta.affix) {
       const tagPath = path.resolve(basePath, route.path)
       tags.push({
@@ -113,7 +113,10 @@ function isAffix(tag: TagView) {
 
 function isFirstView() {
   try {
-    return (selectedTag.value as TagView).fullPath === tagsViewStore.visitedViews[1].fullPath || (selectedTag.value as TagView).fullPath === '/index'
+    return (
+      (selectedTag.value as TagView).fullPath === tagsViewStore.visitedViews[1].fullPath ||
+      (selectedTag.value as TagView).fullPath === '/index'
+    )
   } catch (err) {
     return false
   }
@@ -121,7 +124,10 @@ function isFirstView() {
 
 function isLastView() {
   try {
-    return (selectedTag.value as TagView).fullPath === tagsViewStore.visitedViews[tagsViewStore.visitedViews.length - 1].fullPath
+    return (
+      (selectedTag.value as TagView).fullPath ===
+      tagsViewStore.visitedViews[tagsViewStore.visitedViews.length - 1].fullPath
+    )
   } catch (err) {
     return false
   }
@@ -131,7 +137,7 @@ function refreshSelectedTag(view: TagView) {
   tagsViewStore.delCachedView(view)
   const { fullPath } = view
   nextTick(() => {
-    router.replace({ path: '/redirect' + fullPath }).catch(err => {
+    router.replace({ path: '/redirect' + fullPath }).catch((err) => {
       console.warn(err)
     })
   })
@@ -222,7 +228,6 @@ onMounted(() => {
   console.log(visitedViews)
   initTags()
 })
-
 </script>
 
 <template>
@@ -238,7 +243,11 @@ onMounted(() => {
         @contextmenu.prevent="openTagMenu(tag, $event)"
       >
         {{ translateRouteTitleI18n(tag.meta?.title) }}
-        <span v-if="!isAffix(tag)" class="tags-item-close show-close" @click.prevent.stop="closeSelectedTag(tag)">
+        <span
+          v-if="!isAffix(tag)"
+          class="tags-item-close show-close"
+          @click.prevent.stop="closeSelectedTag(tag)"
+        >
           <i-ep-closeBold />
         </span>
       </router-link>
@@ -293,7 +302,7 @@ onMounted(() => {
     font-size: 12px;
     transition: all 0.4s;
     position: relative;
-    
+
     &:first-of-type {
       margin-left: 15px;
     }

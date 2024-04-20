@@ -1,8 +1,10 @@
-import {createPinia} from 'pinia'
-const pinia =createPinia()
+import { createPinia } from 'pinia'
+const pinia = createPinia()
 export default pinia
 export * from './modules/user'
 export * from './modules/app'
 export * from './modules/settings'
 export * from './modules/permission'
 export * from './modules/tagsView'
+export * from './modules/feedback'
+export * from './modules/userMessage'

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { useTagsViewStore, TagView } from '@/store/modules/tagsView'
 
 const tagAndTagSpacing = ref(4)
@@ -45,22 +46,27 @@ function moveToTarget(currentTag: TagView) {
     $scrollWrapper.scrollLeft = $scrollWrapper.scrollWidth - $containerWidth
   } else {
     const tagListDom = document.getElementsByClassName('tags-item')
-    const currentIndex = tagsViewStore.visitedViews.findIndex(item => item === currentTag)
+    const currentIndex = tagsViewStore.visitedViews.findIndex((item) => item === currentTag)
     let prevTag = null
     let nextTag = null
     for (const k in tagListDom) {
       if (k !== 'length' && Object.hasOwnProperty.call(tagListDom, k)) {
-        if ((tagListDom[k] as any).dataset.path === tagsViewStore.visitedViews[currentIndex - 1].path) {
+        if (
+          (tagListDom[k] as any).dataset.path === tagsViewStore.visitedViews[currentIndex - 1].path
+        ) {
           prevTag = tagListDom[k]
         }
-        if ((tagListDom[k] as any).dataset.path === tagsViewStore.visitedViews[currentIndex + 1].path) {
+        if (
+          (tagListDom[k] as any).dataset.path === tagsViewStore.visitedViews[currentIndex + 1].path
+        ) {
           nextTag = tagListDom[k]
         }
       }
     }
 
     // the tag's offsetLeft after of nextTag
-    const afterNextTagOffsetLeft = (nextTag as any).offsetLeft + (nextTag as any).offsetWidth + tagAndTagSpacing.value
+    const afterNextTagOffsetLeft =
+      (nextTag as any).offsetLeft + (nextTag as any).offsetWidth + tagAndTagSpacing.value
 
     // the tag's offsetLeft before of prevTag
     const beforePrevTagOffsetLeft = (prevTag as any).offsetLeft - tagAndTagSpacing.value
@@ -78,7 +84,12 @@ defineExpose({
 </script>
 
 <template>
-  <el-scrollbar ref="scrollContainer" class="scroll-container" :vertical="false" @wheel.prevent="handleScroll">
+  <el-scrollbar
+    ref="scrollContainer"
+    class="scroll-container"
+    :vertical="false"
+    @wheel.prevent="handleScroll"
+  >
     <slot />
   </el-scrollbar>
 </template>
