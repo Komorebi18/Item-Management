@@ -9,5 +9,8 @@ export const judgeState = (value: any) => {
 }
 
 export const formatterTimeToDetail = (value: any) => {
+  if (!value.loginTime) {
+    return '暂无登录记录'
+  }
   return dayjs(value.loginTime).format('YYYY-MM-DD HH:mm:ss')
 }
