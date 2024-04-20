@@ -4,29 +4,29 @@ const props = defineProps({
     type: String,
     require: false
   }
-})
+});
 
-const emit = defineEmits(['update:modelValue'])
-const inputValue = toRef(props, 'modelValue')
+const emit = defineEmits(['update:modelValue']);
+const inputValue = toRef(props, 'modelValue');
 
-const visible = ref(false) // 弹窗显示状态
+const visible = ref(false); // 弹窗显示状态
 
-const iconNames: string[] = [] // 所有的图标名称集合
+const iconNames: string[] = []; // 所有的图标名称集合
 
-const filterValue = ref('') // 筛选的值
-const filterIconNames = ref<string[]>([]) // 过滤后的图标名称集合
+const filterValue = ref(''); // 筛选的值
+const filterIconNames = ref<string[]>([]); // 过滤后的图标名称集合
 
-const iconSelectorRef = ref(null)
+const iconSelectorRef = ref(null);
 /**
  * icon 加载
  */
 function loadIcons() {
-  const icons = import.meta.glob('../../assets/icons/*.svg')
+  const icons = import.meta.glob('../../assets/icons/*.svg');
   for (const icon in icons) {
-    const iconName = icon.split('assets/icons/')[1].split('.svg')[0]
-    iconNames.push(iconName)
+    const iconName = icon.split('assets/icons/')[1].split('.svg')[0];
+    iconNames.push(iconName);
   }
-  filterIconNames.value = iconNames
+  filterIconNames.value = iconNames;
 }
 
 /**
@@ -34,9 +34,11 @@ function loadIcons() {
  */
 function handleFilter() {
   if (filterValue.value) {
-    filterIconNames.value = iconNames.filter((iconName) => iconName.includes(filterValue.value))
+    filterIconNames.value = iconNames.filter(iconName =>
+      iconName.includes(filterValue.value)
+    );
   } else {
-    filterIconNames.value = iconNames
+    filterIconNames.value = iconNames;
   }
 }
 
@@ -44,29 +46,40 @@ function handleFilter() {
  * icon 选择
  */
 function handleSelect(iconName: string) {
-  emit('update:modelValue', iconName)
-  visible.value = false
+  emit('update:modelValue', iconName);
+  visible.value = false;
 }
 
 /**
  * 点击容器外的区域关闭弹窗 VueUse onClickOutside
  */
-onClickOutside(iconSelectorRef, () => (visible.value = false))
+onClickOutside(iconSelectorRef, () => (visible.value = false));
 
 onMounted(() => {
-  loadIcons()
-})
+  loadIcons();
+});
 </script>
 
 <template>
   <div class="iconselect-container" ref="iconSelectorRef">
-    <el-input v-model="inputValue" readonly @click="visible = !visible" placeholder="点击选择图标">
+    <el-input
+      v-model="inputValue"
+      readonly
+      @click="visible = !visible"
+      placeholder="点击选择图标"
+    >
       <template #prepend>
         <svg-icon :icon-class="inputValue" />
       </template>
     </el-input>
 
-    <el-popover shadow="none" :visible="visible" placement="bottom-end" trigger="click" width="400">
+    <el-popover
+      shadow="none"
+      :visible="visible"
+      placement="bottom-end"
+      trigger="click"
+      width="400"
+    >
       <template #reference>
         <div
           @click="visible = !visible"
@@ -96,7 +109,10 @@ onMounted(() => {
             @click="handleSelect(iconName)"
           >
             <el-tooltip :content="iconName" placement="bottom" effect="light">
-              <svg-icon color="var(--el-text-color-regular)" :icon-class="iconName" />
+              <svg-icon
+                color="var(--el-text-color-regular)"
+                :icon-class="iconName"
+              />
             </el-tooltip>
           </li>
         </ul>

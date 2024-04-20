@@ -41,9 +41,10 @@ const filterAsyncRoutes = (routes: RouteRecordRaw[], roles: string[]) => {
 
   routes.forEach((route) => {
     const tmpRoute = { ...route } // ES6扩展运算符复制新对象
+    console.log(tmpRoute)
     // 判断用户(角色)是否有该路由的访问权限  hasPermission() 判断当前角色是否有该路由权限 有返回true 没有false
     if (hasPermission(roles, tmpRoute)) {
-      if (tmpRoute.component?.toString() === 'Layout') {
+      if (tmpRoute.component?.toString() == 'Layout') {
         // 将 后台 传过来的 'layout' 字符 替换成 Layout 组件
         tmpRoute.component = Layout
       } else {
@@ -78,6 +79,7 @@ export const usePermissionStore = defineStore('permission', () => {
   // actions // 拼接动态路由和静态路由
   function setRoutes(newRoutes: RouteRecordRaw[]) {
     routes.value = constantRoutes.concat(newRoutes)
+    console.log(routes.value)
   }
   /**
    * 生成动态路由
@@ -90,6 +92,7 @@ export const usePermissionStore = defineStore('permission', () => {
       // 接口获取所有路由
       getAsyncRoutes()
         .then(({ data: asyncRoutes }) => {
+          console.log(asyncRoutes)
           hasRouter.value = asyncRoutes
           // 根据角色获取有访问权限的路由
           const accessedRoutes = filterAsyncRoutes(asyncRoutes, roles)

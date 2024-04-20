@@ -14,28 +14,7 @@ export const constantRoutes: RouteRecordRaw[] = [
       }
     ]
   },
-  {
-    //404
-    path: '/404',
-    component: () => import('@/views/error-page/404.vue'),
-    name: '404',
-    meta: {
-      title: '404',
-      icon: 'error',
-      hidden: true
-    }
-  },
-  {
-    //403
-    path: '/403',
-    component: () => import('@/views/error-page/403.vue'),
-    name: '403',
-    meta: {
-      title: '403',
-      icon: 'error',
-      hidden: true
-    }
-  },
+
   {
     path: '/login',
     component: () => import('@/views/login/index.vue'),
@@ -51,7 +30,42 @@ export const constantRoutes: RouteRecordRaw[] = [
         path: 'dashboard',
         component: () => import('@/views/dashboard/index.vue'),
         name: 'dashboard',
-        meta: { title: '首页', icon: 'home', affix: true, keepAlive: true }
+        meta: { title: '首页', icon: 'home', affix: true ,keepAlive: true,}
+      },
+      {
+        path: '403',
+        component: () => import('@/views/error-page/403.vue'),
+        meta: { hidden: true }
+      },
+      {
+        path: '404',
+        component: () => import('@/views/error-page/404.vue'),
+        meta: { hidden: true }
+      }
+    ]
+  },
+  {
+    path: '/error',
+    component: Layout,
+    redirect: '/error/404',
+    name: 'error',
+    meta: {
+      title: '错误页面',
+      icon: 'error',
+      hidden: false
+    },
+    children: [
+      {
+        component: () => import('@/views/error-page/404.vue'),
+        path: '404',
+        name: '404',
+        meta: { title: '404' }
+      },
+      {
+        component: () => import('@/views/error-page/403.vue'),
+        path: '403',
+        name: '403',
+        meta: { title: '403' }
       }
     ]
   }

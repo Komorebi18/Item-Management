@@ -43,7 +43,7 @@ interface DefaultSettings {
    * 主题色
    */
   themeColor: number
-  sideStyle: string
+  sideStyle:string
 }
 
 const defaultSettings: DefaultSettings = {
@@ -63,7 +63,7 @@ const defaultSettings: DefaultSettings = {
   size: 'default', // default |large |small
   language: 'zh-cn', // zh-cn| en
   themeColor: 0,
-  sideStyle: 'light'
+  sideStyle:'light'
 }
 
 export default defaultSettings

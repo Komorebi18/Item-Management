@@ -6,12 +6,12 @@
   --subMenuBg: #0f0303;
   --subMenuActiveBg: #4091f7;
   --subMenuActiveText: #4091f7;
-  --subMenuHover: #0f0303;
+  --subMenuHover:#0f0303 ;
   --sidebarLogo: #002140;
   --menuHover: transparent;
   --menuActiveText: #fff;
-  --subMenuHoverText: #fff;
-  --subActiveText: #4091f7;
+  --subMenuHoverText:#fff;
+  --subActiveText:#4091f7;
 }
 
 $menuBg: var(--menuBg);
@@ -24,8 +24,8 @@ $subMenuActiveBg: var(--subMenuActiveBg);
 $subMenuActiveText: var(--subMenuActiveText);
 
 $subMenuHover: var(--subMenuHover);
-$subMenuHoverText: var(--subMenuHoverText);
+$subMenuHoverText:var(--subMenuHoverText);
 $sidebarLogo: var(--sidebarLogo);
-$subActiveText: var(--subActiveText);
+$subActiveText:var(--subActiveText);
 $sideBarWidth: 210px;
 $muenItemHeight: 50px;

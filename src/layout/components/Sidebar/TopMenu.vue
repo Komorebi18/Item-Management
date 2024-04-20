@@ -16,26 +16,21 @@ const route = useRoute()
 </script>
 
 <template>
-  <el-menu
-    mode="horizontal"
-    :default-active="route.path"
-    :background-color="variables.menuBg"
-    :text-color="variables.menuText"
-    :active-text-color="variables.menuActiveText"
-  >
-    <sidebar-item
-      v-for="(route, index) in permissionStore.routes"
-      :item="route"
-      :key="index"
-      :base-path="route.path"
-      :is-collapse="false"
-    />
-  </el-menu>
+    <el-menu
+      mode="horizontal"
+      :default-active="route.path"
+      :background-color="variables.menuBg"
+      :text-color="variables.menuText"
+      :active-text-color="variables.menuActiveText"
+    >
+      <sidebar-item v-for="(route,index) in permissionStore.routes" :item="route" :key="index" :base-path="route.path" :is-collapse="false" />
+    </el-menu>
 </template>
 <style lang="scss" scoped>
 .el-menu {
   height: 50px !important;
   --el-menu-item-height: 50px;
+  
 }
 .el-menu--horizontal {
   border: 0;

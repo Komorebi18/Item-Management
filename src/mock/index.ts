@@ -3,9 +3,7 @@ import Mock from 'mockjs'
 // 注册
 const USERS_KEY = 'users'
 // 从本地存储中加载注册数据
-const users: { username: string; password: string }[] = JSON.parse(
-  localStorage.getItem(USERS_KEY) || '[]'
-)
+let users: { username: string; password: string }[] = JSON.parse(localStorage.getItem(USERS_KEY) || '[]')
 
 Mock.mock('/register', 'post', (options: any) => {
   const body = JSON.parse(options.body)
@@ -59,143 +57,41 @@ Mock.mock('/test', 'get', {
   message: '操作成功',
   data: [
     {
-      path: '/item',
+      path: '/demo',
       component: 'Layout',
-      name: 'itemMessage',
       meta: {
-        title: '物品管理',
+        title: '组件封装',
         icon: 'menu',
-        roles: ['ITEM'],
-        hidden: false,
-        keepAlive: true
-      },
-      children: [
-        {
-          path: 'item-info',
-          name: 'item-info',
-          component: 'itemMessage/message',
-          meta: { title: '物品信息', icon: '', hidden: false, keepAlive: true, roles: ['ITEM'] }
-        },
-        {
-          path: 'relationships',
-          name: 'relationships',
-          component: 'itemMessage/relationships',
-          meta: { title: '层级关系', icon: '', hidden: false, keepAlive: true, roles: ['ITEM'] }
-        }
-      ]
-    },
-    {
-      path: '/user',
-      component: 'Layout',
-      name: 'userMessage',
-      meta: {
-        title: '用户管理',
-        icon: 'user',
-        roles: ['USER'],
-        hidden: false,
-        keepAlive: true
-      },
-      children: [
-        {
-          path: 'user-info',
-          name: 'user-info',
-          component: 'userMessage/userMessage',
-          meta: { title: '用户信息', icon: '', hidden: false, keepAlive: true, roles: ['USER'] }
-        },
-        {
-          path: 'blacklist',
-          name: 'blacklist',
-          component: 'userMessage/blacklist',
-          meta: { title: '用户黑名单', icon: '', hidden: false, keepAlive: true, roles: ['USER'] }
-        }
-      ]
-    },
-    {
-      path: '/acl',
-      component: 'Layout',
-      name: 'acl',
-      meta: {
-        title: '权限管理',
-        icon: 'acl',
         roles: ['ROOT'],
         hidden: false,
         keepAlive: true
       },
+
       children: [
         {
-          path: 'admin-info',
-          name: 'admin-info',
-          component: 'acl/adminMessage',
-          meta: { title: '管理员信息', icon: '', hidden: false, keepAlive: true, roles: ['ROOT'] }
+          path: 'emoji',
+          component: 'demo/emoji/index',
+          name: 'Emoji',
+          meta: { title: '聊天框', icon: '', hidden: false, keepAlive: true, roles: ['ROOT'] }
         },
         {
-          path: 'management',
-          name: 'management',
-          component: 'acl/powerManagement',
-          meta: { title: '权限分配', icon: '', hidden: false, keepAlive: true, roles: ['ROOT'] }
-        }
-      ]
-    },
-    {
-      path: '/system',
-      component: 'Layout',
-      name: 'system',
-      meta: {
-        title: '系统通知',
-        icon: 'message',
-        roles: ['NOTICE'],
-        hidden: false,
-        keepAlive: true
-      },
-      children: [
-        {
-          path: 'deliver-info',
-          name: 'deliver-info',
-          component: 'systemMessage/deliverMessage',
-          meta: { title: '发布通知', icon: '', hidden: false, keepAlive: true, roles: ['NOTICE'] }
+          path: 'waterfall',
+          component: 'demo/waterfall/index',
+          name: 'Waterfall',
+          meta: { title: '瀑布流', icon: '', hidden: false, keepAlive: true, roles: ['ROOT'] }
         },
         {
-          path: 'view-info',
-          name: 'view-info',
-          component: 'systemMessage/viewMessage',
-          meta: { title: '所有通知', icon: '', hidden: false, keepAlive: true, roles: ['NOTICE'] }
+          path: 'upload',
+          component: 'demo/upload/index',
+          name: 'Upload',
+          meta: { title: '文件上传', icon: '', roles: ['ROOT'], hidden: false, keepAlive: true }
         },
         {
-          path: 'audit-info',
-          name: 'audit-info',
-          component: 'systemMessage/auditMessage',
-          meta: { title: '审核通知', icon: '', hidden: false, keepAlive: true, roles: ['NOTICE'] }
+          path: 'test',
+          component: 'demo/test',
+          name: 'Test',
+          meta: { title: '测试', icon: '', roles: ['ROOT'], hidden: false, keepAlive: true }
         },
-        {
-          path: 'edit',
-          name: 'edit-info',
-          component: 'systemMessage/editMessage',
-          meta: { title: '编辑通知', icon: '', hidden: true, keepAlive: false, roles: ['NOTICE'] }
-        }
-      ]
-    },
-    {
-      path: '/feedback',
-      component: 'Layout',
-      name: 'feedback',
-      meta: {
-        roles: ['FEEDBACK'],
-        hidden: false,
-        keepAlive: true
-      },
-      children: [
-        {
-          path: '',
-          name: ' childFeedback',
-          component: 'feedback/feedback',
-          meta: {
-            title: '用户反馈',
-            icon: 'feedback',
-            hidden: false,
-            keepAlive: true,
-            roles: ['FEEDBACK']
-          }
-        }
       ]
     }
   ]

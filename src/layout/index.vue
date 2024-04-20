@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, watch, watchEffect } from 'vue'
+import { computed, watchEffect } from 'vue'
 import { useWindowSize } from '@vueuse/core'
 import { AppMain, Navbar, TagsView } from './components/index'
 
@@ -41,7 +41,7 @@ const mixLeftMenu = computed(() => {
 
 watch(
   () => activeTopMenu.value,
-  (newVal) => {
+  newVal => {
     console.log(newVal)
 
     if (layout.value !== 'mix') return
@@ -52,6 +52,7 @@ watch(
     immediate: true
   }
 )
+
 
 const classObj = computed(() => ({
   hideSidebar: !appStore.sidebar.opened, // 隐藏侧边栏
@@ -96,24 +97,10 @@ function toggleSideBar() {
 
 <template>
   <div :class="classObj" class="app-wrapper">
-    <div
-      v-if="classObj.mobile && classObj.openSidebar"
-      class="drawer-bg"
-      @click="handleOutsideClick"
-    ></div>
+    <div v-if="classObj.mobile && classObj.openSidebar" class="drawer-bg" @click="handleOutsideClick"></div>
 
-    <LeftMenu
-      :menu-list="permissionStore.routes"
-      :base-path="activeTopMenu"
-      class="sidebar-container"
-      v-if="settingsStore.layout !== 'top'"
-    ></LeftMenu>
-    <LeftMenu
-      :menu-list="mixLeftMenu"
-      :base-path="activeTopMenu"
-      class="sidebar-container"
-      v-if="settingsStore.layout === 'mix'"
-    ></LeftMenu>
+    <LeftMenu :menu-list="permissionStore.routes" :base-path="activeTopMenu" class="sidebar-container" v-if="settingsStore.layout !== 'top'"></LeftMenu>
+    <LeftMenu :menu-list="mixLeftMenu" :base-path="activeTopMenu" class="sidebar-container" v-if="settingsStore.layout === 'mix'"></LeftMenu>
 
     <div :class="{ hasTagsView: showTagsView, 'main-container': layout !== 'top' }">
       <div :class="{ 'fixed-header': fixedHeader }" v-show="layout === 'left'">
@@ -127,21 +114,15 @@ function toggleSideBar() {
       </div>
 
       <!-- 顶部模式 -->
-      <div
-        :class="{
-          'fixed-header-top': fixedHeader && layout !== 'mix',
-          'fixed-header': layout === 'mix' && fixedHeader
-        }"
-        v-if="layout !== 'left'"
-      >
+      <div :class="{ 'fixed-header-top': fixedHeader && layout !== 'mix', 'fixed-header': layout === 'mix' && fixedHeader }" v-if="layout !== 'left'">
         <navbar>
           <template #logo v-if="layout === 'top'">
             <Logo class="top-logo" />
           </template>
-          <template #layout v-if="layout === 'top'">
+          <template #layout v-if="layout ==='top'">
             <TopMenu class="sidebar-top"></TopMenu>
           </template>
-          <template #layout v-if="layout === 'mix'">
+          <template #layout v-if="layout ==='mix'">
             <MixMenu class="sidebar-top"></MixMenu>
           </template>
         </navbar>

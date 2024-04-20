@@ -84,7 +84,7 @@ function changeSidebarStyle(style: string) {
 
 // 主题颜色
 const MenuObjectSaveKey: Map<string, string> = new Map<string, string>()
-MenuObjectSaveKey.set('menuBg', '--menuBg')
+MenuObjectSaveKey.set('menuBg', '--menuBg') 
   .set('menuText', '--menuText')
   .set('menuActiveText', 'menuActiveText')
   .set('subMenuBg', '--subMenuBg')
@@ -115,18 +115,10 @@ watch(
   isDark,
   (newVal, oldVal) => {
     for (let i = 1; i <= 2; i++) {
-      setPropertyPrimary(
-        'dark',
-        i,
-        themeColorList.value[Number(settingsStore.themeColor)].themeColor
-      )
+      setPropertyPrimary('dark', i, themeColorList.value[Number(settingsStore.themeColor)].themeColor)
     }
     for (let i = 1; i <= 9; i++) {
-      setPropertyPrimary(
-        'light',
-        i,
-        themeColorList.value[Number(settingsStore.themeColor)].themeColor
-      )
+      setPropertyPrimary('light', i, themeColorList.value[Number(settingsStore.themeColor)].themeColor)
     }
   },
   {
@@ -158,10 +150,7 @@ function changeThemeColor(color: MenuObject, index: number) {
 }
 
 onMounted(() => {
-  changeThemeColor(
-    themeColorList.value[Number(settingsStore.themeColor)],
-    Number(settingsStore.themeColor)
-  )
+  changeThemeColor(themeColorList.value[Number(settingsStore.themeColor)], Number(settingsStore.themeColor))
   window.document.body.setAttribute('layout', settingsStore.layout)
   if (!isDark.value) {
     changeSidebarStyle(settingsStore.sideStyle)
@@ -220,28 +209,19 @@ onMounted(() => {
 
     <ul class="layout">
       <el-tooltip content="左侧模式" placement="bottom">
-        <li
-          :class="'layout-item layout-left ' + (settingsStore.layout == 'left' ? 'is-active' : '')"
-          @click="changeLayout('left')"
-        >
+        <li :class="'layout-item layout-left ' + (settingsStore.layout == 'left' ? 'is-active' : '')" @click="changeLayout('left')">
           <div />
           <div />
         </li>
       </el-tooltip>
       <el-tooltip content="顶部模式" placement="bottom">
-        <li
-          :class="'layout-item layout-top ' + (settingsStore.layout == 'top' ? 'is-active' : '')"
-          @click="changeLayout('top')"
-        >
+        <li :class="'layout-item layout-top ' + (settingsStore.layout == 'top' ? 'is-active' : '')" @click="changeLayout('top')">
           <div />
           <div />
         </li>
       </el-tooltip>
       <el-tooltip content="混合模式" placement="bottom">
-        <li
-          :class="'layout-item layout-mix ' + (settingsStore.layout == 'mix' ? 'is-active' : '')"
-          @click="changeLayout('mix')"
-        >
+        <li :class="'layout-item layout-mix ' + (settingsStore.layout == 'mix' ? 'is-active' : '')" @click="changeLayout('mix')">
           <div />
           <div />
         </li>
@@ -250,23 +230,13 @@ onMounted(() => {
     <el-divider>导航栏风格</el-divider>
     <ul class="layout">
       <el-tooltip content="暗色侧边栏" placement="bottom">
-        <li
-          :class="
-            'layout-item layout-dark ' + (settingsStore.sideStyle == 'dark' ? 'is-active' : '')
-          "
-          @click="changeSidebarStyle('dark')"
-        >
+        <li :class="'layout-item layout-dark ' + (settingsStore.sideStyle == 'dark' ? 'is-active' : '')" @click="changeSidebarStyle('dark')">
           <div />
           <div />
         </li>
       </el-tooltip>
       <el-tooltip content="白色侧边栏" placement="bottom">
-        <li
-          :class="
-            'layout-item layout-light ' + (settingsStore.sideStyle == 'light' ? 'is-active' : '')
-          "
-          @click="changeSidebarStyle('light')"
-        >
+        <li :class="'layout-item layout-light ' + (settingsStore.sideStyle == 'light' ? 'is-active' : '')" @click="changeSidebarStyle('light')">
           <div />
           <div />
         </li>

@@ -1,4 +1,4 @@
-<!-- <script setup lang="ts">
+<script setup lang="ts">
 import { User, Lock } from '@element-plus/icons-vue'
 import { FormRules, FormInstance } from 'element-plus'
 import { getRegister } from '@/api/login'
@@ -141,4 +141,4 @@ onBeforeUnmount(() => {
     }
   }
 }
-</style> -->
+</style>

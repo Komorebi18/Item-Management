@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { useTagsViewStore } from '@/store/modules/tagsView'
+import { useTagsViewStore } from '@/store/modules/tagsView';
 
-const tagsViewStore = useTagsViewStore()
+const tagsViewStore = useTagsViewStore();
 </script>
 
 <template>
-  <section class="app-main">
+   <section class="app-main">
     <router-view v-slot="{ Component, route }">
       <transition name="fade-transform" mode="out-in">
         <keep-alive :include="tagsViewStore.cachedViews">
