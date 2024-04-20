@@ -5,10 +5,12 @@ export const formatterTime = (value: any) => {
 
 // 判断是否为特殊用户
 export const judgeState = (value: any) => {
-  console.log(value.state)
   return value.state === 0 ? '否' : '历史黑名单用户'
 }
 
 export const formatterTimeToDetail = (value: any) => {
+  if (!value.loginTime) {
+    return '暂无登录记录'
+  }
   return dayjs(value.loginTime).format('YYYY-MM-DD HH:mm:ss')
 }
