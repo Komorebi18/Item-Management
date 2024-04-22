@@ -12,7 +12,7 @@
       <div class="detail-userInfo">
         <el-card class="userInfo-body">
           <div class="body-above">
-            <div class="change-btn" @click="changeDetail">
+            <div class="change-btn" @click="OnChangeDetail">
               <el-icon style="transform: rotate(90deg); color: white"><Sort /></el-icon>
             </div>
             <div class="search">
@@ -25,18 +25,18 @@
           <div class="body-below">
             <TableData
               v-show="!isShow"
-              :tableData="Store.userDetail"
-              @view-Log="viewLog()"
-              @viewFriend="viewFriend()"
+              :tableData="userDetail"
+              @view-Log="OnViewLog()"
+              @viewFriend="OnViewFriend()"
             ></TableData>
-            <LogData v-show="isShow" :logData="Store.userDetail" @view-Log="viewLog()" />
+            <LogData v-show="isShow" :logData="userDetail" @view-Log="OnViewLog()" />
           </div>
         </el-card>
       </div>
     </div>
     <!-- 查看好友信息对话框 -->
     <el-dialog v-model="dialogTableVisibleToLog" width="800">
-      <el-table :data="Store.userDetail" style="width: 100%">
+      <el-table :data="userDetail" style="width: 100%">
         <el-table-column prop="ip" label="登录ip" width="180" align="center" />
         <el-table-column prop="loginTime" label="操作时间" align="center">
           <template #header>
@@ -88,16 +88,16 @@
     </el-dialog>
     <!-- 分页 -->
     <Pagination
-      :total="Store.userMessage?.total"
-      :page="Store.userMessage?.current"
-      :limit="Store.userMessage?.size"
+      :total="userMessage?.total"
+      :page="userMessage?.current"
+      :limit="userMessage?.size"
       @pagination="clickToChange"
       class="pagination_message"
     />
   </div>
 </template>
 <script setup lang="ts">
-import { Sort, Search, ArrowDownBold } from '@element-plus/icons-vue'
+import { Sort, Search } from '@element-plus/icons-vue'
 import { TableColumnCtx } from 'element-plus'
 import { ref } from 'vue'
 import TableData from './components/TableData.vue'
@@ -105,6 +105,7 @@ import LogData from './components/LogData.vue'
 import { getUserMessageAPI } from '@/api/userMessage/userMessage'
 import { userMessageStore } from '@/store/modules/userMessage'
 import { pageInfo } from '@/types/pageMessage'
+import { storeToRefs } from 'pinia'
 // 纪录某列状态
 const isShow = ref(false)
 
@@ -122,19 +123,20 @@ const value2 = ref('')
 
 // 获取用户信息
 const Store = userMessageStore()
-
+const { userMessage, userDetail } = storeToRefs(Store)
+const { getUserMessage } = Store
 // 点击切换
-const changeDetail = () => {
+const OnChangeDetail = () => {
   isShow.value = !isShow.value
 }
 
 // 点击查看日志
-const viewLog = () => {
+const OnViewLog = () => {
   dialogTableVisibleToLog.value = true
 }
 
 // 点击查看好友信息
-const viewFriend = () => {
+const OnViewFriend = () => {
   dialogTableVisibleToFriend.value = true
 }
 
@@ -224,15 +226,15 @@ const friedDate = [
   }
 ]
 // 获取信息
-Store.getUserMessage(0, 5)
+getUserMessage(0, 5)
 
 // 分页逻辑
 const clickToChange = async (pageMessage: pageInfo) => {
   //更改页面信息
-  Store.userMessage!.current = pageMessage.currentPage
-  Store.userMessage!.size = pageMessage.pageLimit
+  userMessage.value!.current = pageMessage.currentPage
+  userMessage.value!.size = pageMessage.pageLimit
   // 请求数据
-  await Store.getUserMessage(pageMessage.currentPage, pageMessage.pageLimit)
+  await getUserMessage(pageMessage.currentPage, pageMessage.pageLimit)
 }
 </script>
 <style lang="scss" scoped>

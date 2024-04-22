@@ -74,9 +74,9 @@ export interface FeedBackInfo {
    */
   type: number
   /**
-   * 是否已读( 0 未读 1 已读)
+   * (0未读1已读2已读已回复)
    */
-  state: string
+  state: number
   /**
    * 版本号
    */

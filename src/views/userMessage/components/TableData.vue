@@ -7,8 +7,8 @@
     <el-table-column prop="state" :formatter="judgeState" label="是否为特殊用户" align="center" />
     <el-table-column label="操作" align="center">
       <div class="detail">
-        <a href="javascript:void(0);" @click="viewLog">查看日志</a>
-        <a href="javascript:void(0);" @click="viewFriend">查看好友信息</a>
+        <a href="javascript:void(0);" @click="OnViewLog">查看日志</a>
+        <a href="javascript:void(0);" @click="OnViewFriend">查看好友信息</a>
       </div>
     </el-table-column>
   </el-table>
@@ -16,7 +16,7 @@
 <script setup lang="ts">
 import { ref, reactive } from 'vue'
 import { UserMessageDetail } from '@/types/userMessage'
-import { formatterTime, judgeState } from '@/utils/formattingFunction'
+import dayjs from 'dayjs'
 // 接受参数
 const { tableData } = defineProps<{
   tableData: UserMessageDetail[]
@@ -29,14 +29,25 @@ const emit = defineEmits<{
 }>()
 
 // 点击查看日志信息
-const viewLog = () => {
+const OnViewLog = () => {
   emit('view-Log')
 }
 
 // 点击查看好友信息
-const viewFriend = () => {
+const OnViewFriend = () => {
   console.log('oosi')
   emit('view-Friend')
+}
+
+// 判断是否为特殊用户
+const judgeState = (value: any) => {
+  const { state } = value
+  return state === 0 ? '否' : '历史黑名单用户'
+}
+// 格式化时间
+const formatterTime = (value: any) => {
+  const { regTime } = value
+  return dayjs(regTime).format('YYYY.MM.DD')
 }
 </script>
 <style lang="scss" scoped>

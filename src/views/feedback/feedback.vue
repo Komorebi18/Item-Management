@@ -1,97 +1,108 @@
 <template>
   <div>
     <div class="feedback">
-      <el-card class="box-card">
-        <el-tabs v-model="activeName" class="demo-tabs" @tab-click="handleClick">
-          <el-tab-pane :label="`全部(${feedBackStore.allFeedBack.total})`" name="first">
-            <el-table :data="feedBackStore.userFeedBack" style="width: 100%">
+      <el-card class="feedback-card">
+        <el-tabs v-model="currentTab" class="tabs" @tab-click="onClickTab">
+          <el-tab-pane :label="`全部(${allFeedBack.total})`" :name="TAB.ALL">
+            <el-table :data="allFeedBack.records" style="width: 100%">
               <el-table-column prop="username" label="用户名" align="center" />
               <el-table-column prop="uuid" label="用户id" align="center" />
               <el-table-column
-                :formatter="chooseContent"
+                :formatter="formatType"
                 prop="type"
                 label="用户反馈"
                 align="center"
               />
               <el-table-column prop="version" label="用户版本" align="center" />
-              <el-table-column prop="state" label="状态" align="center" />
-              <el-table-column class="btn_operation" label="操作" align="center" v-slot="scope">
-                <div class="details">
+              <el-table-column prop="state" label="状态" :formatter="formatState" align="center" />
+              <el-table-column
+                class="feedback-operationBtn"
+                label="操作"
+                align="center"
+                v-slot="scope"
+              >
+                <div class="feedback-viewDetails">
                   <el-button
-                    v-show="!(scope.row.state === '已回复')"
-                    @click="handleCommand(scope.$index, scope.row.userId, scope.row.feedbackId)"
+                    v-show="scope.row.state === 0"
+                    @click="OnHandleCommand(scope.row.userId, scope.row.feedbackId)"
                     >快捷回复</el-button
                   >
-                  <el-button v-show="scope.row.state === '已回复'">已回复</el-button>
+                  <el-button v-show="!(scope.row.state === 0)">已回复</el-button>
                   <a
                     href="javascript:void(0);"
-                    class="details_title"
-                    @click="viewDetail(scope.row.uuid, scope.row.userId)"
+                    class="feedback-viewDetails-btn"
+                    @click="OnViewDetail(scope.row.uuid, scope.row.userId)"
                     >查看详情</a
                   >
                 </div>
               </el-table-column>
             </el-table>
           </el-tab-pane>
-          <el-tab-pane :label="`已查看(${feedBackStore.readFeedBacks.total})`" name="second">
-            <el-table :data="feedBackStore.readFeedBack" style="width: 100%">
+          <el-tab-pane :label="`已查看(${readFeedBacks.total})`" :name="TAB.READ">
+            <el-table :data="readFeedBacks.records" style="width: 100%">
               <el-table-column prop="username" label="用户名" align="center" />
               <el-table-column prop="uuid" label="用户id" align="center" />
               <el-table-column
-                :formatter="chooseContent"
+                :formatter="formatType"
                 prop="type"
                 label="用户反馈"
                 align="center"
               />
               <el-table-column prop="version" label="用户版本" align="center" />
               <el-table-column prop="state" label="状态" align="center" />
-              <el-table-column class="btn_operation" label="操作" align="center" v-slot="scope">
-                <div class="details">
+              <el-table-column
+                class="feedback-operationBtn"
+                label="操作"
+                align="center"
+                v-slot="scope"
+              >
+                <div class="feedback-viewDetails">
                   <el-button
-                    v-show="!(scope.row.state === '已回复')"
-                    @click="handleCommand(scope.$index, scope.row.userId, scope.row.feedbackId)"
+                    v-show="scope.row.state === 0"
+                    @click="OnHandleCommand(scope.row.userId, scope.row.feedbackId)"
                     >快捷回复</el-button
                   >
-                  <el-button v-show="scope.row.state === '已回复' || replyStatus[scope.$index]"
-                    >已回复</el-button
-                  >
+                  <el-button v-show="!(scope.row.state === 0)">已回复</el-button>
 
                   <a
                     href="javascript:void(0);"
-                    class="details_title"
-                    @click="viewDetail(scope.row.uuid, scope.row.userId)"
+                    class="feedback-viewDetails-btn"
+                    @click="OnViewDetail(scope.row.uuid, scope.row.userId)"
                     >查看详情</a
                   >
                 </div>
               </el-table-column>
             </el-table></el-tab-pane
           >
-          <el-tab-pane :label="`未查看(${feedBackStore.unReadFeedBacks.total})`" name="third">
-            <el-table :data="feedBackStore.unReadFeedBack" style="width: 100%">
+          <el-tab-pane :label="`未查看(${unReadFeedBacks.total})`" :name="TAB.UNREAD">
+            <el-table :data="unReadFeedBacks.records" style="width: 100%">
               <el-table-column prop="username" label="用户名" align="center" />
               <el-table-column prop="uuid" label="用户id" align="center" />
               <el-table-column
-                :formatter="chooseContent"
+                :formatter="formatType"
                 prop="type"
                 label="用户反馈"
                 align="center"
               />
               <el-table-column prop="version" label="用户版本" align="center" />
               <el-table-column prop="state" label="状态" align="center" />
-              <el-table-column class="btn_operation" label="操作" align="center" v-slot="scope">
-                <div class="details">
+              <el-table-column
+                class="feedback-operationBtn"
+                label="操作"
+                align="center"
+                v-slot="scope"
+              >
+                <div class="feedback-viewDetails">
                   <el-button
-                    v-show="!(scope.row.state === '已回复')"
-                    @click="handleCommand(scope.$index, scope.row, scope.row.feedbackId)"
+                    v-show="scope.row.state === 0"
+                    @click="OnHandleCommand(scope.row, scope.row.feedbackId)"
                     >快捷回复</el-button
                   >
-                  <el-button v-show="scope.row.state === '已回复' || replyStatus[scope.$index]"
-                    >已回复</el-button
-                  >
+                  <el-button v-show="!(scope.row.state === 0)">已回复</el-button>
                   <a
                     href="javascript:void(0);"
-                    class="details_title"
-                    @click="viewDetail(scope.row.uuid, scope.row.userId)"
+                    class="feedback-viewDetails-btn"
+                    @click="OnViewDetail(scope.row.uuid, scope.row.userId)"
                     >查看详情</a
                   >
                 </div>
@@ -102,9 +113,9 @@
       </el-card>
     </div>
     <el-dialog v-model="dialogTableVisible">
-      <text class="dialogTableVisible_title">反馈内容</text>
-      <el-card class="box-card">
-        <div class="demo-image__preview">
+      <span class="dialogTableVisible_title">反馈内容</span>
+      <el-card class="feedback-card">
+        <div class="feedback-image__preview">
           <el-image
             style="width: 150px; height: 150px"
             :src="url"
@@ -117,14 +128,14 @@
             title="点击预览哦"
           />
         </div>
-        <div class="card_title">
+        <div class="dialogCard-title">
           <span>{{ feedBackContent }}</span>
         </div>
         <template #footer>
           <el-input v-model="textarea" :rows="7" type="textarea" placeholder="请输入回复内容" />
-          <div class="card_btn">
-            <el-button @click="cancelMsg">取消</el-button>
-            <el-button type="primary" @click="handleMsg">发送</el-button>
+          <div class="dialogCard-btn">
+            <el-button @click="OnCancelMsg">取消</el-button>
+            <el-button type="primary" @click="OnHandleMsg">发送</el-button>
           </div>
         </template>
       </el-card>
@@ -132,27 +143,27 @@
     <!-- 全部 pagination -->
     <pagination
       v-show="isRead === 0"
-      :total="feedBackStore.allFeedBack.total"
-      :page="feedBackStore.allFeedBack.current"
-      :limit="feedBackStore.allFeedBack.size"
+      :total="allFeedBack.total"
+      :page="allFeedBack.current"
+      :limit="allFeedBack.size"
       @pagination="clickToChange"
       class="pagination_feedBack"
     />
     <!-- 已读 pagination -->
     <pagination
       v-show="isRead === 1"
-      :total="feedBackStore.readFeedBacks.total"
-      :page="feedBackStore.readFeedBacks.current"
-      :limit="feedBackStore.readFeedBacks.size"
+      :total="readFeedBacks.total"
+      :page="readFeedBacks.current"
+      :limit="readFeedBacks.size"
       @pagination="clickToRead"
       class="pagination_feedBack"
     />
     <!-- 未读 pagination -->
     <pagination
       v-show="isRead === 2"
-      :total="feedBackStore.unReadFeedBacks.total"
-      :page="feedBackStore.unReadFeedBacks.current"
-      :limit="feedBackStore.readFeedBacks.size"
+      :total="unReadFeedBacks.total"
+      :page="unReadFeedBacks.current"
+      :limit="readFeedBacks.size"
       @pagination="clickToUnRead"
       class="pagination_feedBack"
     />
@@ -163,14 +174,49 @@
 import { ref, onMounted, toRefs, computed } from 'vue'
 import { ElMessageBox, ElMessage, type TabsPaneContext } from 'element-plus'
 import { useFeedBackStore } from '@/store/modules/feedback'
-import { chooseContent } from '@/utils/chooseFeedBack'
-import { changeStateAPI } from '@/api/feedback'
+
+import { changeStateToRead } from '@/api/feedback'
 import { pageInfo } from '@/types/pageMessage'
 import { ReplyInfo } from '@/types/feedback'
+import { storeToRefs } from 'pinia'
 
-//获取数据
+const enum TAB {
+  /**全部 */
+  ALL = 0,
+  /**已查看 */
+  READ = 1,
+  /**未查看 */
+  UNREAD = 2
+}
+
+const enum STATE_TYPE {
+  /**未读 */
+  UNREAD = '未读',
+  /**已读 */
+  READ = '已读',
+  /**已读已回复 */
+  REPLY = '已读已回复'
+}
+
+const enum FACEBACK_TYPE {
+  /**无法打开小程序 */
+  CANNOT_OPEN_MINI_PROGRAM = '无法打开小程序',
+  /**小程序闪退 */
+  MINI_PROGRAM_FLASH_BACK = '小程序闪退',
+  /**页面加载慢 */
+  PAGE_LOAD_SLOW = '页面加载慢',
+  /**其他异常 */
+  OTHER_EXCEPTION = '其他异常',
+  /**产品开发建议 */
+  PRODUCT_DEVELOPMENT_SUGGESTIONS = '产品开发建议',
+  /**意见反馈 */
+  FEEDBACK = '意见反馈'
+}
 const feedBackStore = useFeedBackStore()
-const activeName = ref('first')
+const { replyMessage, getUnReadFeedback, getReadFeedback, getAllFeedBack } = feedBackStore
+const { allFeedBack, readFeedBacks, unReadFeedBacks } = storeToRefs(feedBackStore)
+
+const currentTab = ref(TAB.ALL)
 //打开反馈
 const dialogTableVisible = ref(false)
 
@@ -186,9 +232,6 @@ const feedBackContent = ref('')
 //文本框内容
 const textarea = ref('')
 
-//控制btn 按钮
-const replyStatus = ref([false])
-
 // 存储 userId
 const userId = ref(0)
 
@@ -196,12 +239,12 @@ const userId = ref(0)
 const isRead = ref(0)
 
 // 回复消息
-const handleMsg = async () => {
+const OnHandleMsg = async () => {
   if (textarea.value === '') {
     ElMessage.warning('回复内容不能为空')
   } else {
-    // 调用后端接口
-    await feedBackStore.replyMessage(userId.value, textarea.value)
+    // // 调用后端接口
+    // await replyMessage(userId.value, textarea.value)
 
     // 关闭回复框
     dialogTableVisible.value = false
@@ -211,7 +254,7 @@ const handleMsg = async () => {
   }
 }
 // 取消发送
-const cancelMsg = () => {
+const OnCancelMsg = () => {
   // 清空 textarea 内容
   textarea.value = ''
   // 关闭回复框
@@ -219,32 +262,34 @@ const cancelMsg = () => {
 }
 
 //切换tab 栏
-const handleClick = (tab: TabsPaneContext) => {
+const onClickTab = (tab: TabsPaneContext) => {
+  const { paneName } = tab
   // 提取tab 信息
+  console.log(paneName)
   let string = tab.props.label.substring(0, tab.props.label.indexOf('('))
   if (string === '全部') {
     // ChangeTabMsg(0)
     isRead.value = 0
-    feedBackStore.unReadInfo(0, 10)
+    getUnReadFeedback(0, 10)
   } else if (string === '已查看') {
     isRead.value = 1
     // 获取已读数据
-    feedBackStore.readInfo(0, 10)
+    getReadFeedback(0, 10)
   } else {
     isRead.value = 2
     // 获取未读数据
-    feedBackStore.unReadInfo(0, 10)
+    getUnReadFeedback(0, 10)
   }
 }
 
 //点击打开详情 (要抽离逻辑)
-const viewDetail = async (id: number, user: number) => {
+const OnViewDetail = async (id: number, user: number) => {
   // 控制详情页显示与否
   dialogTableVisible.value = true
   userId.value = user
 
   //通过 id 筛选出对应反馈信息
-  let feedBacks = feedBackStore.userFeedBack.filter((item) => item.uuid === id)
+  let feedBacks = allFeedBack.value.records.filter((item) => item.uuid === id)
 
   // 视图更新
   url.value = feedBacks[0]?.imageUrl[0]
@@ -252,80 +297,110 @@ const viewDetail = async (id: number, user: number) => {
   feedBackContent.value = feedBacks[0]?.content
 
   //判断 已读还是未读
-  if (feedBacks[0]?.state === '未读') {
+  if (feedBacks[0]?.state === 0) {
     // 将未读设置为已读并请求新数据
-    await feedBackAsRead(feedBacks[0].feedbackId)
-    // 将状态改变
-    feedBacks[0].state = '已读'
+    await feedBackAsRead(feedBacks[0].feedbackId.toString())
+    // // 将状态改变
+    // feedBacks[0].state = '已读'
   }
 
   //获取数据 全部数据
-  await feedBackStore.getAllFeedBack(feedBackStore.allFeedBack.current, 10)
+  await getAllFeedBack(allFeedBack.value.current, 10)
 }
 
 // 将未读改为已读，获取最新数据
-const feedBackAsRead = async (id: number) => {
+const feedBackAsRead = async (id: string) => {
   // 将未读改为已读
-  await changeStateAPI(id, 0)
+  await changeStateToRead(id, 0)
   // 请求已读数据
-  await feedBackStore.readInfo(0, 10)
+  await getReadFeedback(0, 10)
 
   // 获取未读数据
-  await feedBackStore.unReadInfo(0, 10)
+  await getUnReadFeedback(0, 10)
 }
 
 // 按钮逻辑
-const handleCommand = async (index: number, scope: any, feedbackId: number) => {
-  // 将当前行的按钮状态设置为 true
-  replyStatus.value[index] = true
-
+const OnHandleCommand = async (scope: any, feedbackId: string) => {
   // 存储当前行的 userId
   userId.value = scope
 
   // 发送快捷回复
-  await feedBackStore.replyMessage(scope)
+  await replyMessage(scope)
   // 将状态改为已回复
-  await changeStateAPI(feedbackId, 1)
+  await changeStateToRead(feedbackId, 1)
   // 请求新数据
   //获取数据 全部数据
-  await feedBackStore.getAllFeedBack(feedBackStore.allFeedBack.current, 10)
+  await getAllFeedBack(allFeedBack.value.current, 10)
 }
 
+// 格式化反馈内容
+const formatType = (value: any) => {
+  const { type } = value
+  switch (type) {
+    case 1:
+      return FACEBACK_TYPE.CANNOT_OPEN_MINI_PROGRAM
+    case 2:
+      return FACEBACK_TYPE.MINI_PROGRAM_FLASH_BACK
+    case 3:
+      return FACEBACK_TYPE.PAGE_LOAD_SLOW
+    case 4:
+      return FACEBACK_TYPE.OTHER_EXCEPTION
+    case 5:
+      return FACEBACK_TYPE.PRODUCT_DEVELOPMENT_SUGGESTIONS
+    default:
+      return FACEBACK_TYPE.FEEDBACK
+  }
+}
+
+//格式化状态
+const formatState = (value: any) => {
+  const { state } = value
+  switch (state) {
+    case 0:
+      return STATE_TYPE.UNREAD
+    case 1:
+      return STATE_TYPE.READ
+    case 2:
+      return STATE_TYPE.REPLY
+    default:
+      return STATE_TYPE.UNREAD
+  }
+}
 //初次加载获取数据
 // 获取已读数据
-feedBackStore.readInfo(0, 10)
+getReadFeedback(0, 10)
 
 // 获取未读数据
-feedBackStore.unReadInfo(0, 10)
+getUnReadFeedback(0, 10)
 
 //获取数据 全部数据
-feedBackStore.getAllFeedBack(0, 10)
+getAllFeedBack(0, 10)
 
 // pagination  全部逻辑
 const clickToChange = async (pageMessage: pageInfo) => {
   //更改页面信息
-  feedBackStore.allFeedBack.current = pageMessage.currentPage
-  feedBackStore.allFeedBack.size = pageMessage.pageLimit
+  allFeedBack.value.current = pageMessage.currentPage
+  allFeedBack.value.size = pageMessage.pageLimit
   // 发送请求
-  await feedBackStore.getAllFeedBack(pageMessage.currentPage, pageMessage.pageLimit)
+  await getAllFeedBack(pageMessage.currentPage, pageMessage.pageLimit)
 }
 
 // pagination  已读逻辑
 const clickToRead = async (pageMessage: pageInfo) => {
   //更改页面信息
-  feedBackStore.readFeedBacks.current = pageMessage.currentPage
-  feedBackStore.readFeedBacks.size = pageMessage.pageLimit
+  readFeedBacks.value.current = pageMessage.currentPage
+  readFeedBacks.value.size = pageMessage.pageLimit
   // 发送请求
-  await feedBackStore.readInfo(pageMessage.currentPage, pageMessage.pageLimit)
+  await getReadFeedback(pageMessage.currentPage, pageMessage.pageLimit)
 }
 
 // pagination  未读逻辑
 const clickToUnRead = async (pageMessage: pageInfo) => {
   //更改页面信息
-  feedBackStore.unReadFeedBacks.current = pageMessage.currentPage
-  feedBackStore.unReadFeedBacks.size = pageMessage.pageLimit
+  unReadFeedBacks.value.current = pageMessage.currentPage
+  unReadFeedBacks.value.size = pageMessage.pageLimit
   // 发送请求
-  await feedBackStore.unReadInfo(pageMessage.currentPage, pageMessage.pageLimit)
+  await getUnReadFeedback(pageMessage.currentPage, pageMessage.pageLimit)
 }
 </script>
 
@@ -340,12 +415,12 @@ const clickToUnRead = async (pageMessage: pageInfo) => {
 // .el-button {
 //   padding-right: 20px;
 // }
-.details {
+.feedback-viewDetails {
   display: flex;
   flex-direction: row;
   justify-content: center;
   align-items: center;
-  .details_title {
+  .feedback-viewDetails-btn {
     text-decoration: underline;
   }
 }
@@ -357,7 +432,7 @@ const clickToUnRead = async (pageMessage: pageInfo) => {
   height: 114px;
   background-color: bisque;
 }
-.card_title {
+.dialogCard-title {
   margin-top: 25px;
 }
 .demo-image__error .image-slot {
@@ -370,7 +445,7 @@ const clickToUnRead = async (pageMessage: pageInfo) => {
   width: 100%;
   height: 200px;
 }
-.card_btn {
+.dialogCard-btn {
   float: right;
   margin: 10px 30px;
 }
@@ -382,7 +457,7 @@ const clickToUnRead = async (pageMessage: pageInfo) => {
   font-weight: 600;
   line-height: normal;
 }
-.card_title {
+.dialogCard-title {
   color: #9d9d9d;
   font-family: Inter;
   font-size: 16px;
@@ -390,7 +465,7 @@ const clickToUnRead = async (pageMessage: pageInfo) => {
   font-weight: 400;
   line-height: normal;
 }
-.box-card {
+.feedback-card {
   padding-top: 0px;
   box-shadow: none;
 }
