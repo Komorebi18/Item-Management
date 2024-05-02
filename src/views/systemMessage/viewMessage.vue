@@ -1,311 +1,252 @@
 <template>
-  <div class="box">
-    <!-- 左边盒子 -->
-    <div class="left-box">
-      <div class="header">
-        <div class="left-header">
+  <div class="wrapper">
+    <div class="notice-list-container">
+      <Header
+        :is-show-time-selection="true"
+        :is-show-type-selection="true"
+        @update-limit="onChangeLimit"
+        @search="searchNotice"
+      >
+        <template #button>
           <el-button
             type="primary"
-            :icon="isDelete === true ? '' : EditPen"
-            class="button-deliver"
+            :icon="isDeleteState ? undefined : EditPen"
+            class="remove-notice-btn"
             color="#2F3367"
-            @click="isDelete = !isDelete"
+            @click="isDeleteState = !isDeleteState"
           >
-            {{ isDelete === true ? '取消' : '删除通知' }}
+            {{ isDeleteState ? '取消' : '删除通知' }}
           </el-button>
-          <div class="select-box">
-            <el-select
-              v-model="timeLimit"
-              placeholder="全部"
-              style="width: 88px; margin: 5px 0 0"
-              @change="handleTimeLimit"
-            >
-              <el-option key="4" label="全部" value="0" />
-              <el-option key="1" label="近三天" value="1" />
-              <el-option key="2" label="近一周" value="2" />
-              <el-option key="3" label="近一月" value="3" />
-            </el-select>
-            <el-select v-model="userLimit" placeholder="全部" style="width: 100px; margin: 5px 0 0">
-              <el-option
-                v-for="tag in noticeStore.noticeTypeList"
-                v-model="tagId"
-                :key="tag.typeId"
-                :label="tag.typeName"
-                :value="tag.typeId"
-              />
-              <el-option key="0" label="所有类型" value="0" />
-            </el-select>
-          </div>
-        </div>
-        <div class="search-box">
-          <el-input v-model="input" placeholder="请输入关键词" @keydown.enter="searchNotice" />
-          <el-button color="#2F3367" @click="searchNotice">
-            <el-icon style="vertical-align: middle">
-              <Search />
-            </el-icon>
-          </el-button>
-        </div>
-      </div>
+        </template>
+      </Header>
       <!-- 页面主要内容展示 -->
-      <el-main style="padding: 0 10px 0 20px">
+      <el-main class="main-wrapper">
         <!-- 没有数据时展示的内容 -->
-        <template v-if="!noticeDetail">
+        <template v-if="!currentNoticeDetail">
           <p>暂无消息</p>
         </template>
         <!-- 通知展示表格 -->
         <el-scrollbar class="message-box" ref="scrollbarRef">
-          <div v-for="notice in noticeStore.allNoticeList.records" :key="notice.noticeId as number">
-            <el-row
-              class="single-message"
-              @click="handleMessage(notice.noticeId as number, notice.title as string)"
-              :class="{ activeClass: notice.noticeId === noticeDetail.noticeId }"
-            >
-              <div class="content-box">
-                <div style="display: flex; align-items: center">
-                  <div class="delete-icon" v-if="isDelete">
-                    <img src="../../assets/icons/delete-message.svg" alt="删除通知" />
-                  </div>
-                  <div>
-                    <div class="title">
-                      <el-icon v-if="notice.userId !== 0"><User /></el-icon>
-                      <span>{{ notice.title }}</span>
-                    </div>
-                    <div class="content">
-                      <el-text class="w-90% mb-2" truncated>
-                        {{ notice.content }}
-                      </el-text>
-                    </div>
-                  </div>
+          <el-row
+            v-for="notice in allNoticeList.records"
+            :key="notice.noticeId"
+            class="message-item"
+            @click="onClickMessage(notice.noticeId)"
+            :class="{ 'active-message-item': notice.noticeId === currentNoticeId }"
+          >
+            <div class="content-box">
+              <div class="delete-icon" v-if="isDeleteState">
+                <img src="../../assets/icons/delete-message.svg" alt="删除通知" />
+              </div>
+              <div>
+                <div class="message-item-title">
+                  <!-- 通知发送给不同的用户显示不同的图标 -->
+                  <img
+                    class="deliver-to-user-img"
+                    v-if="notice.userId === 1"
+                    src="../../assets/imgs/deliver-to-single.png"
+                  />
+                  <img
+                    class="deliver-to-user-img"
+                    v-else-if="notice.groupId !== 0"
+                    src="../../assets/imgs/deliver-to-group.png"
+                  />
+                  <span>{{ notice.title }}</span>
+                </div>
+                <el-text class="message-item-content" truncated>
+                  {{ notice.content }}
+                </el-text>
+              </div>
+            </div>
+            <div class="item-info">
+              <div class="item-publisher">
+                <el-icon class="user-icon"><UserFilled /></el-icon>
+                <span class="icon-gap">发布者:{{ notice.adminName }}</span>
+              </div>
+              <div class="item-browse-num">
+                <div v-if="notice.userId === 1 && notice.userIds.length > 1">
+                  <span class="icon-gap">发布给多个用户</span>
+                </div>
+                <div v-else-if="notice.userId === 1 && notice.userIds.length === 1">
+                  <span class="icon-gap">用户ID: {{ notice.userIds[0] }}</span>
+                </div>
+                <div v-else-if="notice.groupId !== 0">
+                  <span class="icon-gap"
+                    >分组:
+                    {{
+                      userGroupList.find((item) => item.groupId === notice.groupId)!.groupName
+                    }}</span
+                  >
+                </div>
+                <div class="deliver-to-all-icon" v-else>
+                  <el-icon class="user-icon"><View /></el-icon>
+                  <span class="icon-gap">浏览:{{ notice.browse }}</span>
                 </div>
               </div>
-
-              <div class="info">
-                <div class="info-deliver">
-                  <el-icon style="font-size: 1.5em"><UserFilled /></el-icon>
-                  <span style="padding-left: 2px">发布者:{{ notice.adminName }}</span>
-                </div>
-                <div class="info-pageview">
-                  <div class="to-all" v-if="notice.userId === 0">
-                    <el-icon style="font-size: 1.5em"><View /></el-icon>
-                    <span style="padding-left: 5px">浏览:{{ notice.browse }}</span>
-                  </div>
-                  <div class="to-one" v-if="notice.userId !== 0">
-                    <span style="padding-left: 5px">{{ notice.username }}</span>
-                  </div>
-                </div>
-              </div>
-              <div class="date">{{ notice.publishTime }}</div>
-            </el-row>
-          </div>
+            </div>
+            <div class="date">{{ notice.publishTime }}</div>
+          </el-row>
         </el-scrollbar>
       </el-main>
       <!-- 分页按钮 -->
-      <pagination
-        :total="noticeStore.allNoticeList.total"
-        :page="noticeStore.allNoticeList.current"
-        :limit="noticeStore.allNoticeList.size"
+      <Pagination
+        :total="viewNoticeStore.allNoticeList.total"
+        :page="viewNoticeStore.allNoticeList.current"
+        :limit="viewNoticeStore.allNoticeList.size"
         @pagination="handlePageChange"
       />
     </div>
-    <!-- 右边盒子 -->
-    <div class="right-box" v-show="!isDelete">
-      <template v-if="noticeDetail">
-        <div class="detail-title">{{ noticeDetail.title }}</div>
+    <!-- 当前选中消息的详情展示 -->
+    <div class="current-notice-wrapper" v-show="!isDeleteState">
+      <template v-if="currentNoticeDetail">
+        <div class="detail-title">{{ currentNoticeDetail.title }}</div>
         <div class="detail-info">
-          <div class="detail-info-deliver">
-            <el-icon style="font-size: 1.5em"><UserFilled /></el-icon>
-            <span>发布者:{{ noticeDetail.adminName }}</span>
+          <div class="current-notice-publisher">
+            <el-icon class="user-icon"><UserFilled /></el-icon>
+            <span>发布者:{{ currentNoticeDetail.adminName }}</span>
           </div>
-          <div class="detail-info-date">{{ noticeDetail.publishTime }}</div>
+          <div class="detail-info-date">{{ currentNoticeDetail.publishTime }}</div>
         </div>
         <div class="detail-content">
-          <el-text class="mx-1" type="info">
-            {{ noticeDetail.content }}
+          <el-text type="info">
+            {{ currentNoticeDetail.content }}
           </el-text>
         </div>
-        <div class="detail-pageview">
-          <el-icon style="font-size: 1.5em"><View /></el-icon>
-          <span style="padding-left: 2px">浏览:{{ noticeDetail.browse }}</span>
+        <div class="current-notice-browse-num">
+          <el-icon class="user-icon"><View /></el-icon>
+          <span class="icon-gap">浏览:{{ currentNoticeDetail.browse }}</span>
         </div>
       </template>
-      <template v-if="!noticeDetail">
+      <template v-if="!currentNoticeDetail">
         <p>暂无消息</p>
       </template>
     </div>
-    <!-- 对话框 -->
-    <el-dialog v-model="showDeleteBox" width="30%" center>
-      <div>
-        <div class="deleteWaing-icon">
-          <img src="../../assets/icons/delete-waring.svg" alt="" />
-          <span> 是否确认将此通知删除？ </span>
-        </div>
-      </div>
-      <p>删除后无法恢复。</p>
-      <template #footer>
-        <span class="dialog-footer">
-          <el-button @click="showDeleteBox = false">取消</el-button>
-          <el-button type="primary" @click="handleDelete"> 确认 </el-button>
-        </span>
-      </template>
-    </el-dialog>
-    <div class="alert-box" v-show="showAlertBox">
-      <div class="content">
-        <p>已删除此通知</p>
-        <img src="../../assets/icons/delete-confirm.svg" alt="" />
-      </div>
-    </div>
   </div>
+  <!-- 对话框 -->
+  <ConfirmDialog
+    ref="confirmDialogRef"
+    :confirmation-message="`是否确认将此通知删除?<br>删除后将无法恢复。`"
+    :prompt-message="`已删除此通知`"
+    @confirm="handleDeleteNotice()"
+  />
 </template>
 
 <script lang="ts" setup>
-import { EditPen, Search, UserFilled, View, User } from '@element-plus/icons-vue'
-import { ref, onMounted } from 'vue'
-import type { NoticeItem } from '@/types/notice'
+import { EditPen, UserFilled, View } from '@element-plus/icons-vue'
+import { storeToRefs } from 'pinia'
+import { ref, onMounted, computed } from 'vue'
+import { useViewNoticeStore } from '@/store/modules/notice/viewNotice'
+import { useUserStore } from '@/store/modules/user'
+import { deleteAnyNotice } from '@/api/notice'
 import type { pageInfo } from '@/types/pageMessage'
-import { useNoticeStore } from '@/store/modules/notice'
-// 搜索框内容
-let input = ref('')
-
-// 用户限制
-let userLimit = ref('所有类型')
-
-// 是否处于删除状态
-let isDelete = ref(false)
-
-// 控制删除信息对话框显示
-let showDeleteBox = ref(false)
-
-// 控制提示框显示
-let showAlertBox = ref(false)
-
-// 待删除的通知Id
-let deleteMessageId = ref(0)
-
-// 待删除的通知标题
-let deleteMessageTitle = ref('')
+import Header from '@/views/systemMessage/components/Header.vue'
+import ConfirmDialog from '@/views/systemMessage/components/ConfirmDialog.vue'
 
 // store数据
-const noticeStore = useNoticeStore()
+const viewNoticeStore = useViewNoticeStore()
+const userStore = useUserStore()
 
-// 通知数据
-let noticeList = ref<NoticeItem[]>([])
+const { allNoticeList } = storeToRefs(viewNoticeStore)
+const { userGroupList } = storeToRefs(userStore)
 
 // 待绑定滚动条组件
 const scrollbarRef = ref<HTMLElement | null>(null)
 
-// 通知时间限制
-let timeLimit = ref('0')
+// 获取confirmDialog实例
+const confirmDialogRef = ref<InstanceType<typeof ConfirmDialog>>()
 
-// 通知类型的ID
-let tagId = ref(0)
+// 搜索框内容
+const searchKeyword = ref('')
+
+// 是否处于删除状态
+const isDeleteState = ref(false)
+
+// 当前展示的通知的Id
+let currentNoticeId = ref(0)
+
+// 通知时间限制
+let timeLimit = ref(0)
+
+// 通知类型限制
+let typeLimit = ref(0)
 
 // 当前选中通知的详细内容
-let noticeDetail = ref<NoticeItem>({
-  noticeId: 0,
-  title: '',
-  content: '',
-  userId: 0,
-  userIds: [],
-  usernames: [],
-  adminName: '',
-  publishTime: '',
-  browse: 0,
-  state: 0,
-  comment: '',
-  groupId: 0,
-  typeId: 0,
-  groupName: ''
+const currentNoticeDetail = computed(() => {
+  return allNoticeList.value.records.find((item) => item.noticeId === currentNoticeId.value)
 })
 
 onMounted(async () => {
-  // 重置页面页码
-  noticeStore.allNoticeList.current = 1
-  // 获取所有通知的类型
+  // 获取分组
   // 获取该管理员所有通知
   await Promise.all([
-    noticeStore.getAllNoticeType(),
-    noticeStore.getAllNoticeList('', 0, parseInt(timeLimit.value))
+    userStore.getUserGroupList(),
+    viewNoticeStore.refreshAllNoticeList('', typeLimit.value, timeLimit.value)
   ])
-  // 初始化盒子右侧详细信息
-  noticeList.value = noticeStore.allNoticeList.records as NoticeItem[]
-  noticeDetail.value = noticeList.value[0]
+  // 更新当前展示信息id
+  currentNoticeId.value = viewNoticeStore.allNoticeList.records[0].noticeId
 })
 
 // 更新页面展示信息
 const handlePageChange = async (pageMessage: pageInfo) => {
-  // 更新页面信息
-  noticeStore.allNoticeList.current = pageMessage.currentPage
-  noticeStore.allNoticeList.size = pageMessage.pageLimit
-  console.log(pageMessage.currentPage)
-  // 发送请求获取新数据
-  await noticeStore.getAllNoticeList(input.value, 0, parseInt(timeLimit.value))
-  // 更新盒子右侧详细信息
-  noticeList.value = noticeStore.allNoticeList.records as NoticeItem[]
-  noticeDetail.value = noticeList.value[0]
+  await viewNoticeStore.upDateAllNoticeList(
+    pageMessage.currentPage,
+    pageMessage.pageLimit,
+    searchKeyword.value,
+    typeLimit.value,
+    timeLimit.value
+  )
+  // 更新当前展示信息id
+  currentNoticeId.value = viewNoticeStore.allNoticeList.records[0].noticeId
   // 滚动条回滚到顶端
   scrollbarRef.value?.scrollTo(0, 0)
 }
 
 // 点击通知
-const handleMessage = (messageId: number, messageTitle: string) => {
+const onClickMessage = (messageId: number) => {
+  // 更新当前选中通知的Id和标题
+  currentNoticeId.value = messageId
   // 判断当前是否处于删除状态
-  if (isDelete.value === true) {
+  if (isDeleteState.value) {
     // 处在删除状态--打开确认删除弹窗
-    showDeleteBox.value = true
-    // 记录当前通知的Id和标题
-    deleteMessageId.value = messageId
-    deleteMessageTitle.value = messageTitle
-  } else {
-    // 不处在删除状态--更新选中消息的详细信息
-    noticeList.value.forEach((element) => {
-      if (element.noticeId === messageId) {
-        noticeDetail.value = element
-      }
-    })
+    confirmDialogRef.value!.openDialog()
   }
 }
 
 // 删除通知
-const handleDelete = async () => {
-  showDeleteBox.value = false
+const handleDeleteNotice = async () => {
   // 拿到待删除的通知Id发送请求
-  await noticeStore.deleteAnyNotice(deleteMessageTitle.value, deleteMessageId.value)
+  await deleteAnyNotice(currentNoticeDetail.value!.title, currentNoticeId.value)
   // 发送请求获取新数据
-  await noticeStore.getAllNoticeList(input.value, 0, parseInt(timeLimit.value))
-  // 更新盒子右侧详细信息
-  noticeList.value = noticeStore.allNoticeList.records as NoticeItem[]
-  noticeDetail.value = noticeList.value[0]
-  // 展示提示信息
-  showAlertBox.value = true
-  // 3s后关闭提示窗
-  setTimeout(() => {
-    showAlertBox.value = false
-  }, 1500)
+  await viewNoticeStore.refreshAllNoticeList(searchKeyword.value, typeLimit.value, timeLimit.value)
+  // 更新当前展示信息id
+  currentNoticeId.value = viewNoticeStore.allNoticeList.records[0].noticeId
 }
 
 // 搜索框筛选通知
-const searchNotice = async () => {
+const searchNotice = async (keyword: string) => {
+  // 更新搜索关键词
+  searchKeyword.value = keyword
   // 重置页面页码
-  noticeStore.allNoticeList.current = 1
+  viewNoticeStore.allNoticeList.current = 1
   // 发送请求更新数据
-  await noticeStore.getAllNoticeList(input.value, 0, parseInt(timeLimit.value))
-  // 更新盒子右侧详细信息
-  noticeList.value = noticeStore.allNoticeList.records as NoticeItem[]
-  noticeDetail.value = noticeList.value[0]
+  await viewNoticeStore.refreshAllNoticeList(searchKeyword.value, typeLimit.value, timeLimit.value)
+  // 更新当前展示信息id
+  currentNoticeId.value = viewNoticeStore.allNoticeList.records[0].noticeId
 }
 
-// 根据时间筛选通知
-const handleTimeLimit = async () => {
-  // 携带新的时间限制参数重新发送请求，更新数据
-  await noticeStore.getAllNoticeList(input.value, 0, parseInt(timeLimit.value))
-  // 更新盒子右侧详细信息
-  noticeList.value = noticeStore.allNoticeList.records as NoticeItem[]
-  noticeDetail.value = noticeList.value[0]
+// 根据时间or类型筛选通知
+const onChangeLimit = async (time: number, type: number) => {
+  // 更新时间限制
+  timeLimit.value = time
+  typeLimit.value = type
+  await viewNoticeStore.refreshAllNoticeList(searchKeyword.value, typeLimit.value, timeLimit.value)
+  // 更新当前展示信息id
+  currentNoticeId.value = viewNoticeStore.allNoticeList.records[0].noticeId
 }
 </script>
 
 <style scoped lang="scss">
-.box {
+.wrapper {
   position: relative;
   display: flex;
   justify-content: space-between;
@@ -313,19 +254,19 @@ const handleTimeLimit = async () => {
   margin: 15px 0 0 15px;
 }
 
-.left-box {
-  width: 52vw;
+.notice-list-container {
+  width: 65%;
   background-color: #fff;
 }
 
-.right-box {
-  width: 30vw;
+.current-notice-wrapper {
+  width: 35%;
   background-color: #fff;
   padding: 30px 25px;
   gap: 10px;
 }
 
-.button-deliver {
+.remove-notice-btn {
   display: flex;
   height: 38px;
   padding: 8px 16px;
@@ -369,7 +310,7 @@ const handleTimeLimit = async () => {
   margin-top: 20px;
 }
 
-.single-message {
+.message-item {
   position: relative;
   height: 120px;
   margin-right: 15px;
@@ -379,17 +320,26 @@ const handleTimeLimit = async () => {
   background: #fff;
 }
 
-.single-message:hover {
+.message-item:hover {
   background-color: #fafafa;
 }
 
+.deliver-to-user-img {
+  width: 18px;
+  height: 18px;
+  margin-right: 3px;
+  vertical-align: top;
+}
+
 .content-box {
+  display: flex;
+  align-items: center;
   position: absolute;
   top: 20px;
   left: 5px;
 }
 
-.title {
+.message-item-title {
   color: var(--2F3367, #2f3367);
   font-family: Inter;
   font-size: 1rem;
@@ -399,8 +349,9 @@ const handleTimeLimit = async () => {
   letter-spacing: 1.6px;
 }
 
-.content {
+.message-item-content {
   margin-top: 14px;
+  width: 90%;
   color: var(--8A8EA8, #8a8ea8) !important;
   font-family: Inter;
   font-size: 0.8em;
@@ -423,7 +374,7 @@ const handleTimeLimit = async () => {
   letter-spacing: 1.28px;
 }
 
-.info {
+.item-info {
   position: absolute;
   bottom: 10px;
   right: 5px;
@@ -432,7 +383,7 @@ const handleTimeLimit = async () => {
   align-items: center;
   gap: 12px;
 }
-.info-deliver {
+.item-publisher {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -446,7 +397,7 @@ const handleTimeLimit = async () => {
   line-height: normal;
   letter-spacing: 1.28px;
 }
-.info-pageview {
+.item-browse-num {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -478,7 +429,7 @@ const handleTimeLimit = async () => {
   justify-content: space-between;
 }
 
-.detail-info-deliver {
+.current-notice-publisher {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -524,7 +475,7 @@ const handleTimeLimit = async () => {
   letter-spacing: 1.28px;
 }
 
-.detail-pageview {
+.current-notice-browse-num {
   display: flex;
   justify-content: flex-end;
   align-items: center;
@@ -539,7 +490,7 @@ const handleTimeLimit = async () => {
   letter-spacing: 1.28px;
 }
 
-.to-all {
+.deliver-to-all-icon {
   display: flex;
   justify-content: flex-end;
   align-items: center;
@@ -559,13 +510,13 @@ const handleTimeLimit = async () => {
   box-shadow: 2px 3px 4px 1px rgba(142, 142, 142, 0.17);
 }
 
-.deleteWaing-icon {
+.warning-icon {
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
-.deleteWaing-icon img {
+.warning-icon img {
   display: inline-block;
   margin-right: 12px;
   width: 32px;
@@ -586,10 +537,6 @@ const handleTimeLimit = async () => {
   background-color: #8a8ea8;
 }
 // 对话框样式修改
-:deep(.el-dialog) {
-  --el-dialog-margin-top: 30vh;
-}
-
 :deep(.el-dialog__body) {
   display: flex;
   flex-direction: column;
@@ -616,7 +563,7 @@ const handleTimeLimit = async () => {
 }
 
 // 消息提示框
-.alert-box {
+.toast {
   position: absolute;
   top: 30%;
   left: 30%;
@@ -627,13 +574,13 @@ const handleTimeLimit = async () => {
   box-shadow: 0px 2px 8.1px 6px rgba(161, 166, 201, 0.35);
   background-color: #2f3367;
 }
-.alert-box .content {
+.toast .message-item-content {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
 }
-.alert-box p {
+.toast p {
   margin: 16px;
   color: #fff;
   font-family: Inter;
@@ -644,7 +591,29 @@ const handleTimeLimit = async () => {
   letter-spacing: 1.28px;
 }
 
-.activeClass {
+.active-message-item {
   background-color: #fafafa;
+}
+
+.select-time {
+  width: 120px;
+  margin: 5px 0 0;
+}
+
+.select-type {
+  width: 150px;
+  margin: 5px 0 0;
+}
+
+.main-wrapper {
+  padding: 0 10px 0 20px;
+}
+
+.user-icon {
+  font-size: 1.5rem;
+}
+
+.icon-gap {
+  padding-left: 5px;
 }
 </style>
