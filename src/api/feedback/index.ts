@@ -1,4 +1,4 @@
-import { FeedBack, ReplyInfo } from '@/types/feedback'
+import { IFeedBack, ReplyInfoReq } from '@/types/feedback'
 import http from '@/utils/request'
 
 /**
@@ -9,7 +9,7 @@ import http from '@/utils/request'
  * @param type 反馈类型，传0查所有
  */
 export const fetchAllFeedBacks = (offset: number, limit: number, state: number, type = 0) => {
-  return http<FeedBack>({
+  return http<IFeedBack>({
     url: '/feedback',
     method: 'GET',
     params: {
@@ -45,12 +45,10 @@ export const changeStateToRead = (feedbackId: number, state: number) => {
  * @param userIds 选中的用户id列表，userId=1的时候需要传
  * @returns
  */
-export const replyUser = (params: ReplyInfo) => {
+export const replyUser = (params: ReplyInfoReq) => {
   return http({
     url: `/notice/sys/feedback`,
     method: 'POST',
-    data: {
-      ...params
-    }
+    data: params
   })
 }

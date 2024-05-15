@@ -1,5 +1,5 @@
 import { fetchAllFeedBacks, replyUser, changeStateToRead } from '@/api/feedback'
-import { FeedBack, ReplyInfo } from '@/types/feedback'
+import { IFeedBack, ReplyInfoReq } from '@/types/feedback'
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 
@@ -14,7 +14,7 @@ export const useFeedBackStore = defineStore('feedback', () => {
   }
 
   //基本数据
-  const allFeedBack = ref<FeedBack>({
+  const allFeedBack = ref<IFeedBack>({
     current: 0,
     pages: 0,
     records: [],
@@ -23,7 +23,7 @@ export const useFeedBackStore = defineStore('feedback', () => {
   })
 
   //储存已读基本信息
-  const readFeedBacks = ref<FeedBack>({
+  const readFeedBacks = ref<IFeedBack>({
     current: 0,
     pages: 0,
     records: [],
@@ -32,7 +32,7 @@ export const useFeedBackStore = defineStore('feedback', () => {
   })
 
   //储存未读基本信息
-  const unReadFeedBacks = ref<FeedBack>({
+  const unReadFeedBacks = ref<IFeedBack>({
     current: 0,
     pages: 0,
     records: [],
@@ -94,11 +94,6 @@ export const useFeedBackStore = defineStore('feedback', () => {
     refreshAllFeedBacks()
   }
 
-  // 回复用户
-  const replyToUser = async (context: ReplyInfo) => {
-    await replyUser(context)
-  }
-
   return {
     allFeedBack,
     readFeedBacks,
@@ -110,7 +105,6 @@ export const useFeedBackStore = defineStore('feedback', () => {
     getReadFeedbacks,
     refreshAllFeedBacks,
     refreshReadFeedbacks,
-    replyToUser,
     refreshUnReadFeedbacks
   }
 })

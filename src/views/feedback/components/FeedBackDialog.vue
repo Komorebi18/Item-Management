@@ -1,5 +1,5 @@
 <template>
-  <el-dialog v-model="dialogTableVisible">
+  <el-dialog v-model="isShowDialog">
     <span class="dialogTableVisible-title">反馈内容</span>
     <el-card class="feedback-card">
       <div class="feedback-image-preview">
@@ -26,65 +26,63 @@
           placeholder="请输入回复内容"
         />
         <div class="dialogCard-btn">
-          <el-button @click="OnCancelMsg">取消</el-button>
-          <el-button type="primary" @click="OnHandleMsg">发送</el-button>
+          <el-button @click="closeDialog">取消</el-button>
+          <el-button type="primary" @click="onHandleMsg">发送</el-button>
         </div>
       </template>
     </el-card>
   </el-dialog>
 </template>
 <script setup lang="ts">
-import { FeedBackInfo, ReplyInfo } from '@/types/feedback'
+import { ReplyInfoReq, IFeedBackInfo } from '@/types/feedback'
 import { ref, defineExpose } from 'vue'
 import { ElMessage } from 'element-plus'
 import { useFeedBackStore } from '@/store'
 const feedBackStore = useFeedBackStore()
-const { replyToUser, updateStateReply } = feedBackStore
+const { updateStateReply } = feedBackStore
 //打开反馈
-const dialogTableVisible = ref(false)
+const isShowDialog = ref<boolean>(false)
 
 //反馈内容
-const feedBackContent = ref('')
+const feedBackContent = ref<string>('')
 
 // 接受参数
-const { currentFeedBack, replyMsg } = defineProps<{
-  currentFeedBack: FeedBackInfo | undefined
-  replyMsg: ReplyInfo
+const props = defineProps<{
+  currentFeedBack: IFeedBackInfo | undefined
+  replyMsg: ReplyInfoReq
 }>()
-console.log(currentFeedBack)
 
+// 子掉父
+const emit = defineEmits<{
+  (e: 'onReplyToUser', replyMsg: ReplyInfoReq): void
+}>()
 // 关闭对话框
 const closeDialog = () => {
-  dialogTableVisible.value = false
+  isShowDialog.value = false
   // 清空 textarea 内容
   feedBackContent.value = ''
 }
 
 // 打开对话框
 const openDialog = () => {
-  dialogTableVisible.value = true
+  isShowDialog.value = true
 }
 
 // 回复消息
-const OnHandleMsg = async () => {
-  if (feedBackContent.value === '') {
-    ElMessage.warning('回复内容不能为空')
-  } else {
-    Object.assign(replyMsg, {
-      content: feedBackContent.value,
-      userIds: [currentFeedBack?.userId]
-    })
-    await replyToUser(replyMsg)
-    // 将状态更新为已读已更新
-    await updateStateReply(currentFeedBack?.feedbackId as number)
-    // 关闭对话框
-    closeDialog()
-    ElMessage.success('回复成功')
-  }
-}
-// 取消发送
-const OnCancelMsg = () => {
+const onHandleMsg = async () => {
+  if (feedBackContent.value === '') return ElMessage.warning('回复内容不能为空')
+  console.log(props.currentFeedBack?.userId)
+
+  Object.assign(props.replyMsg, {
+    content: feedBackContent.value,
+    userIds: [props.currentFeedBack?.userId]
+  })
+  emit('onReplyToUser', props.replyMsg)
+  // 将状态更新为已读已更新
+  await updateStateReply(props.currentFeedBack?.feedbackId as number)
+  // 关闭对话框
   closeDialog()
+  ElMessage.success('回复成功')
 }
 
 // 向父组件暴露打开对话框方法

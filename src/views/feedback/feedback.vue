@@ -7,85 +7,56 @@
           <el-tab-pane :label="`全部(${allFeedBack.total})`" :name="TAB.ALL">
             <!-- 全部 -->
             <FeedBackTable
-              :tableData="allFeedBack.records"
+              :tableData="allFeedBack"
               @replyQuick="onReplyQuick"
               @viewDetail="onViewDetail"
+              @changePage="onChangeAllPage"
             />
           </el-tab-pane>
           <el-tab-pane :label="`已查看(${readFeedBacks.total})`" :name="TAB.READ">
             <!--已查看 -->
             <FeedBackTable
-              :tableData="readFeedBacks.records"
+              :tableData="readFeedBacks"
               @replyQuick="onReplyQuick"
               @viewDetail="onViewDetail"
+              @changePage="onChangeReadPage"
             />
           </el-tab-pane>
           <el-tab-pane :label="`未查看(${unReadFeedBacks.total})`" :name="TAB.UNREAD">
             <!-- 未查看 -->
             <FeedBackTable
-              :tableData="unReadFeedBacks.records"
+              :tableData="unReadFeedBacks"
               @replyQuick="onReplyQuick"
               @viewDetail="onViewDetail"
+              @changePage="onChangeUnReadPage"
             />
           </el-tab-pane>
         </el-tabs>
       </el-card>
     </div>
     <!-- 对话框 -->
-    <FeedBackDiag ref="FeedBackDiagRef" :currentFeedBack="currentFeedBack" :replyMsg="replyMsg" />
-    <!-- 全部 pagination -->
-    <pagination
-      v-show="currentTab === TAB.ALL"
-      :total="allFeedBack.total"
-      :page="allFeedBack.current"
-      :limit="allFeedBack.size"
-      @pagination="onChangeAllPage"
-      class="pagination_feedBack"
-    />
-    <!-- 已读 pagination -->
-    <pagination
-      v-show="currentTab === TAB.READ"
-      :total="readFeedBacks.total"
-      :page="readFeedBacks.current"
-      :limit="readFeedBacks.size"
-      @pagination="onChangeReadPage"
-      class="pagination_feedBack"
-    />
-    <!-- 未读 pagination -->
-    <pagination
-      v-show="currentTab === TAB.UNREAD"
-      :total="unReadFeedBacks.total"
-      :page="unReadFeedBacks.current"
-      :limit="readFeedBacks.size"
-      @pagination="onChangeUnReadPage"
-      class="pagination_feedBack"
+    <FeedBackDialog
+      ref="feedBackDiagRef"
+      :currentFeedBack="currentFeedBack"
+      :replyMsg="replyMsg"
+      @onReplyToUser="replyToUser"
     />
   </div>
 </template>
-
 <script lang="ts" setup>
+// 回复用户
+
 import { ref, onMounted, computed } from 'vue'
 import { type TabsPaneContext } from 'element-plus'
 import { useFeedBackStore } from '@/store/modules/feedback'
 
 import { pageInfo } from '@/types/pageMessage'
-import { ReplyInfo } from '@/types/feedback'
+import { ReplyInfoReq } from '@/types/feedback'
 import { storeToRefs } from 'pinia'
 import FeedBackTable from './components/FeedBackTable.vue'
-import FeedBackDiag from './components/FeedBackDiag.vue'
-const enum TAB {
-  /**全部 */
-  ALL,
-  /**已查看 */
-  READ,
-  /**未查看 */
-  UNREAD
-}
-// 页数
-const PAGE_SIZE = 10
-
-// 偏移量
-const PAGE_OFFSET = 0
+import FeedBackDialog from './components/FeedBackDialog.vue'
+import { TAB } from '@/enums/Feedback'
+import { replyUser } from '@/api/feedback'
 
 // 回复标题
 const TITLE = '收到反馈'
@@ -98,9 +69,8 @@ const {
   getUnReadFeedbacks,
   getAllFeedBacks,
   getReadFeedbacks,
-  updateStateToRead,
-  replyToUser,
   updateStateReply,
+  updateStateToRead,
   refreshAllFeedBacks,
   refreshReadFeedbacks,
   refreshUnReadFeedbacks
@@ -108,13 +78,13 @@ const {
 const { allFeedBack, readFeedBacks, unReadFeedBacks } = storeToRefs(feedBackStore)
 
 // 当前Tab状态
-const currentTab = ref(TAB.ALL)
+const currentTab = ref<TAB>(TAB.ALL)
 
 // 当前行的feedBackId
-const currentFeedbackId = ref()
+const currentFeedbackId = ref<number>()
 
 // 获取对话框组件
-const FeedBackDiagRef = ref<InstanceType<typeof FeedBackDiag>>()
+const feedBackDiagRef = ref<InstanceType<typeof FeedBackDialog>>()
 
 // 获取当前行的反馈信息
 const currentFeedBack = computed(() => {
@@ -122,7 +92,7 @@ const currentFeedBack = computed(() => {
 })
 
 // 快捷回复消息
-const replyMsg = ref<ReplyInfo>({
+const replyMsg = ref<ReplyInfoReq>({
   title: TITLE,
   content: DEFUALT_CONTENT,
   userId: 1,
@@ -144,9 +114,9 @@ const onClickTab = async (tab: TabsPaneContext) => {
 }
 
 //点击打开详情
-const onViewDetail = async (feedbackId: number) => {
+const onViewDetail = (feedbackId: number) => {
   // 控制详情页显示
-  FeedBackDiagRef.value?.openDialog()
+  feedBackDiagRef.value?.openDialog()
 
   // 纪录当前行 feedBackID
   currentFeedbackId.value = feedbackId
@@ -154,7 +124,7 @@ const onViewDetail = async (feedbackId: number) => {
   // 判断是否已读
   if (currentFeedBack.value?.state === 0) {
     // 将未读设置为已读并刷新数据
-    await updateStateToRead(feedbackId)
+    updateStateToRead(feedbackId)
   }
 }
 
@@ -170,39 +140,37 @@ const onReplyQuick = async (userId: number, feedbackId: number) => {
   updateStateReply(feedbackId)
 }
 
+// 回复用户
+const replyToUser = async (context: ReplyInfoReq) => {
+  await replyUser(context)
+}
 // 初次加载获取数据
 onMounted(() => {
-  getReadFeedbacks(PAGE_OFFSET, PAGE_SIZE)
+  getReadFeedbacks(0, 10)
 
-  getUnReadFeedbacks(PAGE_OFFSET, PAGE_SIZE)
+  getUnReadFeedbacks(0, 10)
 
-  getAllFeedBacks(PAGE_OFFSET, PAGE_SIZE)
+  getAllFeedBacks(0, 10)
 })
 
-const onChangeAllPage = async (pageMessage: pageInfo) => {
-  await getAllFeedBacks(pageMessage.currentPage, pageMessage.pageLimit)
+const onChangeAllPage = (pageMessage: pageInfo) => {
+  getAllFeedBacks(pageMessage.currentPage, pageMessage.pageLimit)
 }
 
 const onChangeReadPage = async (pageMessage: pageInfo) => {
-  await getReadFeedbacks(pageMessage.currentPage, pageMessage.pageLimit)
+  getReadFeedbacks(pageMessage.currentPage, pageMessage.pageLimit)
 }
 
 const onChangeUnReadPage = async (pageMessage: pageInfo) => {
-  await getUnReadFeedbacks(pageMessage.currentPage, pageMessage.pageLimit)
+  getUnReadFeedbacks(pageMessage.currentPage, pageMessage.pageLimit)
 }
 </script>
 
 <style scoped lang="scss">
-.text {
-  font-size: 14px;
-}
-
-.el-card {
+.feedback-card {
   margin: 14px 14px 14px 14px;
 }
-// .el-button {
-//   padding-right: 20px;
-// }
+
 .feedback-viewDetails {
   display: flex;
   flex-direction: row;
@@ -250,7 +218,6 @@ const onChangeUnReadPage = async (pageMessage: pageInfo) => {
   font-weight: 400;
   line-height: normal;
 }
-
 .pagination_feedBack {
   display: flex;
   justify-content: center;

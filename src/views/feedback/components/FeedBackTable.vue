@@ -1,5 +1,5 @@
 <template>
-  <el-table :data="tableData" style="width: 100%">
+  <el-table :data="prop.tableData.records" style="width: 100%">
     <el-table-column prop="username" label="用户名" align="center" />
     <el-table-column prop="uuid" label="用户id" align="center" />
     <el-table-column :formatter="formatType" prop="type" label="用户反馈" align="center" />
@@ -8,11 +8,12 @@
     <el-table-column class="feedback-operationBtn" label="操作" align="center" v-slot="scope">
       <div class="feedback-viewDetails">
         <el-button
+          class="btn"
           v-show="!(scope.row.state === 2)"
           @click="OnReplyQuick(scope.row.userId, scope.row.feedbackId)"
           >快捷回复</el-button
         >
-        <el-button v-show="scope.row.state === 2">已回复</el-button>
+        <el-button class="btn" v-show="scope.row.state === 2">已回复</el-button>
         <a
           href="javascript:void(0);"
           class="feedback-viewDetails-btn"
@@ -22,38 +23,25 @@
       </div>
     </el-table-column>
   </el-table>
+  <!-- 全部 pagination -->
+  <Pagination
+    :total="tableData.total"
+    :page="tableData.current"
+    :limit="tableData.size"
+    @pagination="onChangePage"
+    class="pagination_feedBack"
+  />
 </template>
 <script setup lang="ts">
-import { FeedBackInfo } from '@/types/feedback'
-import { ref, reactive } from 'vue'
+import { STATE_TYPE } from '@/enums/Feedback'
+import { IFeedBack } from '@/types/feedback'
+import { pageInfo } from '@/types/pageMessage'
 
-const enum STATE_TYPE {
-  /**未读 */
-  UNREAD = '未读',
-  /**已读 */
-  READ = '已读',
-  /**已读已回复 */
-  REPLY = '已读已回复'
-}
-
-const enum FACEBACK_TYPE {
-  /**无法打开小程序 */
-  CANNOT_OPEN_MINI_PROGRAM = '无法打开小程序',
-  /**小程序闪退 */
-  MINI_PROGRAM_FLASH_BACK = '小程序闪退',
-  /**页面加载慢 */
-  PAGE_LOAD_SLOW = '页面加载慢',
-  /**其他异常 */
-  OTHER_EXCEPTION = '其他异常',
-  /**产品开发建议 */
-  PRODUCT_DEVELOPMENT_SUGGESTIONS = '产品开发建议',
-  /**意见反馈 */
-  FEEDBACK = '意见反馈'
-}
 // 子掉父
 const emit = defineEmits<{
   (e: 'replyQuick', userId: number, feedbackId: number): void
   (e: 'viewDetail', feedbackId: number): void
+  (e: 'changePage', pageMessage: pageInfo): void
 }>()
 
 const OnReplyQuick = (userId: number, feedbackId: number) => {
@@ -64,32 +52,30 @@ const OnViewDetail = (feedbackId: number) => {
   emit('viewDetail', feedbackId)
 }
 // 接受参数
-const { tableData } = defineProps<{
-  tableData: FeedBackInfo[]
+const prop = defineProps<{
+  tableData: IFeedBack
 }>()
 
 // 格式化反馈内容
-const formatType = (value: any) => {
-  const { type } = value
+const formatType = ({ type }: { type: number }) => {
   switch (type) {
     case 1:
-      return FACEBACK_TYPE.CANNOT_OPEN_MINI_PROGRAM
+      return '无法打开小程序'
     case 2:
-      return FACEBACK_TYPE.MINI_PROGRAM_FLASH_BACK
+      return '小程序闪退'
     case 3:
-      return FACEBACK_TYPE.PAGE_LOAD_SLOW
+      return '页面加载慢'
     case 4:
-      return FACEBACK_TYPE.OTHER_EXCEPTION
+      return '其他异常'
     case 5:
-      return FACEBACK_TYPE.PRODUCT_DEVELOPMENT_SUGGESTIONS
+      return '产品开发建议'
     default:
-      return FACEBACK_TYPE.FEEDBACK
+      return '意见反馈'
   }
 }
 
 //格式化状态
-const formatState = (value: any) => {
-  const { state } = value
+const formatState = ({ state }: { state: number }) => {
   switch (state) {
     case 0:
       return STATE_TYPE.UNREAD
@@ -100,6 +86,11 @@ const formatState = (value: any) => {
     default:
       return STATE_TYPE.UNREAD
   }
+}
+
+// 点击页数改变
+const onChangePage = (pageMessage: pageInfo) => {
+  emit('changePage', pageMessage)
 }
 </script>
 <style lang="scss" scoped>
@@ -112,7 +103,12 @@ const formatState = (value: any) => {
     text-decoration: underline;
   }
 }
-.el-button {
+.btn {
   margin-right: 20px;
+}
+.pagination_feedBack {
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 </style>

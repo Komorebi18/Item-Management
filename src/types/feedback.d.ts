@@ -1,13 +1,5 @@
-import { Common } from './login.d'
-// 基本类型
-// export interface Common<T> {
-//   code: number
-//   msg: string
-//   data: T
-// }
-
 // 用户反馈基本类型
-export interface FeedBack {
+export interface IFeedBack {
   /**
    *当前页
    */
@@ -24,11 +16,11 @@ export interface FeedBack {
    * 总页数
    */
   pages: number
-  records: FeedBackInfo[]
+  records: IFeedBackInfo[]
 }
 
 // 用户反馈类型
-export interface FeedBackInfo {
+export interface IFeedBackInfo {
   /**
    * 反馈Id
    */
@@ -76,7 +68,7 @@ export interface FeedBackInfo {
   /**
    * (0未读1已读2已读已回复)
    */
-  state: number
+  state: enum
   /**
    * 版本号
    */
@@ -84,7 +76,7 @@ export interface FeedBackInfo {
 }
 
 // 回复类型
-export interface ReplyInfo {
+export interface ReplyInfoReq {
   /**
    * 系统通知标题
    */
@@ -97,11 +89,11 @@ export interface ReplyInfo {
   /**
    * 系统通知目标用户id( 广播传-1，分组传0，发给用户传1)
    */
-  userId: number
+  userId: enum
   /**
    * 分组对应的id(不是分组发送传0)
    */
-  groupId: number
+  groupId: enum
   /**
    * 通知类型id 传1
    */
@@ -111,11 +103,3 @@ export interface ReplyInfo {
    */
   userIds: number[]
 }
-// export const enum TAB {
-//   /**全部 */
-//   ALL,
-//   /**已查看 */
-//   READ,
-//   /**未查看 */
-//   UNREAD
-// }
