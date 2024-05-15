@@ -35,12 +35,7 @@
       </el-card>
     </div>
     <!-- 对话框 -->
-    <FeedBackDialog
-      ref="feedBackDiagRef"
-      :currentFeedBack="currentFeedBack"
-      :replyMsg="replyMsg"
-      @onReplyToUser="replyToUser"
-    />
+    <FeedBackDialog ref="feedBackDiagRef" :currentFeedBack="currentFeedBack" />
   </div>
 </template>
 <script lang="ts" setup>
@@ -49,20 +44,13 @@
 import { ref, onMounted, computed } from 'vue'
 import { type TabsPaneContext } from 'element-plus'
 import { useFeedBackStore } from '@/store/modules/feedback'
-
 import { pageInfo } from '@/types/pageMessage'
-import { ReplyInfoReq } from '@/types/feedback'
 import { storeToRefs } from 'pinia'
 import FeedBackTable from './components/FeedBackTable.vue'
 import FeedBackDialog from './components/FeedBackDialog.vue'
 import { TAB } from '@/enums/Feedback'
 import { replyUser } from '@/api/feedback'
-
-// 回复标题
-const TITLE = '收到反馈'
-
-// 默认回复内容
-const DEFUALT_CONTENT = '感谢您的反馈！我们非常重视您提供的信息，我们会尽快处理并采取适当的措施。'
+import { replyMsg } from './constants'
 
 const feedBackStore = useFeedBackStore()
 const {
@@ -89,16 +77,6 @@ const feedBackDiagRef = ref<InstanceType<typeof FeedBackDialog>>()
 // 获取当前行的反馈信息
 const currentFeedBack = computed(() => {
   return allFeedBack.value.records.find((item) => item.feedbackId === currentFeedbackId.value)
-})
-
-// 快捷回复消息
-const replyMsg = ref<ReplyInfoReq>({
-  title: TITLE,
-  content: DEFUALT_CONTENT,
-  userId: 1,
-  userIds: [],
-  groupId: 0,
-  typeId: 1
 })
 
 // 切换tab 栏
@@ -134,16 +112,12 @@ const onReplyQuick = async (userId: number, feedbackId: number) => {
   Object.assign(replyMsg.value, { userIds: [userId] })
 
   // 发送回复消息
-  await replyToUser(replyMsg.value)
+  await replyUser(replyMsg.value)
 
   // 发送更改消息状态，刷新已读和未读
   updateStateReply(feedbackId)
 }
 
-// 回复用户
-const replyToUser = async (context: ReplyInfoReq) => {
-  await replyUser(context)
-}
 // 初次加载获取数据
 onMounted(() => {
   getReadFeedbacks(0, 10)
@@ -179,9 +153,6 @@ const onChangeUnReadPage = async (pageMessage: pageInfo) => {
   .feedback-viewDetails-btn {
     text-decoration: underline;
   }
-}
-.el-button {
-  margin-right: 20px;
 }
 .card_img {
   width: 234px;

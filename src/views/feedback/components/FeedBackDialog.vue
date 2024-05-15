@@ -34,10 +34,12 @@
   </el-dialog>
 </template>
 <script setup lang="ts">
-import { ReplyInfoReq, IFeedBackInfo } from '@/types/feedback'
+import { IFeedBackInfo } from '@/types/feedback'
 import { ref, defineExpose } from 'vue'
 import { ElMessage } from 'element-plus'
 import { useFeedBackStore } from '@/store'
+import { replyUser } from '@/api/feedback'
+import { replyMsg } from '../constants'
 const feedBackStore = useFeedBackStore()
 const { updateStateReply } = feedBackStore
 //打开反馈
@@ -49,13 +51,8 @@ const feedBackContent = ref<string>('')
 // 接受参数
 const props = defineProps<{
   currentFeedBack: IFeedBackInfo | undefined
-  replyMsg: ReplyInfoReq
 }>()
 
-// 子掉父
-const emit = defineEmits<{
-  (e: 'onReplyToUser', replyMsg: ReplyInfoReq): void
-}>()
 // 关闭对话框
 const closeDialog = () => {
   isShowDialog.value = false
@@ -71,13 +68,13 @@ const openDialog = () => {
 // 回复消息
 const onHandleMsg = async () => {
   if (feedBackContent.value === '') return ElMessage.warning('回复内容不能为空')
-  console.log(props.currentFeedBack?.userId)
 
-  Object.assign(props.replyMsg, {
+  Object.assign(replyMsg.value, {
     content: feedBackContent.value,
     userIds: [props.currentFeedBack?.userId]
   })
-  emit('onReplyToUser', props.replyMsg)
+
+  await replyUser(replyMsg.value)
   // 将状态更新为已读已更新
   await updateStateReply(props.currentFeedBack?.feedbackId as number)
   // 关闭对话框
