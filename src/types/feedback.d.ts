@@ -1,13 +1,5 @@
-import { Common } from './login.d'
-// 基本类型
-// export interface Common<T> {
-//   code: number
-//   msg: string
-//   data: T
-// }
-
 // 用户反馈基本类型
-export interface FeedBack {
+export interface IFeedBack {
   /**
    *当前页
    */
@@ -24,11 +16,11 @@ export interface FeedBack {
    * 总页数
    */
   pages: number
-  records: FeedBackInfo[]
+  records: IFeedBackInfo[]
 }
 
 // 用户反馈类型
-export interface FeedBackInfo {
+export interface IFeedBackInfo {
   /**
    * 反馈Id
    */
@@ -74,22 +66,40 @@ export interface FeedBackInfo {
    */
   type: number
   /**
-   * 是否已读( 0 未读 1 已读)
+   * (0未读1已读2已读已回复)
    */
-  state: string
+  state: enum
   /**
    * 版本号
    */
   version: string
 }
 
-/**
- * 回复类型
- */
-export interface ReplyInfo {
+// 回复类型
+export interface ReplyInfoReq {
+  /**
+   * 系统通知标题
+   */
   title: string
+  /**
+   * 系统通知主体内容
+
+   */
   content: string
-  userId: number
-  groupId: number
+  /**
+   * 系统通知目标用户id( 广播传-1，分组传0，发给用户传1)
+   */
+  userId: enum
+  /**
+   * 分组对应的id(不是分组发送传0)
+   */
+  groupId: enum
+  /**
+   * 通知类型id 传1
+   */
   typeId: number
+  /**
+   * 选中的用户id列表，userId=1的时候需要传
+   */
+  userIds: number[]
 }
