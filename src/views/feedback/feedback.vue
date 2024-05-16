@@ -50,7 +50,7 @@ import FeedBackTable from './components/FeedBackTable.vue'
 import FeedBackDialog from './components/FeedBackDialog.vue'
 import { TAB } from '@/enums/Feedback'
 import { replyUser } from '@/api/feedback'
-import { replyMsg } from './constants'
+import { DEFAULT_REPLY_MSG } from './constants'
 
 const feedBackStore = useFeedBackStore()
 const {
@@ -108,11 +108,11 @@ const onViewDetail = (feedbackId: number) => {
 
 // 按钮逻辑
 const onReplyQuick = async (userId: number, feedbackId: number) => {
-  // 合并对象，更新最新数据
-  Object.assign(replyMsg.value, { userIds: [userId] })
-
   // 发送回复消息
-  await replyUser(replyMsg.value)
+  await replyUser({
+    ...DEFAULT_REPLY_MSG,
+    userIds: [userId]
+  })
 
   // 发送更改消息状态，刷新已读和未读
   updateStateReply(feedbackId)

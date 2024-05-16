@@ -39,7 +39,7 @@ import { ref, defineExpose } from 'vue'
 import { ElMessage } from 'element-plus'
 import { useFeedBackStore } from '@/store'
 import { replyUser } from '@/api/feedback'
-import { replyMsg } from '../constants'
+import { DEFAULT_REPLY_MSG } from '../constants'
 const feedBackStore = useFeedBackStore()
 const { updateStateReply } = feedBackStore
 //打开反馈
@@ -67,14 +67,16 @@ const openDialog = () => {
 
 // 回复消息
 const onHandleMsg = async () => {
-  if (feedBackContent.value === '') return ElMessage.warning('回复内容不能为空')
+  if (feedBackContent.value === '') {
+    ElMessage.warning('回复内容不能为空')
+    return
+  }
 
-  Object.assign(replyMsg.value, {
+  await replyUser({
+    ...DEFAULT_REPLY_MSG,
     content: feedBackContent.value,
-    userIds: [props.currentFeedBack?.userId]
+    userIds: [props.currentFeedBack?.userId] as number[]
   })
-
-  await replyUser(replyMsg.value)
   // 将状态更新为已读已更新
   await updateStateReply(props.currentFeedBack?.feedbackId as number)
   // 关闭对话框
