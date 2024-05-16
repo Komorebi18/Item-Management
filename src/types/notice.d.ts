@@ -81,7 +81,7 @@ export interface INoticeItem {
    */
   userIds: number[]
   /**
-   * 用户名列表，userid=1时有效
+   * 用户名列表，userId=1时有效
    */
   usernames: string[]
 }
@@ -98,16 +98,4 @@ export interface INoticeType {
    * 通知类型名称
    */
   typeName: string
-}
-
-// 时间变量
-export const enum TIME {
-  /** 全部 */
-  ALL,
-  /** 近三天 */
-  THREE_DAYS,
-  /** 近一个周 */
-  ONE_WEEK,
-  /** 近一个月 */
-  ONE_MONTH
 }

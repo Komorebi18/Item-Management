@@ -1,7 +1,7 @@
 /**
  * 用户信息
  */
-export interface pageInfo {
+export interface IPageInfo {
   /**
    * 当前页码
    */

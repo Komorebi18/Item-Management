@@ -10,10 +10,10 @@
           class="select-time"
           @change="onChangeLimit()"
         >
-          <el-option label="全部" :value="TIME.ALL" />
-          <el-option label="近三天" :value="TIME.THREE_DAYS" />
-          <el-option label="近一周" :value="TIME.ONE_WEEK" />
-          <el-option label="近一月" :value="TIME.ONE_MONTH" />
+          <el-option label="全部" :value="TIME_LIMIT.ALL" />
+          <el-option label="近三天" :value="TIME_LIMIT.THREE_DAYS" />
+          <el-option label="近一周" :value="TIME_LIMIT.ONE_WEEK" />
+          <el-option label="近一月" :value="TIME_LIMIT.ONE_MONTH" />
         </el-select>
         <el-select
           v-if="props.isShowTypeSelection"
@@ -51,34 +51,44 @@ import { ref, onMounted } from 'vue'
 import { storeToRefs } from 'pinia'
 import { Search } from '@element-plus/icons-vue'
 import { useNoticeStore } from '@/store/modules/notice/index'
-import { TIME } from '@/constants/notice'
+
+// 时间限制变量
+const enum TIME_LIMIT {
+  /** 全部 */
+  ALL,
+  /** 近三天 */
+  THREE_DAYS,
+  /** 近一个周 */
+  ONE_WEEK,
+  /** 近一个月 */
+  ONE_MONTH
+}
 
 const noticeStore = useNoticeStore()
 const { noticeTypeList } = storeToRefs(noticeStore)
 
-const emit = defineEmits(['search', 'updateLimit'])
+const emit = defineEmits<{
+  // 搜索通知
+  search: [keyWord: string]
+  // 更新通知时间/类型限制
+  updateLimit: [timeLimit: number, typeLimit: number]
+}>()
 
-const props = defineProps({
+const props = defineProps<{
   // 是否展示时间筛选下拉框
-  isShowTimeSelection: {
-    type: Boolean,
-    default: false
-  },
+  isShowTimeSelection: boolean
   // 是否展示类型筛选下拉框
-  isShowTypeSelection: {
-    type: Boolean,
-    default: false
-  }
-})
+  isShowTypeSelection: boolean
+}>()
 
 // 时间参数
-let timeLimit = ref(TIME.ALL)
+const timeLimit = ref(TIME_LIMIT.ALL)
 
 // 类型参数
-let typeLimit = ref(0)
+const typeLimit = ref(0)
 
 // 搜索框关键词
-let searchKeyword = ref('')
+const searchKeyword = ref('')
 
 // 获取通知类型
 onMounted(async () => {
@@ -128,7 +138,7 @@ const onChangeLimit = () => {
 .select-box {
   display: flex;
   justify-content: space-between;
-  width: 15vw;
+  width: 13vw;
   border: none;
 }
 
@@ -138,7 +148,7 @@ const onChangeLimit = () => {
 }
 
 .select-time {
-  width: 120px;
+  width: 100px;
   margin: 5px 0 0;
 }
 
@@ -149,6 +159,10 @@ const onChangeLimit = () => {
 
 :deep(.el-input__wrapper) {
   border-radius: 4px 0 0 4px;
+}
+
+:deep(.select-box .el-select__wrapper) {
+  box-shadow: none !important;
 }
 
 .search-btn {

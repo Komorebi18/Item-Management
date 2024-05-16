@@ -1,134 +1,115 @@
 <template>
   <div>
     <div class="message-box">
-      <div class="content">
+      <div class="message-detail">
         <el-input
           placeholder="请在这里输入标题"
           v-model="messageTitle"
           type="text"
-          :disabled="state === '1'"
-          style="font-size: 1.3rem; margin-bottom: 5px"
+          :disabled="isViewingState"
+          class="message-title"
         />
-        <p style="height: 1px; width: 100%; background-color: #d9d9d9; margin-bottom: 15px"></p>
+        <p class="parting-line"></p>
         <el-input
-          v-model="messageText"
+          v-model="messageContent"
           placeholder="请在这里输入正文"
           type="textarea"
-          :disabled="state === '1'"
+          :disabled="isViewingState"
           :resize="'none'"
           class="main-text"
         />
       </div>
       <div class="footer">
-        <p style="margin: 20px 36px">正文共 {{ messageText.length }} 字</p>
-        <div class="button">
-          <el-button @click="setDraft" v-if="state !== '1'">保存为草稿</el-button>
-          <el-button @click="showDeliverBox = true" v-if="state !== '1'">发布</el-button>
+        <p class="word-count">正文共 {{ messageContent.length }} 字</p>
+        <div class="button" v-if="!isViewingState">
+          <el-button @click="setDraft">保存为草稿</el-button>
+          <el-button @click="showDeliverBox = true">发布</el-button>
         </div>
       </div>
     </div>
     <!-- 提示框 -->
     <!-- 暂存草稿提示 -->
-    <div class="alert-box" v-show="showAlertBox">
-      <div class="alert-content">
-        <div style="margin: 15px 0">
-          <p v-if="isDeliverAlert" style="margin-bottom: 5px">发布成功</p>
-          <p :class="{ fontSize: isDeliverAlert === false }">
-            {{ isDeliverAlert ? '请等待管理员审核' : '已保存草稿' }}
-          </p>
-        </div>
-        <img src="../../assets/icons/delete-confirm.svg" />
-      </div>
-    </div>
+    <Toast ref="toastRef" :prompt-message="toastMessage" />
     <!-- 发布对话框 -->
     <el-dialog v-model="showDeliverBox" width="30vw" center title="发送通知">
       <div class="select-box">
+        <div>
+          <span>选择通知类型</span>
+          <el-select v-model="typeId" placeholder="请选择通知类型" class="select-notice-type">
+            <el-option
+              v-for="tag in noticeStore.noticeTypeList"
+              :key="tag.typeId"
+              :label="tag.typeName"
+              :value="tag.typeId"
+            />
+          </el-select>
+        </div>
         <div :class="{ activeFont: isDeliverAll === true }">
           <span>发给所有用户</span>
-          <el-switch
-            v-model="isDeliverAll"
-            class="ml-2"
-            style="--el-switch-on-color: #2f3367; --el-switch-off-color: #8a8ea8"
-          />
+          <el-switch v-model="isDeliverAll" class="deliver-switch" />
         </div>
         <div :class="{ activeFont: isDeliverGroup === true }">
           <span>分组发送通知</span>
-          <el-switch
-            v-model="isDeliverGroup"
-            class="ml-2"
-            style="--el-switch-on-color: #2f3367; --el-switch-off-color: #8a8ea8"
-          />
+          <el-switch v-model="isDeliverGroup" class="deliver-switch" />
         </div>
         <div class="select-detail" v-if="isDeliverGroup">
-          <el-select
-            v-model="tagLimit"
-            placeholder="全部标签"
-            style="width: 100px; margin: 5px 0 0"
-          >
-            <el-option key="4" label="全部" value="item4" />
-            <el-option key="1" label="近三天" value="item1" />
-            <el-option key="2" label="近一周" value="item2" />
-            <el-option key="3" label="近一月" value="item3" />
-          </el-select>
-          <el-select
-            v-model="blacklistUserLimit"
-            placeholder="黑名单用户"
-            style="width: 115px; margin: 5px 0 0"
-          >
-            <el-option key="4" label="全部" value="item4" />
-            <el-option key="1" label="近三天" value="item1" />
-            <el-option key="2" label="近一周" value="item2" />
-            <el-option key="3" label="近一月" value="item3" />
+          <el-select v-model="groupId" placeholder="请选择分组" class="select-notice-group">
+            <el-option
+              v-for="group in userStore.userGroupList"
+              :key="group.groupId"
+              :label="group.groupName"
+              :value="group.groupId"
+            />
           </el-select>
         </div>
         <div :class="{ activeFont: isDeliverOne === true }">
           <span>发送给个人</span>
-          <el-switch
-            v-model="isDeliverOne"
-            class="ml-2"
-            style="--el-switch-on-color: #2f3367; --el-switch-off-color: #8a8ea8"
-          />
+          <el-switch v-model="isDeliverOne" class="deliver-switch" />
         </div>
         <div v-if="isDeliverOne" class="deliver-one">
-          <div class="selected-box" v-for="user in selectedList" :key="user.userId as number">
+          <div class="selected-box" v-for="user in selectedList" :key="user.userId">
             <div class="selected-one">
-              <i style="margin-right: 5px">{{ user.name }}</i>
-              <el-icon class="delete-icon" @click="deleteSelectUser(user.userId as number)"
+              <i class="selected-user-card">{{ user.name }}</i>
+              <el-icon class="delete-icon" @click="deleteSelectUser(user.userId)"
                 ><Close
               /></el-icon>
             </div>
           </div>
           <el-select
-            v-model="userDeliverLimit"
+            v-model="selectedUserId"
             placeholder="Select"
             @change="handleSelectionChange"
-            style="width: 100px"
-          >
-            <div class="select-header">
-              <div class="search-box">
-                <el-input v-model="searchText" placeholder="请输入用户名或ID" />
-                <el-button color="#2F3367">
-                  <el-icon style="vertical-align: middle" color="#fff">
-                    <Search />
-                  </el-icon>
-                </el-button>
-              </div>
-              <div class="select-header-title">
-                <span>用户名</span>
-                <span>用户ID</span>
-              </div>
-            </div>
-            <el-option
-              v-for="item in options"
-              :key="item.userId"
-              :label="item.userId"
-              :value="item.name"
+            class="select-message-user"
+            ><ul
+              v-infinite-scroll="loadMoreUserInfo"
+              class="select-user-list"
+              :infinite-scroll-immediate="false"
             >
-              <div class="select-option">
-                <span>王明</span>
-                <span>114514</span>
+              <div class="select-header">
+                <div class="search-box">
+                  <el-input v-model="searchText" placeholder="请输入用户名或ID" />
+                  <el-button color="#2F3367">
+                    <el-icon class="search-user-icon" color="#fff">
+                      <Search />
+                    </el-icon>
+                  </el-button>
+                </div>
+                <div class="select-header-title">
+                  <span class="option-user-name">用户名</span>
+                  <span class="option-user-id">用户ID</span>
+                </div>
               </div>
-            </el-option>
+              <el-option
+                v-for="user in userStore.userPartialInformation.records"
+                :key="user.userId"
+                :value="user.userId"
+              >
+                <div class="select-option">
+                  <span>{{ user.name }}</span>
+                  <span>{{ user.id }}</span>
+                </div>
+              </el-option>
+            </ul>
           </el-select>
         </div>
       </div>
@@ -141,10 +122,19 @@
 </template>
 <script setup lang="ts">
 import { useRouter, useRoute } from 'vue-router'
-import { ref, reactive, watchEffect } from 'vue'
+import { ref, computed, watchEffect, onMounted } from 'vue'
 import { Search, Close } from '@element-plus/icons-vue'
 import { useNoticeStore } from '@/store/modules/notice'
-import type { userInformation } from '@/types/user'
+import { useUserStore } from '@/store/modules/user'
+import { updateNoticeContent, addNewNotice } from '@/api/notice'
+import Toast from '@/views/systemMessage/components/Toast.vue'
+
+// 常量声明
+// 新建通知为草稿
+const NEW_NOTICE_DRAFT = 1
+// 新建通知为待审核
+const NEW_NOTICE_PENDING = 2
+
 // 初始化路由实例
 const router = useRouter()
 
@@ -153,148 +143,186 @@ const route = useRoute()
 
 // store数据
 const noticeStore = useNoticeStore()
+const userStore = useUserStore()
+
+// 获取toast实例
+const toastRef = ref<InstanceType<typeof Toast>>()
 
 // 通知正文
-let messageText = ref((route.query.content as string) || '')
+const messageContent = ref((route.query.content as string) || '')
 
 // 通知标题
-let messageTitle = ref((route.query.title as string) || '')
+const messageTitle = ref((route.query.title as string) || '')
 
-// 进入编辑界面的状态：1为点击查看icon跳转进入本页面，2为点击编辑按钮，0为用户主动点击进入编辑页面
-let state = ref((route.query.state as string) || '0')
+// 通知ID
+const messageId = parseInt(route.query.noticeId as string)
 
-// 暂存提示框显示
-let showAlertBox = ref(false)
+// 通知分组的ID
+const groupId = ref(1)
+
+// 通知类型的ID
+const typeId = ref(1)
+
+// 是否为查看通知状态--查看状态不展示操作按钮
+const isViewingState = ref<boolean>(route.query.isViewingState === '1')
+
+// 提示框信息
+const toastMessage = ref('')
 
 // 发布通知对话框显示
-let showDeliverBox = ref(false)
+const showDeliverBox = ref(false)
 
 // 变量--发送用户
 // 是否发送给所有人
-let isDeliverAll = ref(true)
+const isDeliverAll = ref(true)
 
 // 是否发送给分组用户
-let isDeliverGroup = ref(false)
+const isDeliverGroup = ref(false)
 
 // 是否发送给个人
-let isDeliverOne = ref(false)
-
-// 发送的标签分组
-let tagLimit = ref('标签分组')
-
-// 发送的黑名单分组
-let blacklistUserLimit = ref('黑名单分组')
+const isDeliverOne = ref(false)
 
 // 发送的用户
-let userDeliverLimit = ref('选择用户')
+const selectedUserId = ref('选择用户')
 
 // 搜索内容
-let searchText = ref('')
-
-// 是否为发送成功提醒
-let isDeliverAlert = ref(false)
+const searchText = ref('')
 
 // 收集被选中的用户信息
-let selectedList = reactive<userInformation[]>([])
+const selectedList = computed(() => {
+  return userStore.userPartialInformation.records.filter((user) =>
+    selectedIdList.value.includes(user.userId)
+  )
+})
 
 // 收集被选中的用户Id
-let selectedIdList: number[] = []
+const selectedIdList = ref<number[]>([])
 
-// 模拟数据
-const options = [
-  {
-    userId: 1,
-    name: 'O1'
-  },
-  {
-    userId: 2,
-    name: 'O2'
-  },
-  {
-    userId: 3,
-    name: 'O3'
-  },
-  {
-    userId: 4,
-    name: 'O4'
-  },
-  {
-    userId: 5,
-    name: 'O5'
-  },
-  {
-    userId: 6,
-    name: 'O6'
-  }
-]
+onMounted(() => {
+  // 获取通知类型 和 用户分组信息 和 用户部分信息
+  Promise.all([
+    noticeStore.getAllNoticeType(),
+    userStore.getUserGroupList(),
+    userStore.getUserPartialInformation()
+  ])
+})
 
 watchEffect(() => {
-  // 选择发送按钮
+  // 选择发送按钮-发送给所有人 与 发送给分组 与 发送给个人 互斥
   if (isDeliverGroup.value === true || isDeliverOne.value === true) {
     isDeliverAll.value = false
   } else {
     isDeliverAll.value = true
   }
+  if (isDeliverAll.value === true || isDeliverOne.value === true) {
+    isDeliverGroup.value = false
+  }
+  if (isDeliverAll.value === true || isDeliverGroup.value === true) {
+    isDeliverOne.value = false
+  }
 })
 
 // 点击保存为草稿触发
-const setDraft = (event: any) => {
-  console.log(messageTitle.value)
-  if (state.value === '0') {
-    // 新增通知
-    noticeStore.addNewNotice(1, messageTitle.value, messageText.value, -1, 0, 0)
+const setDraft = () => {
+  // 通过messageId是否初始化判断是新增通知还是编辑通知
+  if (Number.isInteger(messageId)) {
+    // 新增通知草稿
+    addNewNotice(
+      NEW_NOTICE_DRAFT,
+      messageTitle.value,
+      messageContent.value,
+      -1,
+      0,
+      0,
+      selectedIdList.value
+    )
   } else {
-    // 在已有通知的基础上修改
-    // 待完成
-    // noticeStore.updateNoticeContent()
+    //在已有通知的基础上修改
+    updateNoticeContent(
+      messageTitle.value,
+      messageContent.value,
+      -1,
+      messageId,
+      [],
+      0,
+      typeId.value
+    )
   }
-  event.target.blur()
-  isDeliverAlert.value = false
-  showAlertBox.value = true
-  // 3s后关闭提示窗
-  setTimeout(() => {
-    showAlertBox.value = false
-    router.replace({ path: '/system/deliver-info' })
-  }, 1000)
+  // 打开提示框
+  toastMessage.value = '已保存为草稿'
+  toastRef.value!.openToast()
+  router.back()
 }
 
 // 确认发布通知
 const confirmDeliver = () => {
-  isDeliverAlert.value = true
-  showDeliverBox.value = false
-  showAlertBox.value = true
-  // 3s后关闭提示窗
-  setTimeout(() => {
-    showAlertBox.value = false
-    router.replace({ path: '/system/deliver-info' })
-  }, 1000)
+  if (messageTitle.value !== '' && messageContent.value !== '') {
+    // 新增待审核通知
+    if (isDeliverAll.value) {
+      // 发送给所有人
+      addNewNotice(
+        NEW_NOTICE_PENDING,
+        messageTitle.value,
+        messageContent.value,
+        -1,
+        0,
+        typeId.value,
+        []
+      )
+    } else if (isDeliverGroup.value) {
+      // 发送给分组
+      addNewNotice(
+        NEW_NOTICE_PENDING,
+        messageTitle.value,
+        messageContent.value,
+        0,
+        0,
+        typeId.value,
+        []
+      )
+    } else if (isDeliverOne.value) {
+      // 发送给个人
+      addNewNotice(
+        NEW_NOTICE_PENDING,
+        messageTitle.value,
+        messageContent.value,
+        1,
+        0,
+        typeId.value,
+        selectedIdList.value
+      )
+    }
+    // 打开提示框
+    toastMessage.value = `发布成功\n请等待管理员审核`
+    toastRef.value!.openToast()
+    router.back()
+  }
 }
 
 // 单个用户发送-选中用户时触发逻辑
 const handleSelectionChange = () => {
-  // 查找选中用户的用户名和Id
-  let selectedOption = options.find((option) => option.name === userDeliverLimit.value)
-  // 如果用户先前没有被选中，添加改用户信息
-  if (!selectedList.some((user) => user.userId === selectedOption?.userId)) {
-    // 添加到选中用户信息数组
-    selectedList.push(selectedOption as userInformation)
-    // 收集选中用户Id，用于发请求
-    selectedIdList.push(selectedOption?.userId as number)
+  if (!selectedIdList.value.includes(parseInt(selectedUserId.value))) {
+    selectedIdList.value.push(parseInt(selectedUserId.value))
   }
-  // 将选中值清空
-  userDeliverLimit.value = '选择用户'
+  console.log(selectedIdList)
+  selectedUserId.value = '选择用户'
 }
 
 // 点击icon,将选中的单个用户删除
 const deleteSelectUser = (userId: number) => {
-  // 将目标用户从选中用户信息数组中删除,使用filter会暂时丢失响应式
-  selectedList.splice(
-    selectedList.findIndex((user) => user.userId === userId),
+  // 将目标用户Id从收集选中用户Id的数组中移除
+  selectedIdList.value.splice(
+    selectedIdList.value.findIndex((user) => user === userId),
     1
   )
-  console.log(selectedList)
-  // 将目标用户Id从收集选中用户Id的数组中移除
-  selectedIdList = selectedIdList.filter((id) => id !== userId)
+}
+
+// 触底加载更多用户数据
+const loadMoreUserInfo = () => {
+  // 当前页面没有超过总页码
+  if (userStore.userPartialInformation.current <= userStore.userPartialInformation.pages) {
+    userStore.getUserPartialInformation()
+  }
 }
 </script>
 <style lang="scss" scoped>
@@ -308,7 +336,7 @@ const deleteSelectUser = (userId: number) => {
   background-color: #fff;
   box-shadow: 0px -7px 11.4px 0px rgba(184, 186, 202, 0.07);
 }
-.content {
+.message-detail {
   display: flex;
   flex-direction: column;
   flex: 5;
@@ -316,12 +344,12 @@ const deleteSelectUser = (userId: number) => {
   color: #2f3367;
 }
 
-:deep(.content .el-input__wrapper) {
+:deep(.message-detail .el-input__wrapper) {
   background-color: #fff;
   box-shadow: none;
 }
 
-:deep(.content .el-textarea__inner) {
+:deep(.message-detail .el-textarea__inner) {
   background-color: #fff;
   box-shadow: none;
 }
@@ -516,6 +544,7 @@ const deleteSelectUser = (userId: number) => {
   background-color: #f2f3f7;
   color: var(--2F3367, #2f3367);
   font-size: 1rem;
+  text-align: center;
 }
 
 .button-confirm {
@@ -531,6 +560,11 @@ const deleteSelectUser = (userId: number) => {
   line-height: 32px;
   color: var(--2F3367, #2f3367);
   font-size: 1rem;
+  text-align: center;
+}
+
+.select-option span {
+  flex: 1;
 }
 
 .activeFont {
@@ -558,5 +592,60 @@ const deleteSelectUser = (userId: number) => {
 
 .delete-icon:hover {
   color: #000;
+}
+
+.message-title {
+  font-size: 1.3rem;
+  margin-bottom: 5px;
+}
+
+.parting-line {
+  height: 1px;
+  width: 100%;
+  background-color: #d9d9d9;
+  margin-bottom: 15px;
+}
+
+.word-count {
+  margin: 20px 36px;
+}
+
+.deliver-switch {
+  --el-switch-on-color: #2f3367;
+  --el-switch-off-color: #8a8ea8;
+}
+
+.select-notice-type {
+  width: 150px;
+}
+
+.selected-user-card {
+  margin-right: 5px;
+}
+
+.select-notice-group {
+  width: 100px;
+  margin: 5px 0 0;
+}
+
+.select-user-list {
+  overflow: auto;
+  height: 260px;
+}
+
+.select-message-user {
+  width: 100px;
+}
+
+.search-user-icon {
+  vertical-align: middle;
+}
+
+.option-user-name {
+  margin-left: -10px;
+}
+
+.option-user-id {
+  margin-left: -7px;
 }
 </style>

@@ -1,526 +1,234 @@
 <template>
   <div class="box">
     <!-- 页面顶部 -->
-    <div class="header">
-      <el-button
-        type="primary"
-        :icon="Plus"
-        class="button-deliver"
-        color="#2F3367"
-        @click="deliverMessage"
-      >
-        发布新的通知
-      </el-button>
-      <div class="search-box">
-        <el-input v-model="searchInput" placeholder="请输入关键词" />
-        <el-button class="search-button" color="#2F3367" @click="searchNotice">
-          <el-icon>
-            <Search style="color: #fff" />
-          </el-icon>
+    <Header
+      :is-show-time-selection="true"
+      :is-show-type-selection="true"
+      @search="searchNotice"
+      @update-limit="filterNotice"
+    >
+      <template #button>
+        <el-button
+          type="primary"
+          :icon="Plus"
+          class="button-deliver"
+          color="#2F3367"
+          @click="deliverMessage"
+        >
+          发布新的通知
         </el-button>
-      </div>
-    </div>
+      </template>
+    </Header>
     <!-- 页面主要内容展示 -->
-    <el-main style="padding-top: 0; overflow: hidden">
+    <el-main class="main-wrapper">
       <!-- 通知展示表格 -->
-      <el-tabs v-model="activeName" class="tabs" @tab-change="handleTabChange">
+      <el-tabs v-model="activeTab" class="tabs" @tab-change="handleTabChange">
         <el-scrollbar class="pane-content" ref="scrollbarRef">
-          <el-tab-pane label="全部" name="0">
-            <div
-              v-for="notice in noticeStore.singleAdminNoticeList.records"
-              :key="notice.noticeId as number"
-            >
-              <el-row :gutter="20" class="single-message">
-                <el-col :span="9">
-                  <div class="title">
-                    <img
-                      v-if="notice.state === 1"
-                      src="../../assets/icons/editing.svg"
-                      alt=""
-                      style="width: 1em; height: 1em; margin: 5px"
-                    />
-                    <img
-                      v-if="notice.state === 2"
-                      src="../../assets/icons/under-review.svg"
-                      alt=""
-                      style="width: 1em; height: 1em; margin: 5px"
-                    />
-                    <img
-                      v-if="notice.state === 3"
-                      src="../../assets/icons/info-success.svg"
-                      alt=""
-                      style="width: 1em; height: 1em; margin: 5px"
-                    />
-                    <img
-                      v-if="notice.state === 4"
-                      src="../../assets/icons/fail-the-audit.svg"
-                      alt=""
-                      style="width: 1em; height: 1em; margin: 5px"
-                    />
-                    <h3>{{ notice.title }}</h3>
-                  </div>
-                  <el-text class="w-400px mb-2" truncated style="color: #8a8ea8; margin-left: 2em">
-                    {{ notice.content }}
-                  </el-text>
-                </el-col>
-                <el-col :span="5">
-                  <span class="date">{{ notice.publishTime }}</span>
-                </el-col>
-                <el-col :span="3">
-                  <span class="deliver">{{ notice.adminName }}</span>
-                </el-col>
-                <el-col :span="3" style="display: flex; justify-content: space-between">
-                  <el-tooltip effect="dark" content="查看" placement="top">
-                    <el-icon
-                      color="#2F3367"
-                      @click="
-                        handleIconClick(
-                          'view',
-                          notice.title as string,
-                          notice.noticeId as number,
-                          notice.content as string
-                        )
-                      "
-                    >
-                      <View />
-                    </el-icon>
-                  </el-tooltip>
-                  <el-tooltip
-                    v-if="notice.state === 3"
-                    effect="dark"
-                    content="发送"
-                    placement="top"
-                  >
-                    <el-icon color="#2F3367" @click="handleIconClick">
-                      <Promotion />
-                    </el-icon>
-                  </el-tooltip>
-                  <el-tooltip
-                    v-if="notice.state === 1 || notice.state === 4"
-                    effect="dark"
-                    content="编辑"
-                    placement="top"
-                  >
-                    <el-icon
-                      color="#2F3367"
-                      @click="
-                        handleIconClick(
-                          'edit',
-                          notice.title as string,
-                          notice.noticeId as number,
-                          notice.content as string
-                        )
-                      "
-                    >
-                      <EditPen />
-                    </el-icon>
-                  </el-tooltip>
-                  <el-tooltip
-                    v-if="notice.state === 1 || notice.state === 4"
-                    effect="dark"
-                    content="删除"
-                    placement="top"
-                  >
-                    <el-icon
-                      color="#2F3367"
-                      @click="
-                        handleIconClick('delete', notice.title as string, notice.noticeId as number)
-                      "
-                    >
-                      <Delete />
-                    </el-icon>
-                  </el-tooltip>
-                </el-col>
-              </el-row>
-            </div>
-          </el-tab-pane>
-          <el-tab-pane label="编辑中" name="1">
-            <div
-              v-for="notice in noticeStore.singleAdminNoticeList.records"
-              :key="notice.noticeId as number"
-            >
-              <el-row :gutter="20" class="single-message">
-                <el-col :span="9">
-                  <div class="title">
-                    <img
-                      src="../../assets/icons/editing.svg"
-                      alt=""
-                      style="width: 1em; height: 1em; margin: 5px"
-                    />
-                    <h3>{{ notice.title }}</h3>
-                  </div>
-                  <el-text class="w-400px mb-2" truncated style="color: #8a8ea8; margin-left: 2em">
-                    {{ notice.content }}
-                  </el-text>
-                </el-col>
-                <el-col :span="5">
-                  <span class="date">{{ notice.publishTime }}</span>
-                </el-col>
-                <el-col :span="3">
-                  <span class="deliver">{{ notice.username }}</span>
-                </el-col>
-                <el-col :span="3" style="display: flex; justify-content: space-between">
-                  <el-tooltip effect="dark" content="查看" placement="top">
-                    <el-icon
-                      color="#2F3367"
-                      @click="
-                        handleIconClick(
-                          'view',
-                          notice.title as string,
-                          notice.noticeId as number,
-                          notice.content as string
-                        )
-                      "
-                    >
-                      <View />
-                    </el-icon>
-                  </el-tooltip>
-                  <el-tooltip
-                    v-if="notice.state === 1 || notice.state === 4"
-                    effect="dark"
-                    content="编辑"
-                    placement="top"
-                  >
-                    <el-icon
-                      color="#2F3367"
-                      @click="
-                        handleIconClick(
-                          'edit',
-                          notice.title as string,
-                          notice.noticeId as number,
-                          notice.content as string
-                        )
-                      "
-                    >
-                      <EditPen />
-                    </el-icon>
-                  </el-tooltip>
-                  <el-tooltip effect="dark" content="删除" placement="top">
-                    <el-icon
-                      color="#2F3367"
-                      @click="
-                        handleIconClick('delete', notice.title as string, notice.noticeId as number)
-                      "
-                    >
-                      <Delete />
-                    </el-icon>
-                  </el-tooltip>
-                </el-col>
-              </el-row>
-            </div>
-          </el-tab-pane>
-          <el-tab-pane label="审核中" name="2">
-            <div
-              v-for="notice in noticeStore.singleAdminNoticeList.records"
-              :key="notice.noticeId as number"
-            >
-              <el-row :gutter="20" class="single-message">
-                <el-col :span="9">
-                  <div class="title">
-                    <img
-                      src="../../assets/icons/under-review.svg"
-                      alt=""
-                      style="width: 1em; height: 1em; margin: 5px"
-                    />
-                    <h3>{{ notice.title }}</h3>
-                  </div>
-                  <el-text class="w-400px mb-2" truncated style="color: #8a8ea8; margin-left: 2em">
-                    {{ notice.content }}
-                  </el-text>
-                </el-col>
-                <el-col :span="5">
-                  <span class="date">{{ notice.publishTime }}</span>
-                </el-col>
-                <el-col :span="3">
-                  <span class="deliver">{{ notice.username }}</span>
-                </el-col>
-                <el-col :span="3" style="display: flex; justify-content: space-between">
-                  <el-tooltip effect="dark" content="查看" placement="top">
-                    <el-icon
-                      color="#2F3367"
-                      @click="
-                        handleIconClick(
-                          'view',
-                          notice.title as string,
-                          notice.noticeId as number,
-                          notice.content as string
-                        )
-                      "
-                    >
-                      <View />
-                    </el-icon>
-                  </el-tooltip>
-                  <el-tooltip effect="dark" content="审核进程" placement="top">
-                    <el-icon color="#2F3367" @click="handleIconClick"><MoreFilled /></el-icon>
-                  </el-tooltip>
-                  <!-- 占位盒子 -->
-                  <el-icon></el-icon>
-                </el-col>
-              </el-row>
-            </div>
-          </el-tab-pane>
-          <el-tab-pane label="已审核" name="3">
-            <div
-              v-for="notice in noticeStore.singleAdminNoticeList.records"
-              :key="notice.noticeId as number"
-            >
-              <el-row :gutter="20" class="single-message">
-                <el-col :span="9">
-                  <div class="title">
-                    <img
-                      v-if="notice.state === 3"
-                      src="../../assets/icons/info-success.svg"
-                      alt=""
-                      style="width: 1em; height: 1em; margin: 5px"
-                    />
-                    <img
-                      v-if="notice.state === 4"
-                      src="../../assets/icons/fail-the-audit.svg"
-                      alt=""
-                      style="width: 1em; height: 1em; margin: 5px"
-                    />
-                    <h3>{{ notice.title }}</h3>
-                  </div>
-                  <el-text class="w-400px mb-2" truncated style="color: #8a8ea8; margin-left: 2em">
-                    {{ notice.content }}
-                  </el-text>
-                </el-col>
-                <el-col :span="5">
-                  <span class="date">{{ notice.publishTime }}</span>
-                </el-col>
-                <el-col :span="3">
-                  <span class="deliver">{{ notice.username }}</span>
-                </el-col>
-                <el-col :span="3" style="display: flex; justify-content: space-between">
-                  <el-tooltip effect="dark" content="查看" placement="top">
-                    <el-icon
-                      color="#2F3367"
-                      @click="
-                        handleIconClick(
-                          'view',
-                          notice.title as string,
-                          notice.noticeId as number,
-                          notice.content as string
-                        )
-                      "
-                    >
-                      <View />
-                    </el-icon>
-                  </el-tooltip>
-                  <el-tooltip
-                    v-if="notice.state === 3"
-                    effect="dark"
-                    content="发送"
-                    placement="top"
-                  >
-                    <el-icon
-                      color="#2F3367"
-                      @click="
-                        handleIconClick(
-                          'deliver',
-                          notice.title as string,
-                          notice.noticeId as number
-                        )
-                      "
-                    >
-                      <Promotion />
-                    </el-icon>
-                  </el-tooltip>
-                  <!-- 占位盒子 -->
-                  <el-icon v-if="notice.state === 3"></el-icon>
-                  <el-tooltip
-                    v-if="notice.state === 4"
-                    effect="dark"
-                    content="编辑"
-                    placement="top"
-                  >
-                    <el-icon
-                      color="#2F3367"
-                      @click="
-                        handleIconClick(
-                          'edit',
-                          notice.title as string,
-                          notice.noticeId as number,
-                          notice.content as string
-                        )
-                      "
-                    >
-                      <EditPen />
-                    </el-icon>
-                  </el-tooltip>
-                  <el-tooltip
-                    v-if="notice.state === 4"
-                    effect="dark"
-                    content="删除"
-                    placement="top"
-                  >
-                    <el-icon
-                      color="#2F3367"
-                      @click="
-                        handleIconClick('delete', notice.title as string, notice.noticeId as number)
-                      "
-                    >
-                      <Delete />
-                    </el-icon>
-                  </el-tooltip>
-                </el-col>
-              </el-row>
-            </div>
-          </el-tab-pane>
+          <TabPane
+            :noticeList="singleAdminNoticeList.records"
+            tabName="全部"
+            :name="TAB_TYPE.ALL"
+            @view="handleViewIconClick"
+            @edit="handleEditIconClick"
+            @delete="handleDeleteIconClick"
+            @process="handleProcessIconClick"
+            @publish="handlePublishIconClick"
+          />
+          <TabPane
+            :noticeList="singleAdminNoticeList.records"
+            tabName="编辑中"
+            :name="TAB_TYPE.EDITING"
+            @view="handleViewIconClick"
+            @edit="handleViewIconClick"
+            @delete="handleDeleteIconClick"
+          />
+          <TabPane
+            :noticeList="singleAdminNoticeList.records"
+            tabName="审核中"
+            :name="TAB_TYPE.AUDITING"
+            @view="handleViewIconClick"
+            @process="handleProcessIconClick"
+          />
+          <TabPane
+            :noticeList="singleAdminNoticeList.records"
+            tabName="已审核"
+            :name="TAB_TYPE.AUDITED"
+            @view="handleViewIconClick"
+            @publish="handlePublishIconClick"
+          />
         </el-scrollbar>
       </el-tabs>
     </el-main>
     <!-- 分页按钮 -->
-    <pagination
-      :total="noticeStore.singleAdminNoticeList.total"
-      :page="noticeStore.singleAdminNoticeList.current"
-      :limit="noticeStore.singleAdminNoticeList.size"
+    <Pagination
+      :total="deliverNoticeStore.singleAdminNoticeList.total"
+      :page="deliverNoticeStore.singleAdminNoticeList.current"
+      :limit="deliverNoticeStore.singleAdminNoticeList.size"
       @pagination="handlePageChange"
     />
     <!-- 对话框 -->
-    <el-dialog v-model="showDeleteBox" width="30%" center>
-      <div>
-        <div class="deleteWaing-icon">
-          <img src="../../assets/icons/delete-waring.svg" alt="" />
-          <span> 是否确认将此通知删除？ </span>
-        </div>
-      </div>
-      <p>删除后无法恢复。</p>
-      <template #footer>
-        <span class="dialog-footer">
-          <el-button @click="showDeleteBox = false">取消</el-button>
-          <el-button type="primary" @click="handleDelete"> 确认 </el-button>
-        </span>
-      </template>
-    </el-dialog>
-    <div class="alert-box" v-show="showAlertBox">
-      <div class="content">
-        <p>{{ state === '3' ? '已发布通知' : '已删除此通知' }}</p>
-        <img src="../../assets/icons/delete-confirm.svg" alt="" />
-      </div>
-    </div>
+    <ConfirmDialog
+      ref="toastRef"
+      :confirmation-message="confirmationMessage"
+      :prompt-message="promptMessage"
+      @confirm="handleConfirm(true)"
+    />
   </div>
 </template>
 <script setup lang="ts">
-// import header from '/components/header.vue'
-import { Delete, Search, Promotion, Plus, View, EditPen, MoreFilled } from '@element-plus/icons-vue'
-import pagination from '@/components/Pagination/index.vue'
+import { storeToRefs } from 'pinia'
+import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { ref, onMounted } from 'vue'
-import { useNoticeStore } from '@/store/modules/notice'
-import type { pageInfo } from '@/types/pageMessage'
-// 初始化路由实例
-const router = useRouter()
-
-// 搜索框内容
-let searchInput = ref('')
-
-// 当前页签
-let activeName = ref('0')
-
-// 控制删除信息对话框显示
-let showDeleteBox = ref(false)
-
-// 控制提示框显示
-let showAlertBox = ref(false)
-
-// 选中的通知Id
-let chooseMessageId = ref(0)
-
-// 选中的通知标题
-let chooseMessageTitle = ref('')
-
-// 选中的通知内容
-let chooseMessageContent = ref('')
-
-// 表示跳转编辑页的动机：1表示点击查看按钮跳转， 2表示点击编辑按钮跳转, 3表示点击发布按钮（用来展示弹窗提示信息）
-let state = ref('1')
+import type { IPageInfo } from '@/types/pageMessage'
+import Header from '@/views/systemMessage/components/Header.vue'
+import TabPane from '@/views/systemMessage/components/TabPane.vue'
+import ConfirmDialog from '@/views/systemMessage/components/ConfirmDialog.vue'
+import { useDeliverNoticeStore } from '@/store/modules/notice/deliverNotice'
+import { Plus } from '@element-plus/icons-vue'
+import { deleteOwnNotice, publishNoticeToUser } from '@/api/notice'
 
 // store数据
-const noticeStore = useNoticeStore()
+const deliverNoticeStore = useDeliverNoticeStore()
+const router = useRouter()
+
+const { refreshSingleAdminNoticeList, updateSingleAdminNoticeList } = deliverNoticeStore
+const { singleAdminNoticeList } = storeToRefs(deliverNoticeStore)
+
+// 通知发布进度常量
+const enum TAB_TYPE {
+  /**全部 */
+  ALL = '0',
+  /**编辑中*/
+  EDITING = '1',
+  /**审核中 */
+  AUDITING = '2',
+  /**已审核 */
+  AUDITED = '3'
+}
+
+// 搜索框内容
+const searchInput = ref('')
+
+// 当前展示的tab
+const activeTab = ref(TAB_TYPE.ALL)
+
+// 选中的通知Id
+const chooseMessageId = ref(0)
+
+// 选中的通知标题
+const chooseMessageTitle = computed(() => {
+  const res = singleAdminNoticeList.value.records.find(
+    (item) => item.noticeId === chooseMessageId.value
+  )
+  return res!.title
+})
 
 // 待绑定滚动条组件
 const scrollbarRef = ref<HTMLElement | null>(null)
 
+// 确认弹窗信息
+const confirmationMessage = ref('')
+
+// 提示弹窗信息
+const promptMessage = ref('')
+
+// 获取toast实例
+const toastRef = ref<InstanceType<typeof ConfirmDialog>>()
+
 onMounted(() => {
   // 获取该管理员所有通知
-  noticeStore.getSingleAdminNoticeList(activeName.value, searchInput.value, 0, 0)
+  refreshSingleAdminNoticeList(activeTab.value, searchInput.value, 0, 0)
 })
 
 // tab页签点击触发
 const handleTabChange = () => {
-  console.log(activeName.value)
   // 获取该管理员对应类型通知通知
-  noticeStore.getSingleAdminNoticeList(activeName.value, searchInput.value, 0, 0)
+  refreshSingleAdminNoticeList(activeTab.value, searchInput.value, 0, 0)
 }
 
-// 点击icon图标
-const handleIconClick = (type: string, title: string, noticeId: number, content?: string) => {
-  // 获取当前选中通知的信息
-  chooseMessageTitle.value = title
+// 点击操作信息icon触发对应函数
+// isViewingState: 是否为查看通知状态 - 0表示否，1表示是
+// 点击view-icon
+const handleViewIconClick = (noticeId: number) => {
   chooseMessageId.value = noticeId
-  chooseMessageContent.value = content ? content : ''
+  router.push({
+    path: '/system/edit',
+    query: { noticeId, isViewingState: 1 }
+  })
+}
+// 点击edit-icon
+const handleEditIconClick = (noticeId: number) => {
+  chooseMessageId.value = noticeId
+  router.push({
+    path: '/system/edit',
+    query: { noticeId, isViewingState: 0 }
+  })
+}
+// 点击delete-icon
+const handleDeleteIconClick = (noticeId: number) => {
+  chooseMessageId.value = noticeId
+  // 打开确认弹窗
+  toastRef.value!.openDialog()
+  confirmationMessage.value = `是否确认将此通知删除？`
+  promptMessage.value = `已删除此通知`
+}
 
-  switch (type) {
-    // 删除通知
-    case 'delete':
-      state.value = '0'
-      showDeleteBox.value = true
-      break
-    // 查看通知
-    case 'view':
-      state.value = '1'
-      router.push({ path: '/system/edit', query: { title, noticeId, content, state: state.value } })
-      break
-    // 编辑通知
-    case 'edit':
-      state.value = '2'
-      router.push({ path: '/system/edit', query: { title, noticeId, content, state: state.value } })
-      break
-    // 发布通知
-    case 'deliver':
-      // 修改state，达到修改弹窗文字效果
-      state.value = '3'
-      noticeStore.publishNoticeToUser(title, noticeId)
-      noticeStore.getSingleAdminNoticeList(activeName.value, searchInput.value, 0, 0)
-      break
-    default:
-      console.log('点击icon的意外情况')
-  }
+// 点击process-icon
+const handleProcessIconClick = (noticeId: number) => {
+  chooseMessageId.value = noticeId
+  // 接下来的逻辑...
+}
+
+// 点击publish-icon
+const handlePublishIconClick = (noticeId: number) => {
+  chooseMessageId.value = noticeId
+  // 打开确认弹窗
+  toastRef.value!.openDialog()
+  confirmationMessage.value = `是否确认将此通知发布？`
+  promptMessage.value = `已发布通知`
 }
 
 // 分页按钮点击触发
-const handlePageChange = async (pageMessage: pageInfo) => {
-  // 更新页面信息
-  noticeStore.singleAdminNoticeList.current = pageMessage.currentPage
-  noticeStore.singleAdminNoticeList.size = pageMessage.pageLimit
+const handlePageChange = (pageMessage: IPageInfo) => {
   // 发送请求获取新数据
-  await noticeStore.getSingleAdminNoticeList(activeName.value, searchInput.value, 0, 0)
+  updateSingleAdminNoticeList(
+    activeTab.value,
+    pageMessage.currentPage,
+    pageMessage.pageLimit,
+    searchInput.value,
+    0,
+    0
+  )
   // 滚动条回滚到顶端
   scrollbarRef.value?.scrollTo(0, 0)
 }
 
 // 搜索框筛选通知
-const searchNotice = async () => {
-  // 重置页面页码
-  noticeStore.allNoticeList.current = 1
+const searchNotice = (keyword: string) => {
+  // 更新搜索框内容
+  searchInput.value = keyword
   // 发送请求更新数据
-  await noticeStore.getSingleAdminNoticeList(activeName.value, searchInput.value, 0, 0)
+  refreshSingleAdminNoticeList(activeTab.value, searchInput.value, 0, 0)
+}
+
+// 通过通知时间/类型筛选通知
+const filterNotice = (timeLimit: number, typeLimit: number) => {
+  // 发送请求更新数据
+  refreshSingleAdminNoticeList(activeTab.value, searchInput.value, typeLimit, timeLimit)
 }
 
 // 删除通知
-const handleDelete = async () => {
-  showDeleteBox.value = false
-  // 拿到待删除的通知Id发送请求
-  await noticeStore.deleteOwnNotice(chooseMessageTitle.value, chooseMessageId.value)
-  // 发送请求获取新数据
-  await noticeStore.getSingleAdminNoticeList(activeName.value, searchInput.value, 0, 0)
-  // 展示提示信息
-  showAlertBox.value = true
-  // 3s后关闭提示窗
-  setTimeout(() => {
-    showAlertBox.value = false
-  }, 1500)
+const handleConfirm = (isDeleteConfirm: boolean) => {
+  if (isDeleteConfirm) {
+    // 删除通知
+    deleteOwnNotice(chooseMessageTitle.value, chooseMessageId.value)
+    // 发送请求获取新数据
+    refreshSingleAdminNoticeList(activeTab.value, searchInput.value, 0, 0)
+  } else {
+    // 正式发布通知
+    publishNoticeToUser(chooseMessageTitle.value, chooseMessageId.value)
+    refreshSingleAdminNoticeList(activeTab.value, searchInput.value, 0, 0)
+  }
 }
 
 // 发布通知
@@ -598,7 +306,7 @@ const deliverMessage = () => {
   letter-spacing: 1.6px;
 }
 
-.date {
+.publish-time {
   color: var(--2F3367, #2f3367);
   font-family: Inter;
   font-size: 0.5em;
@@ -688,5 +396,10 @@ const deliverMessage = () => {
   font-weight: 500;
   line-height: normal;
   letter-spacing: 1.28px;
+}
+
+.main-wrapper {
+  padding-top: 0;
+  overflow: hidden;
 }
 </style>

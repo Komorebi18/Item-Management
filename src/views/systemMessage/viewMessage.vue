@@ -125,9 +125,9 @@
   <!-- 对话框 -->
   <ConfirmDialog
     ref="confirmDialogRef"
-    :confirmation-message="`是否确认将此通知删除?<br>删除后将无法恢复。`"
+    :confirmation-message="`是否确认将此通知删除?\n删除后将无法恢复。`"
     :prompt-message="`已删除此通知`"
-    @confirm="handleDeleteNotice()"
+    @confirm="handleDeleteNotice"
   />
 </template>
 
@@ -138,7 +138,7 @@ import { ref, onMounted, computed } from 'vue'
 import { useViewNoticeStore } from '@/store/modules/notice/viewNotice'
 import { useUserStore } from '@/store/modules/user'
 import { deleteAnyNotice } from '@/api/notice'
-import type { pageInfo } from '@/types/pageMessage'
+import type { IPageInfo } from '@/types/pageMessage'
 import Header from '@/views/systemMessage/components/Header.vue'
 import ConfirmDialog from '@/views/systemMessage/components/ConfirmDialog.vue'
 
@@ -146,6 +146,7 @@ import ConfirmDialog from '@/views/systemMessage/components/ConfirmDialog.vue'
 const viewNoticeStore = useViewNoticeStore()
 const userStore = useUserStore()
 
+const { refreshAllNoticeList, updateAllNoticeList } = viewNoticeStore
 const { allNoticeList } = storeToRefs(viewNoticeStore)
 const { userGroupList } = storeToRefs(userStore)
 
@@ -162,13 +163,13 @@ const searchKeyword = ref('')
 const isDeleteState = ref(false)
 
 // 当前展示的通知的Id
-let currentNoticeId = ref(0)
+const currentNoticeId = ref(0)
 
 // 通知时间限制
-let timeLimit = ref(0)
+const timeLimit = ref(0)
 
 // 通知类型限制
-let typeLimit = ref(0)
+const typeLimit = ref(0)
 
 // 当前选中通知的详细内容
 const currentNoticeDetail = computed(() => {
@@ -180,15 +181,15 @@ onMounted(async () => {
   // 获取该管理员所有通知
   await Promise.all([
     userStore.getUserGroupList(),
-    viewNoticeStore.refreshAllNoticeList('', typeLimit.value, timeLimit.value)
+    refreshAllNoticeList('', typeLimit.value, timeLimit.value)
   ])
   // 更新当前展示信息id
-  currentNoticeId.value = viewNoticeStore.allNoticeList.records[0].noticeId
+  currentNoticeId.value = allNoticeList.value.records[0].noticeId
 })
 
 // 更新页面展示信息
-const handlePageChange = async (pageMessage: pageInfo) => {
-  await viewNoticeStore.upDateAllNoticeList(
+const handlePageChange = async (pageMessage: IPageInfo) => {
+  await updateAllNoticeList(
     pageMessage.currentPage,
     pageMessage.pageLimit,
     searchKeyword.value,
@@ -196,7 +197,7 @@ const handlePageChange = async (pageMessage: pageInfo) => {
     timeLimit.value
   )
   // 更新当前展示信息id
-  currentNoticeId.value = viewNoticeStore.allNoticeList.records[0].noticeId
+  currentNoticeId.value = allNoticeList.value.records[0].noticeId
   // 滚动条回滚到顶端
   scrollbarRef.value?.scrollTo(0, 0)
 }
@@ -217,21 +218,19 @@ const handleDeleteNotice = async () => {
   // 拿到待删除的通知Id发送请求
   await deleteAnyNotice(currentNoticeDetail.value!.title, currentNoticeId.value)
   // 发送请求获取新数据
-  await viewNoticeStore.refreshAllNoticeList(searchKeyword.value, typeLimit.value, timeLimit.value)
+  await refreshAllNoticeList(searchKeyword.value, typeLimit.value, timeLimit.value)
   // 更新当前展示信息id
-  currentNoticeId.value = viewNoticeStore.allNoticeList.records[0].noticeId
+  currentNoticeId.value = allNoticeList.value.records[0].noticeId
 }
 
 // 搜索框筛选通知
 const searchNotice = async (keyword: string) => {
   // 更新搜索关键词
   searchKeyword.value = keyword
-  // 重置页面页码
-  viewNoticeStore.allNoticeList.current = 1
   // 发送请求更新数据
-  await viewNoticeStore.refreshAllNoticeList(searchKeyword.value, typeLimit.value, timeLimit.value)
+  await refreshAllNoticeList(searchKeyword.value, typeLimit.value, timeLimit.value)
   // 更新当前展示信息id
-  currentNoticeId.value = viewNoticeStore.allNoticeList.records[0].noticeId
+  currentNoticeId.value = allNoticeList.value.records[0].noticeId
 }
 
 // 根据时间or类型筛选通知
@@ -239,9 +238,9 @@ const onChangeLimit = async (time: number, type: number) => {
   // 更新时间限制
   timeLimit.value = time
   typeLimit.value = type
-  await viewNoticeStore.refreshAllNoticeList(searchKeyword.value, typeLimit.value, timeLimit.value)
+  await refreshAllNoticeList(searchKeyword.value, typeLimit.value, timeLimit.value)
   // 更新当前展示信息id
-  currentNoticeId.value = viewNoticeStore.allNoticeList.records[0].noticeId
+  currentNoticeId.value = allNoticeList.value.records[0].noticeId
 }
 </script>
 

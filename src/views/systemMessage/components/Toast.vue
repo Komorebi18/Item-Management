@@ -1,7 +1,7 @@
 <template>
   <div class="toast" v-show="isShowToast">
     <div class="message-item-content">
-      <p v-html="props.promptMessage"></p>
+      <p>{{ props.promptMessage }}</p>
       <img src="../../../assets/icons/delete-confirm.svg" alt="" />
     </div>
   </div>
@@ -9,15 +9,12 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 
-const props = defineProps({
+const props = defineProps<{
   // 确认框展示信息
-  promptMessage: {
-    type: String,
-    required: true
-  }
-})
+  promptMessage: string
+}>()
 
-let isShowToast = ref(false)
+const isShowToast = ref(false)
 
 // 打开提示框
 const openToast = () => {
@@ -34,7 +31,7 @@ defineExpose({ openToast })
 .toast {
   position: absolute;
   top: 30%;
-  left: 30%;
+  left: 40%;
   width: 140px;
   height: 140px;
   border-radius: 8px;
@@ -51,6 +48,7 @@ defineExpose({ openToast })
 }
 .toast p {
   margin: 16px;
+  white-space: pre-line;
   color: #fff;
   font-family: Inter;
   font-size: 16px;
