@@ -1,9 +1,9 @@
 <template>
-  <div class="wrapper">
+  <div class="view-wrapper">
     <div class="notice-list-container">
       <Header
-        :is-show-time-selection="true"
-        :is-show-type-selection="true"
+        is-show-time-selection
+        is-show-type-selection
         @update-limit="onChangeLimit"
         @search="searchNotice"
       >
@@ -21,10 +21,6 @@
       </Header>
       <!-- 页面主要内容展示 -->
       <el-main class="main-wrapper">
-        <!-- 没有数据时展示的内容 -->
-        <template v-if="!currentNoticeDetail">
-          <p>暂无消息</p>
-        </template>
         <!-- 通知展示表格 -->
         <el-scrollbar class="message-box" ref="scrollbarRef">
           <el-row
@@ -72,10 +68,7 @@
                 </div>
                 <div v-else-if="notice.groupId !== 0">
                   <span class="icon-gap"
-                    >分组:
-                    {{
-                      userGroupList.find((item) => item.groupId === notice.groupId)!.groupName
-                    }}</span
+                    >分组: {{ getGroupName(notice.groupId) || '暂无分组' }}</span
                   >
                 </div>
                 <div class="deliver-to-all-icon" v-else>
@@ -97,30 +90,7 @@
       />
     </div>
     <!-- 当前选中消息的详情展示 -->
-    <div class="current-notice-wrapper" v-show="!isDeleteState">
-      <template v-if="currentNoticeDetail">
-        <div class="detail-title">{{ currentNoticeDetail.title }}</div>
-        <div class="detail-info">
-          <div class="current-notice-publisher">
-            <el-icon class="user-icon"><UserFilled /></el-icon>
-            <span>发布者:{{ currentNoticeDetail.adminName }}</span>
-          </div>
-          <div class="detail-info-date">{{ currentNoticeDetail.publishTime }}</div>
-        </div>
-        <div class="detail-content">
-          <el-text type="info">
-            {{ currentNoticeDetail.content }}
-          </el-text>
-        </div>
-        <div class="current-notice-browse-num">
-          <el-icon class="user-icon"><View /></el-icon>
-          <span class="icon-gap">浏览:{{ currentNoticeDetail.browse }}</span>
-        </div>
-      </template>
-      <template v-if="!currentNoticeDetail">
-        <p>暂无消息</p>
-      </template>
-    </div>
+    <NoticeDetailWrapper v-show="!isDeleteState" :current-notice-detail="currentNoticeDetail" />
   </div>
   <!-- 对话框 -->
   <ConfirmDialog
@@ -134,13 +104,14 @@
 <script lang="ts" setup>
 import { EditPen, UserFilled, View } from '@element-plus/icons-vue'
 import { storeToRefs } from 'pinia'
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, watch } from 'vue'
 import { useViewNoticeStore } from '@/store/modules/notice/viewNotice'
 import { useUserStore } from '@/store/modules/user'
 import { deleteAnyNotice } from '@/api/notice'
 import type { IPageInfo } from '@/types/pageMessage'
 import Header from '@/views/systemMessage/components/Header.vue'
 import ConfirmDialog from '@/views/systemMessage/components/ConfirmDialog.vue'
+import NoticeDetailWrapper from '@/views/systemMessage/components/NoticeDetailWrapper.vue'
 
 // store数据
 const viewNoticeStore = useViewNoticeStore()
@@ -170,10 +141,19 @@ const timeLimit = ref(0)
 
 // 通知类型限制
 const typeLimit = ref(0)
+// 获取用户分组名称
+const getGroupName = (groupId: number) => {
+  return userGroupList.value.find((item) => item.groupId === groupId)?.groupName
+}
 
 // 当前选中通知的详细内容
 const currentNoticeDetail = computed(() => {
   return allNoticeList.value.records.find((item) => item.noticeId === currentNoticeId.value)
+})
+
+watch(allNoticeList.value.records[0], (newVal) => {
+  // 更新当前展示信息id
+  currentNoticeId.value = newVal.noticeId
 })
 
 onMounted(async () => {
@@ -183,8 +163,8 @@ onMounted(async () => {
     userStore.getUserGroupList(),
     refreshAllNoticeList('', typeLimit.value, timeLimit.value)
   ])
-  // 更新当前展示信息id
   currentNoticeId.value = allNoticeList.value.records[0].noticeId
+  console.log(currentNoticeId.value)
 })
 
 // 更新页面展示信息
@@ -196,8 +176,6 @@ const handlePageChange = async (pageMessage: IPageInfo) => {
     typeLimit.value,
     timeLimit.value
   )
-  // 更新当前展示信息id
-  currentNoticeId.value = allNoticeList.value.records[0].noticeId
   // 滚动条回滚到顶端
   scrollbarRef.value?.scrollTo(0, 0)
 }
@@ -219,8 +197,6 @@ const handleDeleteNotice = async () => {
   await deleteAnyNotice(currentNoticeDetail.value!.title, currentNoticeId.value)
   // 发送请求获取新数据
   await refreshAllNoticeList(searchKeyword.value, typeLimit.value, timeLimit.value)
-  // 更新当前展示信息id
-  currentNoticeId.value = allNoticeList.value.records[0].noticeId
 }
 
 // 搜索框筛选通知
@@ -229,8 +205,6 @@ const searchNotice = async (keyword: string) => {
   searchKeyword.value = keyword
   // 发送请求更新数据
   await refreshAllNoticeList(searchKeyword.value, typeLimit.value, timeLimit.value)
-  // 更新当前展示信息id
-  currentNoticeId.value = allNoticeList.value.records[0].noticeId
 }
 
 // 根据时间or类型筛选通知
@@ -239,13 +213,11 @@ const onChangeLimit = async (time: number, type: number) => {
   timeLimit.value = time
   typeLimit.value = type
   await refreshAllNoticeList(searchKeyword.value, typeLimit.value, timeLimit.value)
-  // 更新当前展示信息id
-  currentNoticeId.value = allNoticeList.value.records[0].noticeId
 }
 </script>
 
 <style scoped lang="scss">
-.wrapper {
+.view-wrapper {
   position: relative;
   display: flex;
   justify-content: space-between;

@@ -304,7 +304,6 @@ const handleSelectionChange = () => {
   if (!selectedIdList.value.includes(parseInt(selectedUserId.value))) {
     selectedIdList.value.push(parseInt(selectedUserId.value))
   }
-  console.log(selectedIdList)
   selectedUserId.value = '选择用户'
 }
 

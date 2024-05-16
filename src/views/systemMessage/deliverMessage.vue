@@ -2,8 +2,8 @@
   <div class="box">
     <!-- 页面顶部 -->
     <Header
-      :is-show-time-selection="true"
-      :is-show-type-selection="true"
+      is-show-time-selection
+      is-show-type-selection
       @search="searchNotice"
       @update-limit="filterNotice"
     >
