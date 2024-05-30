@@ -9,7 +9,7 @@ export interface Common<T> {
 /**
  * 用户信息
  */
-export interface userInformation {
+export interface IUserLoginInfo {
   adminId: number
   username: string
   roles: string[]

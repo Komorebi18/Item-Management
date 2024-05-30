@@ -1,5 +1,5 @@
 import http from '@/utils/request'
-import { NoticeList, NoticeType } from '@/types/notice'
+import type { INoticeList, INoticeType } from '@/types/notice'
 
 /**
  * 获取单个管理员的系统通知
@@ -11,15 +11,15 @@ import { NoticeList, NoticeType } from '@/types/notice'
  * @param dateType 时间范围类型，1为近3天，2为近一周，3为近一月，其它为全部
  * @returns 系统通知中每条通知的具体参数
  */
-export const getSingleAdminNoticeAPI = (
-  state: string,
+export const getSingleAdminNotice = (
+  state: number,
   offset: number,
   limit: number,
   content: string,
   type: number,
   dateType: number
 ) => {
-  return http<NoticeList>({
+  return http<INoticeList>({
     url: `/notice/sys/${state}?offset=${offset}&limit=${limit}&content=${content}&type=${type}&dateType=${dateType}`,
     method: 'GET'
   })
@@ -34,14 +34,14 @@ export const getSingleAdminNoticeAPI = (
  * @param dateType 时间范围类型，1为近3天，2为近一周，3为近一月，其它为全部
  * @returns 所有的系统通知
  */
-export const getAllNoticeAPI = (
+export const getAllNotice = (
   offset: number,
   limit: number,
   content: string,
   type: number,
   dateType: number
 ) => {
-  return http<NoticeList>({
+  return http<INoticeList>({
     url: `/notice/sys/publish/review`,
     method: 'GET',
     params: {
@@ -63,14 +63,14 @@ export const getAllNoticeAPI = (
  * @param dateType 时间范围类型，1为近3天，2为近一周，3为近一月，其它为全部
  * @returns 所有待审核的通知
  */
-export const getPendingAuditNoticeAPI = (
+export const getPendingAuditNotice = (
   offset: number,
   limit: number,
   content: string,
   type: number,
   dateType: number
 ) => {
-  return http<NoticeList>({
+  return http<INoticeList>({
     url: `/notice/sys/review`,
     method: 'GET',
     params: {
@@ -87,15 +87,21 @@ export const getPendingAuditNoticeAPI = (
  * 修改自己的通知内容
  * @param title 通知的标题
  * @param content 通知的内容
- * @param userId 管理员的ID
+ * @param userId 系统通知目标用户id(广播传-1,分组传0)
  * @param noticeId 通知的ID
+ * @param userIds 选中的用户id列表，userId=1的时候需要传
+ * @param groupId 分组对应的id(不是分组发送传0)
+ * @param typeId 通知类型ID
  * @returns
  */
-export const updateNoticeContentAPI = (
+export const updateNoticeContent = (
   title: string,
   content: string,
   userId: number,
-  noticeId: number
+  noticeId: number,
+  userIds: number[],
+  groupId: number,
+  typeId: number
 ) => {
   return http({
     url: `/notice/sys/modify/${noticeId}`,
@@ -103,7 +109,10 @@ export const updateNoticeContentAPI = (
     data: {
       title,
       content,
-      userId
+      userId,
+      userIds,
+      groupId,
+      typeId
     }
   })
 }
@@ -114,7 +123,7 @@ export const updateNoticeContentAPI = (
  * @param noticeId 通知的ID
  * @returns
  */
-export const updateNoticeStateToCheckAPI = (title: string, noticeId: number) => {
+export const updateNoticeStateToCheck = (title: string, noticeId: number) => {
   return http({
     url: `/notices/sys/submit/${noticeId}?title=${title}`,
     method: 'PUT'
@@ -127,7 +136,7 @@ export const updateNoticeStateToCheckAPI = (title: string, noticeId: number) => 
  * @param noticeId 通知的ID
  * @returns
  */
-export const updateNoticeStateToPassAPI = (title: string, noticeId: number) => {
+export const updateNoticeStateToPass = (title: string, noticeId: number) => {
   return http({
     url: `/notices/sys/pass/${noticeId}?title=${title}`,
     method: 'PUT'
@@ -140,7 +149,7 @@ export const updateNoticeStateToPassAPI = (title: string, noticeId: number) => {
  * @param noticeId 通知的ID
  * @returns
  */
-export const publishNoticeToUserAPI = (title: string, noticeId: number) => {
+export const publishNoticeToUser = (title: string, noticeId: number) => {
   return http({
     url: `/notices/sys/publish/${noticeId}?title=${title}`,
     method: 'PUT'
@@ -154,7 +163,7 @@ export const publishNoticeToUserAPI = (title: string, noticeId: number) => {
  * @param noticeId 通知的ID
  * @returns
  */
-export const rejectNoticeAPI = (comment: string, title: string, noticeId: number) => {
+export const rejectNotice = (comment: string, title: string, noticeId: number) => {
   return http({
     url: `/notices/sys/reject/${noticeId}?comment${comment}&title=${title}`,
     method: 'PUT'
@@ -167,7 +176,7 @@ export const rejectNoticeAPI = (comment: string, title: string, noticeId: number
  * @param noticeId 通知的ID
  * @returns
  */
-export const deleteOwnNoticeAPI = (title: string, noticeId: number) => {
+export const deleteOwnNotice = (title: string, noticeId: number) => {
   return http({
     url: `/notices/sys/${noticeId}?title=${title}`,
     method: 'DELETE'
@@ -180,7 +189,7 @@ export const deleteOwnNoticeAPI = (title: string, noticeId: number) => {
  * @param noticeId 通知的ID
  * @returns
  */
-export const deleteAnyNoticeAPI = (title: string, noticeId: number) => {
+export const deleteAnyNotice = (title: string, noticeId: number) => {
   return http({
     url: `/notices/sys/pass/${noticeId}?title=${title}`,
     method: 'DELETE'
@@ -191,8 +200,8 @@ export const deleteAnyNoticeAPI = (title: string, noticeId: number) => {
  * 获取所有通知的类型
  * @returns 所有通知的类型
  */
-export const allNoticeTypeAPI = () => {
-  return http<NoticeType[]>({
+export const allNoticeType = () => {
+  return http<INoticeType[]>({
     url: `/notices/sys/type`,
     method: 'GET'
   })
@@ -205,15 +214,17 @@ export const allNoticeTypeAPI = () => {
  * @param userId 系统通知目标用户id(广播或草稿传-1,分组传0)
  * @param groupId 分组对应的id(不是分组或是草稿发送传0)
  * @param typeId 通知类型id，草稿传0
+ * @param userIds 被选中的用户Id列表
  * @returns 空
  */
-export const addNewNoticeAPI = (
+export const addNewNotice = (
   state: number,
   title: string,
   content: string,
   userId: number,
   groupId: number,
-  typeId: number
+  typeId: number,
+  userIds: number[]
 ) => {
   return http({
     url: `/notice/sys?state=${state}`,
@@ -223,7 +234,8 @@ export const addNewNoticeAPI = (
       content,
       userId,
       groupId,
-      typeId
+      typeId,
+      userIds
     }
   })
 }

@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "isCustomElement": true,
     "target": "esnext",
     "useDefineForClassFields": true,
     "module": "esnext",

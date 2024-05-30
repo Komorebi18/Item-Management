@@ -15,11 +15,11 @@
 //   })
 // }
 import http from '@/utils/request'
-import { userInformation, tokenType } from '@/types/login'
+import { IUserLoginInfo, tokenType } from '@/types/login'
 
 // 登录获取信息
 export const getLoginAPI = (data: object) => {
-  return http<userInformation>({
+  return http<IUserLoginInfo>({
     method: 'POST',
     url: '/admin/login',
     data: data

@@ -1,96 +1,95 @@
 /**
  * 返回的数据对象
  */
-export interface NoticeList {
+export interface INoticeList {
   /**
    * 当前页
    */
-  current?: number
+  current: number
   /**
    * 总页数
    */
-  pages?: number
+  pages: number
   /**
    * 分页对象数据
    */
-  records?: NoticeItem[]
+  records: INoticeItem[]
   /**
    * 每页显示数量
    */
-  size?: number
+  size: number
   /**
    * 数量总数
    */
-  total?: number
+  total: number
 }
 
 /**
  * 分页数据
  */
-export interface NoticeItem {
+export interface INoticeItem {
   /**
    * 发布通知的管理员名称
    */
-  adminName?: null | string
+  adminName: string
   /**
    * 浏览量
    */
-  browse?: number | null
+  browse: number
   /**
    * 审核意见
    */
-  comment?: null | string
+  comment: string
   /**
    * 系统通知主体内容
    */
-  content?: null | string
+  content: string
   /**
    * 通知发送的用户分组id
    */
-  groupId?: number | null
+  groupId: number
   /**
    * 分组名称
    */
-  groupName?: null | string
+  groupName: string
   /**
    * 通知的id
    */
-  noticeId?: number | null
+  noticeId: number
   /**
    * 通知发布时间
    */
-  publishTime?: null | string
+  publishTime: string
   /**
    * 发布状态，1为未发送，2为待审核，3为审核通过，4为审核未通过，5为正式发布给用户
    */
-  state?: number | null
+  state: number
   /**
    * 系统通知标题
    */
-  title?: null | string
+  title: string
   /**
    * 通知类型id
    */
-  typeId?: number | null
+  typeId: number
   /**
    * 私发通知的目标用户id(广播通知为0)
    */
-  userId?: number | null
+  userId: number
   /**
    * 发送的用户id列表
    */
-  userIds?: number[] | null
+  userIds: number[]
   /**
-   * 用户名列表，userid=1时有效
+   * 用户名列表，userId=1时有效
    */
-  usernames?: string[] | null
-  [property: string]: any
+  usernames: string[]
 }
 
 /**
  * 通知类型
  */
-export interface NoticeType {
+export interface INoticeType {
   /**
    * 通知类型id
    */
