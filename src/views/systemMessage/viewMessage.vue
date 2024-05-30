@@ -1,5 +1,6 @@
 <template>
   <div class="view-wrapper">
+  <div class="view-wrapper">
     <div class="notice-list-container">
       <Header
         is-show-time-selection
@@ -76,6 +77,7 @@
                 <div v-else-if="notice.groupId !== NOTICE_RELEASE_GROUP.FALSE">
                   <span class="icon-gap"
                     >分组: {{ getGroupName(notice.groupId) || '暂无分组' }}</span
+                    >分组: {{ getGroupName(notice.groupId) || '暂无分组' }}</span
                   >
                 </div>
                 <div class="deliver-to-all-icon" v-else>
@@ -110,6 +112,7 @@
 import { EditPen, UserFilled, View } from '@element-plus/icons-vue'
 import { storeToRefs } from 'pinia'
 import { ref, onMounted, computed, watch } from 'vue'
+import { ref, onMounted, computed, watch } from 'vue'
 import { useViewNoticeStore } from '@/store/modules/notice/viewNotice'
 import { useUserStore } from '@/store/modules/user'
 import { deleteAnyNotice } from '@/api/notice'
@@ -117,6 +120,7 @@ import type { IPageInfo } from '@/types/pageMessage'
 import { NOTICE_RELEASE_USER, NOTICE_RELEASE_GROUP } from '@/constants/notice'
 import Header from '@/views/systemMessage/components/Header.vue'
 import ConfirmDialog from '@/views/systemMessage/components/ConfirmDialog.vue'
+import NoticeDetailWrapper from '@/views/systemMessage/components/NoticeDetailWrapper.vue'
 import NoticeDetailWrapper from '@/views/systemMessage/components/NoticeDetailWrapper.vue'
 
 // store数据
@@ -141,6 +145,10 @@ const searchKeyword = ref('')
 const timeLimit = ref(0)
 // 通知类型限制
 const typeLimit = ref(0)
+// 获取用户分组名称
+const getGroupName = (groupId: number) => {
+  return userGroupList.value.find((item) => item.groupId === groupId)?.groupName
+}
 
 // 获取用户分组名称
 const getGroupName = (groupId: number) => {
@@ -169,6 +177,7 @@ onMounted(async () => {
     refreshAllNoticeList('', typeLimit.value, timeLimit.value)
   ])
   currentNoticeId.value = allNoticeList.value.records[0].noticeId
+  console.log(currentNoticeId.value)
 })
 
 // 更新页面展示信息
@@ -227,6 +236,7 @@ const onChangeTypeLimit = (type: number) => {
 </script>
 
 <style scoped lang="scss">
+.view-wrapper {
 .view-wrapper {
   position: relative;
   display: flex;
