@@ -1,6 +1,13 @@
 import { defineStore } from 'pinia'
-import type { INoticeList } from '@/types/notice'
+import type { INoticeList, INoticeItem } from '@/types/notice'
 import { getAllNotice } from '@/api/notice'
+
+// 格式化通知列表---移除发布时间字符串中的T
+const formatNoticeList = (noticeList: INoticeItem[]) => {
+  noticeList.forEach((notice) => {
+    notice.publishTime = notice.publishTime.replace('T', ' ')
+  })
+}
 
 export const useViewNoticeStore = defineStore('viewNotice', () => {
   // 全部审核通过通知参数--所有通知界面
@@ -21,11 +28,8 @@ export const useViewNoticeStore = defineStore('viewNotice', () => {
       type,
       dataType
     )
-    // 移除发布时间字符串中的T
     allNoticeList.value = res.data
-    allNoticeList.value.records.forEach((notice) => {
-      notice.publishTime = (notice.publishTime as string).replace('T', ' ')
-    })
+    formatNoticeList(allNoticeList.value.records)
   }
 
   // 更新新正式发布的通知
@@ -38,10 +42,7 @@ export const useViewNoticeStore = defineStore('viewNotice', () => {
   ) => {
     const res = await getAllNotice(offset, limit, content, type, dataType)
     allNoticeList.value = res.data
-    // 移除发布时间字符串中的T
-    allNoticeList.value.records.forEach((notice) => {
-      notice.publishTime = (notice.publishTime as string).replace('T', ' ')
-    })
+    formatNoticeList(allNoticeList.value.records)
   }
 
   return {

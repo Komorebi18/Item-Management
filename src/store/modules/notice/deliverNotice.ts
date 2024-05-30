@@ -1,6 +1,13 @@
 import { defineStore } from 'pinia'
-import type { INoticeList } from '@/types/notice'
+import type { INoticeList, INoticeItem } from '@/types/notice'
 import { getSingleAdminNotice } from '@/api/notice'
+
+// 格式化通知列表---移除发布时间字符串中的T
+const formatNoticeList = (noticeList: INoticeItem[]) => {
+  noticeList.forEach((notice) => {
+    notice.publishTime = notice.publishTime.replace('T', ' ')
+  })
+}
 
 export const useDeliverNoticeStore = defineStore('deliverNotice', () => {
   // 管理员个人通知参数--发布通知界面
@@ -14,7 +21,7 @@ export const useDeliverNoticeStore = defineStore('deliverNotice', () => {
 
   // 刷新管理员个人通知
   const refreshSingleAdminNoticeList = async (
-    state: string,
+    state: number,
     content: string,
     type: number,
     dataType: number
@@ -28,15 +35,12 @@ export const useDeliverNoticeStore = defineStore('deliverNotice', () => {
       dataType
     )
     singleAdminNoticeList.value = res.data
-    // 移除发布时间字符串中的T
-    singleAdminNoticeList.value.records.forEach((notice) => {
-      notice.publishTime = notice.publishTime.replace('T', ' ')
-    })
+    formatNoticeList(singleAdminNoticeList.value.records)
   }
 
   // 刷新管理员个人通知
   const updateSingleAdminNoticeList = async (
-    state: string,
+    state: number,
     current: number,
     size: number,
     content: string,
@@ -45,10 +49,7 @@ export const useDeliverNoticeStore = defineStore('deliverNotice', () => {
   ) => {
     const res = await getSingleAdminNotice(state, current, size, content, type, dataType)
     singleAdminNoticeList.value = res.data
-    // 移除发布时间字符串中的T
-    singleAdminNoticeList.value.records.forEach((notice) => {
-      notice.publishTime = notice.publishTime.replace('T', ' ')
-    })
+    formatNoticeList(singleAdminNoticeList.value.records)
   }
 
   return {

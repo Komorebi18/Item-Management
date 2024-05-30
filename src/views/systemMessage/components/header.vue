@@ -3,75 +3,26 @@
     <div class="left-header">
       <slot name="button"></slot>
       <div class="select-box">
-        <el-select
-          v-if="props.isShowTimeSelection"
-          v-model="timeLimit"
-          placeholder="全部"
-          class="select-time"
-          @change="onChangeLimit()"
-        >
-          <el-option label="全部" :value="TIME_LIMIT.ALL" />
-          <el-option label="近三天" :value="TIME_LIMIT.THREE_DAYS" />
-          <el-option label="近一周" :value="TIME_LIMIT.ONE_WEEK" />
-          <el-option label="近一月" :value="TIME_LIMIT.ONE_MONTH" />
-        </el-select>
-        <el-select
-          v-if="props.isShowTypeSelection"
-          v-model="typeLimit"
-          placeholder="所有类型"
-          class="select-type"
-          @change="onChangeLimit()"
-        >
-          <el-option label="所有类型" :value="0" />
-          <el-option
-            v-for="tag in noticeTypeList"
-            :key="tag.typeId"
-            :label="tag.typeName"
-            :value="tag.typeId"
-          />
-        </el-select>
+        <TimeSelection v-if="props.isShowTimeSelection" @update-time-limit="onChangeTimeLimit" />
+        <TypeSelection v-if="props.isShowTypeSelection" @update-type-limit="onChangeTypeLimit" />
       </div>
     </div>
-    <div class="search-box">
-      <el-input
-        v-model="searchKeyword"
-        placeholder="请输入关键词"
-        @keydown.enter="searchNotice()"
-      />
-      <el-button class="search-btn" color="#2F3367" @click="searchNotice()">
-        <el-icon>
-          <Search />
-        </el-icon>
-      </el-button>
-    </div>
+    <SearchInput @search="searchNotice" />
   </div>
 </template>
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import { storeToRefs } from 'pinia'
-import { Search } from '@element-plus/icons-vue'
-import { useNoticeStore } from '@/store/modules/notice/index'
-
-// 时间限制变量
-const enum TIME_LIMIT {
-  /** 全部 */
-  ALL,
-  /** 近三天 */
-  THREE_DAYS,
-  /** 近一个周 */
-  ONE_WEEK,
-  /** 近一个月 */
-  ONE_MONTH
-}
-
-const noticeStore = useNoticeStore()
-const { noticeTypeList } = storeToRefs(noticeStore)
+import { ref } from 'vue'
+import TypeSelection from './TypeSelection.vue'
+import TimeSelection from './TimeSelection.vue'
+import SearchInput from '@/components/SearchInput/index.vue'
 
 const emit = defineEmits<{
   // 搜索通知
-  search: [keyWord: string]
-  // 更新通知时间/类型限制
-  updateLimit: [timeLimit: number, typeLimit: number]
+  search: [keyword: string]
+  // 更新通知时间限制
+  updateTimeLimit: [timeLimit: number]
+  // 更新通类型限制
+  updateTypeLimit: [typeLimit: number]
 }>()
 
 const props = defineProps<{
@@ -82,29 +33,25 @@ const props = defineProps<{
 }>()
 
 // 时间参数
-const timeLimit = ref(TIME_LIMIT.ALL)
-
+const timeLimit = ref(0)
 // 类型参数
 const typeLimit = ref(0)
 
-// 搜索框关键词
-const searchKeyword = ref('')
-
-// 获取通知类型
-onMounted(async () => {
-  await noticeStore.getAllNoticeType()
-})
-
-// 事件回调
-
 // 搜索通知
-const searchNotice = () => {
-  emit('search', searchKeyword.value)
+const searchNotice = (keyword: string) => {
+  emit('search', keyword)
 }
 
-// 时间or类型参数改变
-const onChangeLimit = () => {
-  emit('updateLimit', timeLimit.value, typeLimit.value)
+// 类型限制参数改变
+const onChangeTypeLimit = (type: number) => {
+  typeLimit.value = type
+  emit('updateTypeLimit', typeLimit.value)
+}
+
+// 时间限制参数改变
+const onChangeTimeLimit = (time: number) => {
+  timeLimit.value = time
+  emit('updateTimeLimit', timeLimit.value)
 }
 </script>
 <style lang="scss" scoped>
@@ -145,16 +92,6 @@ const onChangeLimit = () => {
 :deep(.select-box .el-select__placeholder) {
   color: #2f3367;
   font-weight: 600;
-}
-
-.select-time {
-  width: 100px;
-  margin: 5px 0 0;
-}
-
-.select-type {
-  width: 130px;
-  margin: 5px 0 0;
 }
 
 :deep(.el-input__wrapper) {

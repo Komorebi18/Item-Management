@@ -12,7 +12,7 @@ import type { INoticeList, INoticeType } from '@/types/notice'
  * @returns 系统通知中每条通知的具体参数
  */
 export const getSingleAdminNotice = (
-  state: string,
+  state: number,
   offset: number,
   limit: number,
   content: string,

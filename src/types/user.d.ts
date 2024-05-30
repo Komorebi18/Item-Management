@@ -1,7 +1,7 @@
 /**
  * 返回的数据对象
  */
-export interface Data {
+export interface IPagingData {
   /**
    * 当前页
    */
@@ -13,7 +13,7 @@ export interface Data {
   /**
    * 分页对象数据
    */
-  records: UserInformation[]
+  records: IUserInformation[]
   /**
    * 每页显示数量
    */
@@ -22,13 +22,12 @@ export interface Data {
    * 数量总数
    */
   total: number
-  [property: string]: any
 }
 
 /**
  * 用户详细数据
  */
-export interface UserInformation {
+export interface IUserInformation {
   /**
    * 头像
    */
@@ -86,7 +85,7 @@ export interface UserInformation {
 /**
  * 用户分组
  */
-export interface UserGroup {
+export interface IUserGroup {
   /**
    * 用户分组id
    */

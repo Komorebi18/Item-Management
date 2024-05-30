@@ -3,13 +3,13 @@ import { defineStore } from 'pinia'
 import { useStorage } from '@vueuse/core'
 import { getLoginAPI, fetchTokenAPI } from '@/api/login'
 import { getUserGroupList, getUserPartialInformation } from '@/api/user'
-import type { userInformation } from '@/types/login'
-import type { UserGroup, UserInformation, Data } from '@/types/user'
+import type { IUserLoginInfo } from '@/types/login'
+import type { IUserGroup, IUserInformation, IPagingData } from '@/types/user'
 import { ref, reactive } from 'vue'
 
 export const useUserStore = defineStore('user', () => {
   // 初始化用户数据
-  const userInfo = ref<userInformation>({
+  const userInfo = ref<IUserLoginInfo>({
     adminId: 0,
     roles: [],
     route: '',
@@ -20,16 +20,16 @@ export const useUserStore = defineStore('user', () => {
   })
 
   // 用户信息--用来渲染发送通知给单个用户，展示可选用户的列表
-  const userPartialInformation = reactive<Data>({
+  const userPartialInformation = reactive<IPagingData>({
     current: 1,
     size: 10,
     total: 0,
     pages: 0,
-    records: <UserInformation[]>[]
+    records: <IUserInformation[]>[]
   })
 
   // 所有分组类型
-  const userGroupList = ref<UserGroup[]>([])
+  const userGroupList = ref<IUserGroup[]>([])
 
   // 初始化accessToken
   const token = useStorage<string>('token', '')
@@ -107,7 +107,7 @@ export const useUserStore = defineStore('user', () => {
   }
 
   // 获取用户ID和昵称
-  const getPartialUserinfo = async () => {
+  const getPartialUserInfo = async () => {
     const res = await getUserPartialInformation(userPartialInformation.current as number, 20)
     // 页码递增
     userPartialInformation.current = (res.data.current as number) + 1
@@ -116,7 +116,7 @@ export const useUserStore = defineStore('user', () => {
     userPartialInformation.total = res.data.total
     userPartialInformation.pages = res.data.pages
     if (userPartialInformation.records) {
-      userPartialInformation.records.push(...(res.data.records as UserInformation[]))
+      userPartialInformation.records.push(...(res.data.records as IUserInformation[]))
     }
   }
   return {
@@ -127,7 +127,7 @@ export const useUserStore = defineStore('user', () => {
     setLogin,
     outLogin,
     updateToken,
-    getUserGroupList: getUserGroup,
-    getUserPartialInformation: getPartialUserinfo
+    getUserGroup,
+    getPartialUserInfo
   }
 })

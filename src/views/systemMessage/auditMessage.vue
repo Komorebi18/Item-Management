@@ -174,10 +174,10 @@ import { Search, UserFilled, View, User, Plus } from '@element-plus/icons-vue'
 import { ref, onMounted } from 'vue'
 import type { NoticeItem } from '@/types/notice'
 import type { pageInfo } from '@/types/pageMessage'
-import { useNoticeStore } from '@/store/modules/notice'
+// import { useNoticeStore } from '@/store/modules/notice'
 
 // store数据
-const noticeStore = useNoticeStore()
+// const noticeStore = useNoticeStore()
 
 // 搜索框内容
 let input = ref('')

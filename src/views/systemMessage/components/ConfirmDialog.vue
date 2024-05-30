@@ -3,7 +3,7 @@
     <div>
       <div class="warning-icon">
         <img src="../../../assets/icons/delete-waring.svg" alt="" />
-        <span>{{ props.confirmationMessage }}</span>
+        <span>{{ confirmationMessage }}</span>
       </div>
     </div>
     <template #footer>
@@ -13,19 +13,17 @@
       </span>
     </template>
   </el-dialog>
-  <Toast ref="toastRef" :prompt-message="props.promptMessage" />
+  <Toast ref="toastRef" :prompt-message="promptMessage" />
 </template>
 
 <script setup lang="ts">
 import { ref } from 'vue'
 import Toast from './Toast.vue'
 
-const props = defineProps<{
-  // 确认框展示信息
-  confirmationMessage: string
-  // 确认框展示信息
-  promptMessage: string
-}>()
+// 确认框展示信息
+const confirmationMessage = ref('')
+// 确认后提示信息
+const promptMessage = ref('')
 
 const emit = defineEmits<{
   // 确认按钮点击事件
@@ -47,7 +45,9 @@ const handleClickConfirm = () => {
 }
 
 // 打开确认对话框的方法
-const openDialog = () => {
+const openDialog = (confirmMsg: string, promptMsg: string) => {
+  confirmationMessage.value = confirmMsg
+  promptMessage.value = promptMsg
   isShowConfirmDialog.value = true
 }
 

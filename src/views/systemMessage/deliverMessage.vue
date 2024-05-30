@@ -2,10 +2,11 @@
   <div class="box">
     <!-- 页面顶部 -->
     <Header
-      :is-show-time-selection="true"
-      :is-show-type-selection="true"
+      is-show-time-selection
+      is-show-type-selection
       @search="searchNotice"
-      @update-limit="filterNotice"
+      @update-time-limit="filterNoticeByTime"
+      @update-type-limit="filterNoticeByType"
     >
       <template #button>
         <el-button
@@ -26,34 +27,10 @@
         <el-scrollbar class="pane-content" ref="scrollbarRef">
           <TabPane
             :noticeList="singleAdminNoticeList.records"
-            tabName="全部"
-            :name="TAB_TYPE.ALL"
             @view="handleViewIconClick"
             @edit="handleEditIconClick"
             @delete="handleDeleteIconClick"
             @process="handleProcessIconClick"
-            @publish="handlePublishIconClick"
-          />
-          <TabPane
-            :noticeList="singleAdminNoticeList.records"
-            tabName="编辑中"
-            :name="TAB_TYPE.EDITING"
-            @view="handleViewIconClick"
-            @edit="handleViewIconClick"
-            @delete="handleDeleteIconClick"
-          />
-          <TabPane
-            :noticeList="singleAdminNoticeList.records"
-            tabName="审核中"
-            :name="TAB_TYPE.AUDITING"
-            @view="handleViewIconClick"
-            @process="handleProcessIconClick"
-          />
-          <TabPane
-            :noticeList="singleAdminNoticeList.records"
-            tabName="已审核"
-            :name="TAB_TYPE.AUDITED"
-            @view="handleViewIconClick"
             @publish="handlePublishIconClick"
           />
         </el-scrollbar>
@@ -67,12 +44,7 @@
       @pagination="handlePageChange"
     />
     <!-- 对话框 -->
-    <ConfirmDialog
-      ref="toastRef"
-      :confirmation-message="confirmationMessage"
-      :prompt-message="promptMessage"
-      @confirm="handleConfirm(true)"
-    />
+    <ConfirmDialog ref="toastRef" @confirm="handleConfirm(isDeleteConfirm)" />
   </div>
 </template>
 <script setup lang="ts">
@@ -94,26 +66,20 @@ const router = useRouter()
 const { refreshSingleAdminNoticeList, updateSingleAdminNoticeList } = deliverNoticeStore
 const { singleAdminNoticeList } = storeToRefs(deliverNoticeStore)
 
-// 通知发布进度常量
-const enum TAB_TYPE {
-  /**全部 */
-  ALL = '0',
-  /**编辑中*/
-  EDITING = '1',
-  /**审核中 */
-  AUDITING = '2',
-  /**已审核 */
-  AUDITED = '3'
-}
-
-// 搜索框内容
-const searchInput = ref('')
-
 // 当前展示的tab
-const activeTab = ref(TAB_TYPE.ALL)
+const activeTab = ref(0)
 
 // 选中的通知Id
 const chooseMessageId = ref(0)
+
+// 搜索关键词
+const searchKeyword = ref('')
+
+// 时间限制
+const timeLimit = ref(0)
+
+// 类型限制
+const typeLimit = ref(0)
 
 // 选中的通知标题
 const chooseMessageTitle = computed(() => {
@@ -132,18 +98,31 @@ const confirmationMessage = ref('')
 // 提示弹窗信息
 const promptMessage = ref('')
 
+// 是否是删除确认弹窗
+const isDeleteConfirm = ref(false)
+
 // 获取toast实例
 const toastRef = ref<InstanceType<typeof ConfirmDialog>>()
 
 onMounted(() => {
   // 获取该管理员所有通知
-  refreshSingleAdminNoticeList(activeTab.value, searchInput.value, 0, 0)
+  refreshSingleAdminNoticeList(
+    activeTab.value,
+    searchKeyword.value,
+    typeLimit.value,
+    timeLimit.value
+  )
 })
 
 // tab页签点击触发
 const handleTabChange = () => {
   // 获取该管理员对应类型通知通知
-  refreshSingleAdminNoticeList(activeTab.value, searchInput.value, 0, 0)
+  refreshSingleAdminNoticeList(
+    activeTab.value,
+    searchKeyword.value,
+    typeLimit.value,
+    timeLimit.value
+  )
 }
 
 // 点击操作信息icon触发对应函数
@@ -166,11 +145,12 @@ const handleEditIconClick = (noticeId: number) => {
 }
 // 点击delete-icon
 const handleDeleteIconClick = (noticeId: number) => {
+  isDeleteConfirm.value = true
   chooseMessageId.value = noticeId
   // 打开确认弹窗
-  toastRef.value!.openDialog()
   confirmationMessage.value = `是否确认将此通知删除？`
   promptMessage.value = `已删除此通知`
+  toastRef.value!.openDialog(confirmationMessage.value, promptMessage.value)
 }
 
 // 点击process-icon
@@ -181,11 +161,12 @@ const handleProcessIconClick = (noticeId: number) => {
 
 // 点击publish-icon
 const handlePublishIconClick = (noticeId: number) => {
+  isDeleteConfirm.value = false
   chooseMessageId.value = noticeId
   // 打开确认弹窗
-  toastRef.value!.openDialog()
   confirmationMessage.value = `是否确认将此通知发布？`
   promptMessage.value = `已发布通知`
+  toastRef.value!.openDialog(confirmationMessage.value, promptMessage.value)
 }
 
 // 分页按钮点击触发
@@ -195,9 +176,9 @@ const handlePageChange = (pageMessage: IPageInfo) => {
     activeTab.value,
     pageMessage.currentPage,
     pageMessage.pageLimit,
-    searchInput.value,
-    0,
-    0
+    searchKeyword.value,
+    typeLimit.value,
+    timeLimit.value
   )
   // 滚动条回滚到顶端
   scrollbarRef.value?.scrollTo(0, 0)
@@ -205,29 +186,61 @@ const handlePageChange = (pageMessage: IPageInfo) => {
 
 // 搜索框筛选通知
 const searchNotice = (keyword: string) => {
-  // 更新搜索框内容
-  searchInput.value = keyword
+  searchKeyword.value = keyword
   // 发送请求更新数据
-  refreshSingleAdminNoticeList(activeTab.value, searchInput.value, 0, 0)
+  refreshSingleAdminNoticeList(
+    activeTab.value,
+    searchKeyword.value,
+    typeLimit.value,
+    timeLimit.value
+  )
 }
 
-// 通过通知时间/类型筛选通知
-const filterNotice = (timeLimit: number, typeLimit: number) => {
+// 通过通知时间筛选通知
+const filterNoticeByTime = (time: number) => {
+  timeLimit.value = time
   // 发送请求更新数据
-  refreshSingleAdminNoticeList(activeTab.value, searchInput.value, typeLimit, timeLimit)
+  refreshSingleAdminNoticeList(
+    activeTab.value,
+    searchKeyword.value,
+    typeLimit.value,
+    timeLimit.value
+  )
+}
+
+// 通过通知类型筛选通知
+const filterNoticeByType = (type: number) => {
+  typeLimit.value = type
+  // 发送请求更新数据
+  refreshSingleAdminNoticeList(
+    activeTab.value,
+    searchKeyword.value,
+    typeLimit.value,
+    timeLimit.value
+  )
 }
 
 // 删除通知
-const handleConfirm = (isDeleteConfirm: boolean) => {
-  if (isDeleteConfirm) {
+const handleConfirm = async (isDeleteConfirmState: boolean) => {
+  if (isDeleteConfirmState) {
     // 删除通知
-    deleteOwnNotice(chooseMessageTitle.value, chooseMessageId.value)
+    await deleteOwnNotice(chooseMessageTitle.value, chooseMessageId.value)
     // 发送请求获取新数据
-    refreshSingleAdminNoticeList(activeTab.value, searchInput.value, 0, 0)
+    refreshSingleAdminNoticeList(
+      activeTab.value,
+      searchKeyword.value,
+      typeLimit.value,
+      timeLimit.value
+    )
   } else {
     // 正式发布通知
-    publishNoticeToUser(chooseMessageTitle.value, chooseMessageId.value)
-    refreshSingleAdminNoticeList(activeTab.value, searchInput.value, 0, 0)
+    await publishNoticeToUser(chooseMessageTitle.value, chooseMessageId.value)
+    refreshSingleAdminNoticeList(
+      activeTab.value,
+      searchKeyword.value,
+      typeLimit.value,
+      timeLimit.value
+    )
   }
 }
 
