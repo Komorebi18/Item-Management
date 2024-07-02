@@ -43,6 +43,13 @@ import { updateNoticeContent, addNewNotice } from '@/api/notice'
 import Toast from '@/views/systemMessage/components/Toast.vue'
 import DeliverOptionDialog from '@/views/systemMessage/components/DeliverOptionDialog.vue'
 
+// 发送方式枚举
+enum DELIVER_MODE {
+  TO_ALL_USER,
+  TO_GROUP_USER,
+  TO_SPECIFIED_USER
+}
+
 const deliverNoticeStore = useDeliverNoticeStore()
 const { singleAdminNoticeList } = storeToRefs(deliverNoticeStore)
 
@@ -78,13 +85,6 @@ const messageTitle = ref(currentNoticeDetail.value?.title || '')
 const selectedTypeId = ref(1)
 // 提示框信息
 const toastMessage = ref('')
-
-// 发送方式枚举
-enum DELIVER_MODE {
-  TO_ALL_USER,
-  TO_GROUP_USER,
-  TO_SPECIFIED_USER
-}
 
 // 点击保存为草稿触发
 const setDraft = async () => {
