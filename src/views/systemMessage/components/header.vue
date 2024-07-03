@@ -7,7 +7,7 @@
         <TypeSelection v-if="props.isShowTypeSelection" @update-type-limit="onChangeTypeLimit" />
       </div>
     </div>
-    <SearchInput @search="searchNotice" />
+    <SearchInput v-model="searchKeyword" @search="searchNotice" />
   </div>
 </template>
 <script setup lang="ts">
@@ -36,10 +36,12 @@ const props = defineProps<{
 const timeLimit = ref(0)
 // 类型参数
 const typeLimit = ref(0)
+// 搜索关键字
+const searchKeyword = ref('')
 
 // 搜索通知
-const searchNotice = (keyword: string) => {
-  emit('search', keyword)
+const searchNotice = () => {
+  emit('search', searchKeyword.value)
 }
 
 // 类型限制参数改变

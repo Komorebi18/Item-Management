@@ -9,17 +9,18 @@
   </div>
 </template>
 <script setup lang="ts">
-import { ref } from 'vue'
 import { Search } from '@element-plus/icons-vue'
 
 const emit = defineEmits<{
-  search: [keyword: string]
+  search: []
 }>()
 
-const searchKeyword = ref('')
+// 搜索关键词
+const searchKeyword = defineModel({ default: '' })
 
+// 触发搜索逻辑
 const searchNotice = () => {
-  emit('search', searchKeyword.value)
+  emit('search')
 }
 </script>
 <style lang="scss" scoped>
