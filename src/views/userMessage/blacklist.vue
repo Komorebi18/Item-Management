@@ -63,7 +63,6 @@
     <!-- 对话框 -->
     <!-- 打回通知依据对话框 -->
     <el-dialog v-model="isOpenBasisDialog" width="30%" :title="basisBoxTitle" class="basis-box">
-      <div class="line"></div>
       <div class="basis">
         <p>移入依据:</p>
         <el-input
@@ -121,6 +120,7 @@
 <script setup lang="ts">
 import { Search, Plus } from '@element-plus/icons-vue'
 import { ref, onMounted, computed } from 'vue'
+import CallBackDialog from '@/views/systemMessage/components/CallBackDialog.vue'
 
 // 表示当前所处状态：查看黑名单/待拉入黑名单
 let isBlackList = ref(true)
