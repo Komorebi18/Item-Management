@@ -75,12 +75,18 @@
         <p>图片依据：</p>
         <el-upload
           v-model:file-list="fileList"
-          action="https://run.mocky.io/v3/9d059bf9-4660-45f2-925d-ce80ad6c4d15"
+          action="#"
           list-type="picture-card"
+          :http-request="httpRequest"
           :on-preview="handlePictureCardPreview"
           :on-remove="handleRemove"
-          ><el-icon><Plus /></el-icon
-        ></el-upload>
+        >
+          <el-icon><Plus /></el-icon>
+        </el-upload>
+
+        <el-dialog v-model="dialogVisible">
+          <img w-full :src="dialogImageUrl" alt="Preview Image" />
+        </el-dialog>
       </div>
       <template #footer>
         <span class="dialog-footer">
@@ -120,7 +126,7 @@
 <script setup lang="ts">
 import { Search, Plus } from '@element-plus/icons-vue'
 import { ref, onMounted, computed } from 'vue'
-import CallBackDialog from '@/views/systemMessage/components/CallBackDialog.vue'
+import { uploadPicture } from '@/utils/uploadFile/uploadPicture'
 
 // 表示当前所处状态：查看黑名单/待拉入黑名单
 let isBlackList = ref(true)
@@ -185,6 +191,30 @@ const handleConfirm = () => {
   setTimeout(() => {
     showAlertBox.value = false
   }, 1500)
+}
+
+// 图片上传
+
+import type { UploadProps, UploadUserFile } from 'element-plus'
+
+const fileList = ref<UploadUserFile[]>([])
+
+const dialogImageUrl = ref('')
+const dialogVisible = ref(false)
+
+const handleRemove: UploadProps['onRemove'] = (uploadFile, uploadFiles) => {
+  console.log(uploadFile, uploadFiles)
+}
+
+const handlePictureCardPreview: UploadProps['onPreview'] = (uploadFile) => {
+  dialogImageUrl.value = uploadFile.url!
+  dialogVisible.value = true
+}
+
+const httpRequest = (params: any) => {
+  uploadPicture(params.file, 'blacklist/out')
+  console.log(params)
+  console.log(fileList)
 }
 </script>
 <style lang="scss" scoped>
