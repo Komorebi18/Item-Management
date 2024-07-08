@@ -2,6 +2,22 @@ import { defineStore } from 'pinia'
 import type { INoticeList, INoticeItem } from '@/types/notice'
 import { getPendingAuditNotice } from '@/api/notice'
 
+// 类型枚举
+enum NoticeType {
+  ALL
+}
+
+// 时间枚举
+enum NoticeDateLimit {
+  ALL
+}
+// 搜索关键词
+const searchKeyword = ref('')
+// 通知类型
+const typeLimit = ref(NoticeType.ALL)
+// 日期限制
+const dateLimit = ref(NoticeDateLimit.ALL)
+
 // 格式化通知列表---移除发布时间字符串中的T
 const formatNoticeList = (noticeList: INoticeItem[]) => {
   noticeList.forEach((notice) => {
@@ -20,13 +36,13 @@ export const useAuditNoticeStore = defineStore('viewNotice', () => {
   })
 
   // 刷新待审核的通知
-  const refreshPendingAuditNotice = async (content: string, type: number, dataType: number) => {
+  const refreshPendingAuditNotice = async () => {
     const res = await getPendingAuditNotice(
       pendingAuditNotice.value.current,
       pendingAuditNotice.value.size,
-      content,
-      type,
-      dataType
+      searchKeyword.value,
+      typeLimit.value,
+      dateLimit.value
     )
     pendingAuditNotice.value = res.data
     formatNoticeList(pendingAuditNotice.value.records)
@@ -38,9 +54,14 @@ export const useAuditNoticeStore = defineStore('viewNotice', () => {
     limit: number,
     content: string,
     type: number,
-    dataType: number
+    dateType: number
   ) => {
-    const res = await getPendingAuditNotice(offset, limit, content, type, dataType)
+    // 更新请求参数
+    searchKeyword.value = content
+    typeLimit.value = type
+    dateLimit.value = dateType
+    // 更新数据
+    const res = await getPendingAuditNotice(offset, limit, content, type, dateType)
     pendingAuditNotice.value = res.data
     formatNoticeList(pendingAuditNotice.value.records)
   }

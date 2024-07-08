@@ -1,23 +1,21 @@
 <template>
   <el-dialog v-model="repulseState" width="30%" :title="props.dialogTitle" class="basis-box" center>
     <div class="basis">
-      <p>打回依据:</p>
-      <el-input
-        v-model="textualBasis"
-        type="textarea"
-        :resize="'none'"
-        :rows="4"
-        class="basis-input"
-      />
+      <p>{{ props.commentTitle }}:</p>
+      <el-input v-model="comment" type="textarea" :resize="'none'" :rows="4" class="basis-input" />
       <p>图片依据：</p>
       <el-upload
         v-model:file-list="fileList"
-        action=""
+        action="#"
         list-type="picture-card"
         :on-preview="handlePictureCardPreview"
-        :on-remove="handleRemove"
-        ><el-icon><Plus /></el-icon
-      ></el-upload>
+      >
+        <el-icon><Plus /></el-icon>
+      </el-upload>
+
+      <el-dialog v-model="dialogVisible">
+        <img w-full :src="dialogImageUrl" alt="Preview Image" />
+      </el-dialog>
     </div>
     <template #footer>
       <div class="footer">
@@ -29,31 +27,60 @@
 </template>
 <script setup lang="ts">
 import { ref } from 'vue'
+import type { UploadProps, UploadUserFile } from 'element-plus'
+import { uploadPicture } from '@/utils/uploadFile/uploadPicture'
 const props = defineProps<{
   // 对话框标题
   dialogTitle: string
+  // 文字输入框标题
+  commentTitle: string
 }>()
 
 const emit = defineEmits<{
   // 确认按钮点击事件
-  confirm: []
+  confirm: [callbackBasis: string, imgUrlList: string[]]
 }>()
 
 // 控制对话框的开关
 const repulseState = ref(false)
 
 // 打回通知依据
-const textualBasis = ref('')
+const comment = ref('')
+
+// 收集待上传的图片
+const fileList = ref<UploadUserFile[]>([])
+// 预览图片地址
+const dialogImageUrl = ref('')
+// 上传完成后的图片地址
+const imgUrlList = ref<string[]>([])
+// 控制预览图片对话框的开关
+const dialogVisible = ref(false)
 
 // 确认打回
 const handleRepulseNotice = () => {
-  emit('confirm')
+  // 上传图片到腾讯云
+  fileList.value.forEach(async (file) => {
+    // 文件非空，继续执行
+    if (file.raw) {
+      const imgUrl = await uploadPicture(file.raw, 'systemMessage/callback')
+      imgUrlList.value.push(imgUrl)
+    }
+  })
+  // 通知父组件
+  emit('confirm', comment.value, imgUrlList.value)
+  // 关闭对话框
   repulseState.value = false
 }
 
 // 打开对话框
 const openDialog = () => {
   repulseState.value = true
+}
+
+// 预览图片
+const handlePictureCardPreview: UploadProps['onPreview'] = (uploadFile) => {
+  dialogImageUrl.value = uploadFile.url!
+  dialogVisible.value = true
 }
 
 // 向父组件暴露打开对话框方法

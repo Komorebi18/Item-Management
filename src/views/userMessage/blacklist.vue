@@ -211,10 +211,10 @@ const handlePictureCardPreview: UploadProps['onPreview'] = (uploadFile) => {
   dialogVisible.value = true
 }
 
-const httpRequest = (params: any) => {
-  uploadPicture(params.file, 'blacklist/out')
-  console.log(params)
-  console.log(fileList)
+const httpRequest =  (params: any) => {
+  console.log(fileList.value.length)
+  console.log(params.file)
+  // const res = await uploadPicture(params.file, 'blacklist/out')
 }
 </script>
 <style lang="scss" scoped>

@@ -163,10 +163,18 @@ export const publishNoticeToUser = (title: string, noticeId: number) => {
  * @param noticeId 通知的ID
  * @returns
  */
-export const rejectNotice = (comment: string, title: string, noticeId: number) => {
+export const rejectNotice = (
+  comment: string,
+  title: string,
+  noticeId: number,
+  imgUrlList: string[]
+) => {
   return http({
     url: `/notices/sys/reject/${noticeId}?comment${comment}&title=${title}`,
-    method: 'PUT'
+    method: 'PUT',
+    data: {
+      imgUrlList
+    }
   })
 }
 
