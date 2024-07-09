@@ -8,6 +8,7 @@
         v-model:file-list="fileList"
         action="#"
         list-type="picture-card"
+        :http-request="httpRequest"
         :on-preview="handlePictureCardPreview"
       >
         <el-icon><Plus /></el-icon>
@@ -26,7 +27,8 @@
   </el-dialog>
 </template>
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, toRaw } from 'vue'
+import { Plus } from '@element-plus/icons-vue'
 import type { UploadProps, UploadUserFile } from 'element-plus'
 import { uploadPicture } from '@/utils/uploadFile/uploadPicture'
 const props = defineProps<{
@@ -51,21 +53,25 @@ const comment = ref('')
 const fileList = ref<UploadUserFile[]>([])
 // 预览图片地址
 const dialogImageUrl = ref('')
-// 上传完成后的图片地址
-const imgUrlList = ref<string[]>([])
 // 控制预览图片对话框的开关
 const dialogVisible = ref(false)
+// 上传完成后的图片地址
+const imgUrlList = ref<string[]>([])
 
 // 确认打回
-const handleRepulseNotice = () => {
+const handleRepulseNotice = async () => {
+  imgUrlList.value = []
   // 上传图片到腾讯云
-  fileList.value.forEach(async (file) => {
+  for (const rawFile of fileList.value) {
+    const file = toRaw(rawFile)
     // 文件非空，继续执行
     if (file.raw) {
+      // 图片上传腾讯云，返回图片地址
       const imgUrl = await uploadPicture(file.raw, 'systemMessage/callback')
       imgUrlList.value.push(imgUrl)
     }
-  })
+  }
+
   // 通知父组件
   emit('confirm', comment.value, imgUrlList.value)
   // 关闭对话框
@@ -75,6 +81,11 @@ const handleRepulseNotice = () => {
 // 打开对话框
 const openDialog = () => {
   repulseState.value = true
+}
+
+// 覆盖默认的上传行为
+const httpRequest = async () => {
+  // 啥也不做，文件上传腾讯云放到确认后
 }
 
 // 预览图片

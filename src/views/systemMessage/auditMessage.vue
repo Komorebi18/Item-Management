@@ -33,7 +33,7 @@
                 ><img
                   src="../../assets/icons/passAudit.svg"
                   alt=""
-                  style="width: 1.3em; height: 1.3em; margin: 10px"
+                  class="tooltip-audit"
                   @click="confirmDialogRef!.openDialog(`是否确认通过此通知`, `已通过此通知`)"
               /></el-tooltip>
 
@@ -41,7 +41,7 @@
                 ><img
                   src="../../assets/icons/repulse.svg"
                   alt=""
-                  style="width: 1.3em; height: 1.3em; margin: 10px"
+                  class="tooltip-audit"
                   @click="callBackDialogRef!.openDialog()"
               /></el-tooltip>
             </div>
@@ -69,17 +69,20 @@
       ref="callBackDialogRef"
       @confirm="repulseNotice"
     />
+    <!-- 消息提示框 -->
+    <Toast ref="toastRef" :prompt-message="toastMessage" />
   </div>
 </template>
 
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
-import { ref, onMounted, computed, watch } from 'vue'
+import { ref, onMounted, computed, watch, toRaw } from 'vue'
 import { useAuditNoticeStore } from '@/store/modules/notice/auditNotice'
 import { useUserStore } from '@/store/modules/user'
 import { updateNoticeStateToPass, rejectNotice } from '@/api/notice'
 import type { IPageInfo } from '@/types/pageMessage'
 import Header from '@/views/systemMessage/components/Header.vue'
+import Toast from '@/views/systemMessage/components/Toast.vue'
 import ConfirmDialog from '@/views/systemMessage/components/ConfirmDialog.vue'
 import NoticeDetailWrapper from '@/views/systemMessage/components/NoticeDetailWrapper.vue'
 import CallBackDialog from '@/views/systemMessage/components/CallBackDialog.vue'
@@ -97,6 +100,10 @@ const scrollbarRef = ref<HTMLElement | null>(null)
 const confirmDialogRef = ref<InstanceType<typeof ConfirmDialog>>()
 // 获取callBackDialogRef实例
 const callBackDialogRef = ref<InstanceType<typeof CallBackDialog>>()
+// 获取toast实例
+const toastRef = ref<InstanceType<typeof Toast>>()
+// 消息提示框提示信息
+const toastMessage = ref('')
 // 当前选中的通知的Id
 const currentNoticeId = ref(0)
 // 当前选中的通知的标题
@@ -157,14 +164,18 @@ const onClickMessage = (messageId: number, title: string) => {
 }
 
 // 确认打回通知
-const repulseNotice = (comment: string, imgUrlList: string[]) => {
-  rejectNotice(comment, currentNoticeTitle.value, currentNoticeId.value, imgUrlList)
+const repulseNotice = async (comment: string, imgUrlList: string[]) => {
+  await rejectNotice(comment, currentNoticeTitle.value, currentNoticeId.value, imgUrlList)
+  toastMessage.value = '已打回通知'
+  toastRef.value?.openToast()
   refreshPendingAuditNotice()
 }
 
 // 审核通过
-const passPendingAuditNotice = () => {
-  updateNoticeStateToPass(currentNoticeTitle.value, currentNoticeId.value)
+const passPendingAuditNotice = async () => {
+  await updateNoticeStateToPass(currentNoticeTitle.value, currentNoticeId.value)
+  toastMessage.value = '已审核通过'
+  toastRef.value?.openToast()
   refreshPendingAuditNotice()
 }
 // 搜索框筛选通知
@@ -246,7 +257,7 @@ const onChangeTypeLimit = (type: number) => {
 }
 
 .message-box {
-  height: 64vh;
+  height: 70vh;
   margin-top: 20px;
 }
 
@@ -322,5 +333,11 @@ const onChangeTypeLimit = (type: number) => {
 
 .main-wrapper {
   padding: 0 10px 0 20px;
+}
+
+.tooltip-audit {
+  width: 1.3em;
+  height: 1.3em;
+  margin: 9px;
 }
 </style>

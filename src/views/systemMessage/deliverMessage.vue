@@ -81,6 +81,12 @@ const timeLimit = ref(0)
 // 类型限制
 const typeLimit = ref(0)
 
+// 页面参数
+const pageInfo = ref({
+  currentPage: 1,
+  pageLimit: 10
+})
+
 // 选中的通知标题
 const chooseMessageTitle = computed(() => {
   const res = singleAdminNoticeList.value.records.find(
@@ -106,19 +112,16 @@ const toastRef = ref<InstanceType<typeof ConfirmDialog>>()
 
 onMounted(() => {
   // 获取该管理员所有通知
-  refreshSingleAdminNoticeList(
-    activeTab.value,
-    searchKeyword.value,
-    typeLimit.value,
-    timeLimit.value
-  )
+  refreshSingleAdminNoticeList()
 })
 
 // tab页签点击触发
 const handleTabChange = () => {
   // 获取该管理员对应类型通知通知
-  refreshSingleAdminNoticeList(
+  updateSingleAdminNoticeList(
     activeTab.value,
+    pageInfo.value.currentPage,
+    pageInfo.value.pageLimit,
     searchKeyword.value,
     typeLimit.value,
     timeLimit.value
@@ -171,11 +174,13 @@ const handlePublishIconClick = (noticeId: number) => {
 
 // 分页按钮点击触发
 const handlePageChange = (pageMessage: IPageInfo) => {
-  // 发送请求获取新数据
+  // 更新页面参数
+  pageInfo.value = pageMessage
+  // 更新页面数据
   updateSingleAdminNoticeList(
     activeTab.value,
-    pageMessage.currentPage,
-    pageMessage.pageLimit,
+    pageInfo.value.currentPage,
+    pageInfo.value.pageLimit,
     searchKeyword.value,
     typeLimit.value,
     timeLimit.value
@@ -188,8 +193,10 @@ const handlePageChange = (pageMessage: IPageInfo) => {
 const searchNotice = (keyword: string) => {
   searchKeyword.value = keyword
   // 发送请求更新数据
-  refreshSingleAdminNoticeList(
+  updateSingleAdminNoticeList(
     activeTab.value,
+    pageInfo.value.currentPage,
+    pageInfo.value.pageLimit,
     searchKeyword.value,
     typeLimit.value,
     timeLimit.value
@@ -200,8 +207,10 @@ const searchNotice = (keyword: string) => {
 const filterNoticeByTime = (time: number) => {
   timeLimit.value = time
   // 发送请求更新数据
-  refreshSingleAdminNoticeList(
+  updateSingleAdminNoticeList(
     activeTab.value,
+    pageInfo.value.currentPage,
+    pageInfo.value.pageLimit,
     searchKeyword.value,
     typeLimit.value,
     timeLimit.value
@@ -212,35 +221,27 @@ const filterNoticeByTime = (time: number) => {
 const filterNoticeByType = (type: number) => {
   typeLimit.value = type
   // 发送请求更新数据
-  refreshSingleAdminNoticeList(
+  updateSingleAdminNoticeList(
     activeTab.value,
+    pageInfo.value.currentPage,
+    pageInfo.value.pageLimit,
     searchKeyword.value,
     typeLimit.value,
     timeLimit.value
   )
 }
 
-// 删除通知
+// 确认删除或发布通知
 const handleConfirm = async (isDeleteConfirmState: boolean) => {
   if (isDeleteConfirmState) {
     // 删除通知
     await deleteOwnNotice(chooseMessageTitle.value, chooseMessageId.value)
     // 发送请求获取新数据
-    refreshSingleAdminNoticeList(
-      activeTab.value,
-      searchKeyword.value,
-      typeLimit.value,
-      timeLimit.value
-    )
+    refreshSingleAdminNoticeList()
   } else {
     // 正式发布通知
     await publishNoticeToUser(chooseMessageTitle.value, chooseMessageId.value)
-    refreshSingleAdminNoticeList(
-      activeTab.value,
-      searchKeyword.value,
-      typeLimit.value,
-      timeLimit.value
-    )
+    refreshSingleAdminNoticeList()
   }
 }
 

@@ -6,8 +6,6 @@ const cos = new COS({
   // getAuthorization 必选参数
   getAuthorization: async function (options, callback) {
     const { data } = await getTemporaryToken()
-    // 检查credentials格式
-    console.log(data.credentials)
     callback({
       TmpSecretId: data.credentials.tmpSecretId,
       TmpSecretKey: data.credentials.tmpSecretKey,

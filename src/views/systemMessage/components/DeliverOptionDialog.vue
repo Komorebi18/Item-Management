@@ -195,6 +195,7 @@ const handleSelectionChange = () => {
 // 确认发布通知
 const confirmDeliver = () => {
   emit('confirm', deliverMode.value, typeId.value, selectedIdList.value, groupId.value)
+  isShowDeliverBox.value = false
 }
 
 // 打开提示框
