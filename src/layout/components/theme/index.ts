@@ -18,7 +18,7 @@ export interface MenuObject extends Object {
 
 export const themeColorList = ref<MenuObject[]>([
   {
-    themeColor: '#2F3367', // 默认主题色
+    themeColor: '#2f3367', // 默认主题色
 
     menuBg: '#001529',
     menuText: 'rgb(254 254 254 / 65%)',

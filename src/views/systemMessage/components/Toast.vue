@@ -38,6 +38,7 @@ defineExpose({ openToast })
   background: var(--2F3367, #2f3367);
   box-shadow: 0px 2px 8.1px 6px rgba(161, 166, 201, 0.35);
   background-color: #2f3367;
+  z-index: 999;
 }
 .toast .message-item-content {
   display: flex;

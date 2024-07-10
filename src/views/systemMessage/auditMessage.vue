@@ -82,9 +82,9 @@ import { useUserStore } from '@/store/modules/user'
 import { updateNoticeStateToPass, rejectNotice } from '@/api/notice'
 import type { IPageInfo } from '@/types/pageMessage'
 import Header from '@/views/systemMessage/components/Header.vue'
-import Toast from '@/views/systemMessage/components/Toast.vue'
 import ConfirmDialog from '@/views/systemMessage/components/ConfirmDialog.vue'
 import NoticeDetailWrapper from '@/views/systemMessage/components/NoticeDetailWrapper.vue'
+import Toast from '@/views/systemMessage/components/Toast.vue'
 import CallBackDialog from '@/views/systemMessage/components/CallBackDialog.vue'
 
 // store数据

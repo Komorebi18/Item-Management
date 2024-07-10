@@ -76,6 +76,9 @@ const handleRepulseNotice = async () => {
   emit('confirm', comment.value, imgUrlList.value)
   // 关闭对话框
   repulseState.value = false
+  // 清空数据
+  comment.value = ''
+  fileList.value = []
 }
 
 // 打开对话框
@@ -115,23 +118,6 @@ defineExpose({ openDialog })
   color: #fff;
   background-color: #8a8ea8;
   border-color: #8a8ea8;
-}
-
-:deep(.basis-box .el-dialog__header) {
-  margin-right: 0px;
-  text-align: center;
-  border-bottom: 1px solid #e3e3e3;
-}
-
-:deep(.basis-box .el-dialog__header) {
-  margin-right: 0px;
-  text-align: center;
-  border-bottom: 1px solid #e3e3e3;
-}
-
-:deep(.basis-box .el-dialog__body) {
-  padding: 30px 40px 10px;
-  border-bottom: 1px solid #e3e3e3;
 }
 
 .basis-input {
