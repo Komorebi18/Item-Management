@@ -35,13 +35,13 @@
 <script setup lang="ts">
 import { STATE_TYPE } from '@/enums/Feedback'
 import { IFeedBack } from '@/types/feedback'
-import { pageInfo } from '@/types/pageMessage'
+import { IPageInfo } from '@/types/pageMessage'
 
 // 子掉父
 const emit = defineEmits<{
   (e: 'replyQuick', userId: number, feedbackId: number): void
   (e: 'viewDetail', feedbackId: number): void
-  (e: 'changePage', pageMessage: pageInfo): void
+  (e: 'changePage', pageMessage: IPageInfo): void
 }>()
 
 const OnReplyQuick = (userId: number, feedbackId: number) => {
@@ -89,7 +89,7 @@ const formatState = ({ state }: { state: number }) => {
 }
 
 // 点击页数改变
-const onChangePage = (pageMessage: pageInfo) => {
+const onChangePage = (pageMessage: IPageInfo) => {
   emit('changePage', pageMessage)
 }
 </script>

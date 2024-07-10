@@ -141,6 +141,11 @@ const searchKeyword = ref('')
 const timeLimit = ref(0)
 // 通知类型限制
 const typeLimit = ref(0)
+// 页面参数
+const pageInfo = ref({
+  currentPage: 1,
+  pageLimit: 10
+})
 // 获取用户分组名称
 const getGroupName = (groupId: number) => {
   return userGroupList.value.find((item) => item.groupId === groupId)?.groupName
@@ -164,18 +169,17 @@ watch(
 onMounted(async () => {
   // 获取分组
   // 获取该管理员所有通知
-  await Promise.all([
-    userStore.getUserGroup(),
-    refreshAllNoticeList('', typeLimit.value, timeLimit.value)
-  ])
+  await Promise.all([userStore.getUserGroup(), refreshAllNoticeList()])
   currentNoticeId.value = allNoticeList.value.records[0].noticeId
 })
 
 // 更新页面展示信息
 const handlePageChange = (pageMessage: IPageInfo) => {
+  //更新页面参数
+  pageInfo.value = pageMessage
   updateAllNoticeList(
-    pageMessage.currentPage,
-    pageMessage.pageLimit,
+    pageInfo.value.currentPage,
+    pageInfo.value.pageLimit,
     searchKeyword.value,
     typeLimit.value,
     timeLimit.value
@@ -200,7 +204,7 @@ const handleDeleteNotice = async () => {
   // 拿到待删除的通知Id发送请求
   await deleteAnyNotice(currentNoticeDetail.value!.title, currentNoticeId.value)
   // 发送请求获取新数据
-  await refreshAllNoticeList(searchKeyword.value, typeLimit.value, timeLimit.value)
+  await refreshAllNoticeList()
 }
 
 // 搜索框筛选通知
@@ -208,21 +212,39 @@ const searchNotice = async (keyword: string) => {
   // 更新搜索关键字
   searchKeyword.value = keyword
   // 发送请求更新数据
-  await refreshAllNoticeList(searchKeyword.value, typeLimit.value, timeLimit.value)
+  await updateAllNoticeList(
+    pageInfo.value.currentPage,
+    pageInfo.value.pageLimit,
+    searchKeyword.value,
+    typeLimit.value,
+    timeLimit.value
+  )
 }
 
 // 根据时间筛选通知
 const onChangeTimeLimit = (time: number) => {
   // 更新时间限制
   timeLimit.value = time
-  refreshAllNoticeList(searchKeyword.value, typeLimit.value, timeLimit.value)
+  updateAllNoticeList(
+    pageInfo.value.currentPage,
+    pageInfo.value.pageLimit,
+    searchKeyword.value,
+    typeLimit.value,
+    timeLimit.value
+  )
 }
 
 // 根据类型筛选通知
 const onChangeTypeLimit = (type: number) => {
   // 更新类型限制
   typeLimit.value = type
-  refreshAllNoticeList(searchKeyword.value, typeLimit.value, timeLimit.value)
+  updateAllNoticeList(
+    pageInfo.value.currentPage,
+    pageInfo.value.pageLimit,
+    searchKeyword.value,
+    typeLimit.value,
+    timeLimit.value
+  )
 }
 </script>
 

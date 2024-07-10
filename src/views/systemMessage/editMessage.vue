@@ -39,7 +39,7 @@ import { storeToRefs } from 'pinia'
 import { useRouter, useRoute } from 'vue-router'
 import { ref, computed } from 'vue'
 import { useDeliverNoticeStore } from '@/store/modules/notice/deliverNotice'
-import { updateNoticeContent, addNewNotice } from '@/api/notice'
+import { updateNoticeContent, addNewNotice, updateNoticeStateToCheck } from '@/api/notice'
 import Toast from '@/views/systemMessage/components/Toast.vue'
 import DeliverOptionDialog from '@/views/systemMessage/components/DeliverOptionDialog.vue'
 
@@ -89,7 +89,7 @@ const toastMessage = ref('')
 // 点击保存为草稿触发
 const setDraft = async () => {
   // 通过messageId是否初始化判断是新建一条通知还是重新编辑已有通知
-  if (Number.isInteger(messageId)) {
+  if (!Number.isInteger(messageId)) {
     // 新增通知草稿
     await addNewNotice(NEW_NOTICE_DRAFT, messageTitle.value, messageContent.value, -1, 0, 0, [])
   } else {
@@ -111,7 +111,7 @@ const setDraft = async () => {
 }
 
 // 确认发布通知
-const confirmDeliver = (
+const confirmDeliver = async (
   deliverMode: number,
   noticeTypeId: number,
   userIdList: number[],
@@ -120,7 +120,7 @@ const confirmDeliver = (
   // 更新数据
   selectedTypeId.value = noticeTypeId
   // 通过messageId是否初始化判断是新建一条通知还是重新编辑已有通知
-  if (Number.isInteger(messageId)) {
+  if (!Number.isInteger(messageId)) {
     // 新增待审核通知
     if (deliverMode === DELIVER_MODE.TO_ALL_USER) {
       // 发送给所有人
@@ -156,11 +156,50 @@ const confirmDeliver = (
         userIdList
       )
     }
-    // 打开提示框
-    toastMessage.value = `发布成功\n请等待管理员审核`
-    toastRef.value!.openToast()
-    router.back()
+  } else {
+    // 已有该通知，直接修改状态即可，不必重新创建
+    // 先修改通知参数
+    if (deliverMode === DELIVER_MODE.TO_ALL_USER) {
+      // 发送给所有用户
+      await updateNoticeContent(
+        messageTitle.value,
+        messageContent.value,
+        -1,
+        messageId,
+        [],
+        0,
+        selectedTypeId.value
+      )
+    } else if (deliverMode === DELIVER_MODE.TO_GROUP_USER) {
+      // 发送给分组用户
+      await updateNoticeContent(
+        messageTitle.value,
+        messageContent.value,
+        0,
+        messageId,
+        [],
+        groupId,
+        selectedTypeId.value
+      )
+    } else if (deliverMode === DELIVER_MODE.TO_SPECIFIED_USER) {
+      // 发送给分组用户
+      await updateNoticeContent(
+        messageTitle.value,
+        messageContent.value,
+        1,
+        messageId,
+        userIdList,
+        0,
+        selectedTypeId.value
+      )
+    }
+    // 再修改通知状态为待审核
+    updateNoticeStateToCheck(messageTitle.value, messageId)
   }
+  // 打开提示框
+  toastMessage.value = `发布成功\n请等待审核`
+  toastRef.value!.openToast()
+  router.back()
 }
 </script>
 <style lang="scss" scoped>

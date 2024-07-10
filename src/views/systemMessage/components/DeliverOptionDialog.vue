@@ -37,7 +37,7 @@
       <div v-if="isDeliverOne" class="deliver-one">
         <div v-for="user in selectedList" :key="user.userId">
           <div class="selected-one">
-            <i class="selected-user-card">{{ user.name }}</i>
+            <i class="selected-user-card">{{ user.username }}</i>
             <el-icon class="delete-icon" @click="deleteSelectUser(user.userId)"><Close /></el-icon>
           </div>
         </div>
@@ -71,7 +71,7 @@
               :value="user.userId"
             >
               <div class="select-option">
-                <span>{{ user.name }}</span>
+                <span>{{ user.username }}</span>
                 <span>{{ user.id }}</span>
               </div>
             </el-option>
@@ -90,9 +90,12 @@ import { ref, computed, onMounted, watchEffect } from 'vue'
 import { Search, Close } from '@element-plus/icons-vue'
 import { useUserStore } from '@/store/modules/user'
 import { useNoticeStore } from '@/store/modules/notice/index'
+import { storeToRefs } from 'pinia'
 
 const userStore = useUserStore()
 const noticeStore = useNoticeStore()
+
+const { userPartialInformation } = storeToRefs(userStore)
 
 // 控制弹窗显示隐藏
 const isShowDeliverBox = ref(false)
@@ -114,7 +117,7 @@ const selectedUserId = ref('选择用户')
 const searchText = ref('')
 // 收集被选中的用户信息
 const selectedList = computed(() => {
-  return userStore.userPartialInformation.records.filter((user) =>
+  return userPartialInformation.value.records.filter((user) =>
     selectedIdList.value.includes(user.userId)
   )
 })
@@ -195,6 +198,7 @@ const handleSelectionChange = () => {
 // 确认发布通知
 const confirmDeliver = () => {
   emit('confirm', deliverMode.value, typeId.value, selectedIdList.value, groupId.value)
+  isShowDeliverBox.value = false
 }
 
 // 打开提示框

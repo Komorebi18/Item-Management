@@ -1,30 +1,4 @@
 /**
- * 返回的数据对象
- */
-export interface IPagingData {
-  /**
-   * 当前页
-   */
-  current: number
-  /**
-   * 总页数
-   */
-  pages: number
-  /**
-   * 分页对象数据
-   */
-  records: IUserInformation[]
-  /**
-   * 每页显示数量
-   */
-  size: number
-  /**
-   * 数量总数
-   */
-  total: number
-}
-
-/**
  * 用户详细数据
  */
 export interface IUserInformation {
@@ -47,7 +21,7 @@ export interface IUserInformation {
   /**
    * 用户名
    */
-  name: string
+  username: string
   /**
    * 手机号
    */
@@ -80,6 +54,65 @@ export interface IUserInformation {
    * 用户操作日志
    */
   userOperationLog: string
+}
+
+export interface IBlacklistUserInfo {
+  /**
+   * 黑名单id
+   */
+  blacklistId: number
+  /**
+   * 移入黑名单操作的管理员id
+   */
+  inAdminId: number
+  /**
+   * 移入操作管理员名称
+   */
+  inAdminName: string
+  /**
+   * 移入黑名单图片
+   */
+  inImages: string[]
+  /**
+   * 拉入黑名单的原因
+   */
+  inReason: string
+  /**
+   * 拉入黑名单的时间
+   */
+  inTime: string
+  /**
+   * 移出黑名单操作的管理员id
+   */
+  outAdminId: number
+  /**
+   * 移出操作管理员名称
+   */
+  outAdminName: string
+  /**
+   * 移出黑名单图片
+   */
+  outImages: string[]
+  /**
+   * 取消黑名单的原因
+   */
+  outReason: string
+  /**
+   * 移出黑名单时间
+   */
+  outTime: string
+  /**
+   * 状态(0未移出黑名单 1表示已经移出黑名单)
+   */
+  state: number
+  /**
+   * 黑名单用户id
+   */
+  userId: number
+  /**
+   * 用户名称
+   */
+  username: string
 }
 
 /**

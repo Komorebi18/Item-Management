@@ -163,10 +163,16 @@ export const publishNoticeToUser = (title: string, noticeId: number) => {
  * @param noticeId 通知的ID
  * @returns
  */
-export const rejectNotice = (comment: string, title: string, noticeId: number) => {
+export const rejectNotice = (
+  comment: string,
+  title: string,
+  noticeId: number,
+  imgUrlList: string[]
+) => {
   return http({
-    url: `/notices/sys/reject/${noticeId}?comment${comment}&title=${title}`,
-    method: 'PUT'
+    url: `/notices/sys/reject/${noticeId}?comment=${comment}&title=${title}`,
+    method: 'PUT',
+    data: imgUrlList
   })
 }
 
@@ -208,7 +214,7 @@ export const allNoticeType = () => {
 }
 /**
  * 添加新通知
- * @param state 请求状态，草稿(未发送)传0，待审核传1
+ * @param state 请求状态，草稿(未发送)传1，待审核传2
  * @param title 系统通知标题
  * @param content 系统通知主体内容
  * @param userId 系统通知目标用户id(广播或草稿传-1,分组传0)

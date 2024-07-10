@@ -33,7 +33,7 @@
                 ><img
                   src="../../assets/icons/passAudit.svg"
                   alt=""
-                  style="width: 1.3em; height: 1.3em; margin: 10px"
+                  class="tooltip-audit"
                   @click="confirmDialogRef!.openDialog(`是否确认通过此通知`, `已通过此通知`)"
               /></el-tooltip>
 
@@ -41,7 +41,7 @@
                 ><img
                   src="../../assets/icons/repulse.svg"
                   alt=""
-                  style="width: 1.3em; height: 1.3em; margin: 10px"
+                  class="tooltip-audit"
                   @click="callBackDialogRef!.openDialog()"
               /></el-tooltip>
             </div>
@@ -59,24 +59,32 @@
       />
     </div>
     <!-- 当前选中消息的详情展示 -->
-    <NoticeDetailWrapper v-show="!isDeleteState" :current-notice-detail="currentNoticeDetail" />
+    <NoticeDetailWrapper :current-notice-detail="currentNoticeDetail" />
     <!-- 审核通过对话框 -->
     <ConfirmDialog ref="confirmDialogRef" @confirm="passPendingAuditNotice" />
     <!-- 打回通知对话框 -->
-    <CallBackDialog dialogTitle="打回依据" ref="callBackDialogRef" @confirm="repulseNotice" />
+    <CallBackDialog
+      dialog-title="打回依据"
+      comment-title="审核意见"
+      ref="callBackDialogRef"
+      @confirm="repulseNotice"
+    />
+    <!-- 消息提示框 -->
+    <Toast ref="toastRef" :prompt-message="toastMessage" />
   </div>
 </template>
 
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
-import { ref, onMounted, computed, watch } from 'vue'
+import { ref, onMounted, computed, watch, toRaw } from 'vue'
 import { useAuditNoticeStore } from '@/store/modules/notice/auditNotice'
 import { useUserStore } from '@/store/modules/user'
-import { updateNoticeStateToPass } from '@/api/notice'
+import { updateNoticeStateToPass, rejectNotice } from '@/api/notice'
 import type { IPageInfo } from '@/types/pageMessage'
 import Header from '@/views/systemMessage/components/Header.vue'
 import ConfirmDialog from '@/views/systemMessage/components/ConfirmDialog.vue'
 import NoticeDetailWrapper from '@/views/systemMessage/components/NoticeDetailWrapper.vue'
+import Toast from '@/views/systemMessage/components/Toast.vue'
 import CallBackDialog from '@/views/systemMessage/components/CallBackDialog.vue'
 
 // store数据
@@ -92,11 +100,13 @@ const scrollbarRef = ref<HTMLElement | null>(null)
 const confirmDialogRef = ref<InstanceType<typeof ConfirmDialog>>()
 // 获取callBackDialogRef实例
 const callBackDialogRef = ref<InstanceType<typeof CallBackDialog>>()
-// 是否处于删除状态
-const isDeleteState = ref(false)
-// 当前展示的通知的Id
+// 获取toast实例
+const toastRef = ref<InstanceType<typeof Toast>>()
+// 消息提示框提示信息
+const toastMessage = ref('')
+// 当前选中的通知的Id
 const currentNoticeId = ref(0)
-// 当前展示的通知的标题
+// 当前选中的通知的标题
 const currentNoticeTitle = ref('')
 // 搜索关键词
 const searchKeyword = ref('')
@@ -104,6 +114,11 @@ const searchKeyword = ref('')
 const timeLimit = ref(0)
 // 通知类型限制
 const typeLimit = ref(0)
+// 页面参数
+const pageInfo = ref({
+  currentPage: 1,
+  pageLimit: 10
+})
 
 // 当前选中通知的详细内容
 const currentNoticeDetail = computed(() => {
@@ -123,18 +138,16 @@ watch(
 onMounted(async () => {
   // 获取分组
   // 获取该管理员所有通知
-  await Promise.all([
-    userStore.getUserGroup(),
-    refreshPendingAuditNotice('', typeLimit.value, timeLimit.value)
-  ])
+  await Promise.all([userStore.getUserGroup(), refreshPendingAuditNotice()])
   currentNoticeId.value = pendingAuditNotice.value.records[0].noticeId
 })
 
 // 更新页面展示信息
 const handlePageChange = (pageMessage: IPageInfo) => {
+  pageInfo.value = pageMessage
   updatePendingAuditNotice(
-    pageMessage.currentPage,
-    pageMessage.pageLimit,
+    pageInfo.value.currentPage,
+    pageInfo.value.pageLimit,
     searchKeyword.value,
     typeLimit.value,
     timeLimit.value
@@ -151,34 +164,58 @@ const onClickMessage = (messageId: number, title: string) => {
 }
 
 // 确认打回通知
-const repulseNotice = () => {
-  // 修改通知状态
+const repulseNotice = async (comment: string, imgUrlList: string[]) => {
+  await rejectNotice(comment, currentNoticeTitle.value, currentNoticeId.value, imgUrlList)
+  toastMessage.value = '已打回通知'
+  toastRef.value?.openToast()
+  refreshPendingAuditNotice()
 }
 
 // 审核通过
-const passPendingAuditNotice = () => {
-  updateNoticeStateToPass(currentNoticeTitle.value, currentNoticeId.value)
+const passPendingAuditNotice = async () => {
+  await updateNoticeStateToPass(currentNoticeTitle.value, currentNoticeId.value)
+  toastMessage.value = '已审核通过'
+  toastRef.value?.openToast()
+  refreshPendingAuditNotice()
 }
 // 搜索框筛选通知
 const searchNotice = async (keyword: string) => {
   // 更新搜索关键字
   searchKeyword.value = keyword
   // 发送请求更新数据
-  await refreshPendingAuditNotice(searchKeyword.value, typeLimit.value, timeLimit.value)
+  await updatePendingAuditNotice(
+    pageInfo.value.currentPage,
+    pageInfo.value.pageLimit,
+    searchKeyword.value,
+    typeLimit.value,
+    timeLimit.value
+  )
 }
 
 // 根据时间筛选通知
 const onChangeTimeLimit = (time: number) => {
   // 更新时间限制
   timeLimit.value = time
-  refreshPendingAuditNotice(searchKeyword.value, typeLimit.value, timeLimit.value)
+  updatePendingAuditNotice(
+    pageInfo.value.currentPage,
+    pageInfo.value.pageLimit,
+    searchKeyword.value,
+    typeLimit.value,
+    timeLimit.value
+  )
 }
 
 // 根据类型筛选通知
 const onChangeTypeLimit = (type: number) => {
   // 更新类型限制
   typeLimit.value = type
-  refreshPendingAuditNotice(searchKeyword.value, typeLimit.value, timeLimit.value)
+  updatePendingAuditNotice(
+    pageInfo.value.currentPage,
+    pageInfo.value.pageLimit,
+    searchKeyword.value,
+    typeLimit.value,
+    timeLimit.value
+  )
 }
 </script>
 
@@ -220,7 +257,7 @@ const onChangeTypeLimit = (type: number) => {
 }
 
 .message-box {
-  height: 64vh;
+  height: 70vh;
   margin-top: 20px;
 }
 
@@ -296,5 +333,11 @@ const onChangeTypeLimit = (type: number) => {
 
 .main-wrapper {
   padding: 0 10px 0 20px;
+}
+
+.tooltip-audit {
+  width: 1.3em;
+  height: 1.3em;
+  margin: 9px;
 }
 </style>

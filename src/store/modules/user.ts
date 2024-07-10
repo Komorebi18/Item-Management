@@ -4,7 +4,8 @@ import { useStorage } from '@vueuse/core'
 import { getLoginAPI, fetchTokenAPI } from '@/api/login'
 import { getUserGroupList, getUserPartialInformation } from '@/api/user'
 import type { IUserLoginInfo } from '@/types/login'
-import type { IUserGroup, IUserInformation, IPagingData } from '@/types/user'
+import type { IUserGroup, IUserInformation } from '@/types/user'
+import type { IPagingData } from '@/types/index'
 import { ref, reactive } from 'vue'
 
 export const useUserStore = defineStore('user', () => {
@@ -20,12 +21,12 @@ export const useUserStore = defineStore('user', () => {
   })
 
   // 用户信息--用来渲染发送通知给单个用户，展示可选用户的列表
-  const userPartialInformation = reactive<IPagingData>({
+  const userPartialInformation = reactive<IPagingData<IUserInformation>>({
     current: 1,
     size: 10,
     total: 0,
     pages: 0,
-    records: <IUserInformation[]>[]
+    records: []
   })
 
   // 所有分组类型
