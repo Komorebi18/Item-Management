@@ -1,256 +1,217 @@
 <template>
-  <div class="box">
+  <div class="wrapper">
     <!-- 头部内容 -->
-    <div class="header">
-      <el-button
-        type="primary"
-        :icon="Plus"
-        class="button-deliver"
-        color="#2F3367"
-        @click="isBlackList = !isBlackList"
-      >
-        {{ isBlackList ? '添加黑名单' : '取消' }}
-      </el-button>
-      <div class="search-box">
-        <el-input v-model="searchInput" placeholder="请输入关键词" />
-        <el-button class="search-button" color="#2F3367" @click="searchUser">
-          <el-icon>
-            <Search style="color: #fff" />
-          </el-icon>
+    <Header :is-show-time-selection="false" :is-show-type-selection="false" @search="searchUser">
+      <template #button>
+        <el-button
+          type="primary"
+          :icon="isViewBlackList ? Plus : undefined"
+          class="remove-notice-btn"
+          color="#2F3367"
+          @click="isViewBlackList = !isViewBlackList"
+        >
+          {{ isViewBlackList ? '添加黑名单' : '取消' }}
         </el-button>
-      </div>
-    </div>
+      </template>
+    </Header>
     <!-- 数据展示行 -->
-    <!-- 已拉入黑名单的页面展示 -->
     <el-table
-      v-show="isBlackList"
-      :data="tableData"
-      :default-sort="{ prop: 'date', order: 'descending' }"
-      style="width: 100%; padding-left: 10px"
+      v-if="blacklistUserList.records && allUserMessage.records"
+      :data="isViewBlackList ? blacklistUserList.records : allUserMessage.records"
+      class="userInfoList"
     >
-      <el-table-column prop="name" label="用户名" width="150" />
-      <el-table-column prop="id" label="用户id" width="180" align="center" />
+      <el-table-column prop="username" label="用户名" width="150" />
+      <el-table-column prop="userId" label="用户id" width="180" align="center" />
       <el-table-column prop="phone" label="用户注册手机号" width="260" align="center" />
-      <el-table-column prop="date" label="拉入黑名单的时间" sortable width="260" align="center" />
+      <el-table-column
+        v-if="isViewBlackList"
+        prop="inTime"
+        label="拉入黑名单的时间"
+        sortable
+        width="260"
+        align="center"
+      />
+      <el-table-column
+        v-else
+        prop="regTime"
+        label="用户注册时间"
+        sortable
+        width="260"
+        align="center"
+      />
       <el-table-column label="操作" width="330" align="center">
-        <template #default>
-          <el-button size="small" @click="isOpenBasisDialog = true" style="margin-right: 20px"
-            >移出黑名单</el-button
+        <template #default="props">
+          <el-button
+            size="small"
+            @click="
+              onClickBlacklistChange(isViewBlackList ? props.row.blacklistId : props.row.userId)
+            "
+            class="button-blacklist"
+            >{{ isViewBlackList ? '移出黑名单' : '拉入黑名单' }}</el-button
           >
-          <el-button link size="small" class="button-view-detail">查看详情</el-button>
-        </template>
-      </el-table-column>
-    </el-table>
-    <!-- 未拉入黑名单的页面展示 -->
-    <el-table
-      v-show="!isBlackList"
-      :data="tableData"
-      :default-sort="{ prop: 'date', order: 'descending' }"
-      style="width: 100%; padding-left: 10px"
-    >
-      <el-table-column prop="name" label="用户名" width="150" />
-      <el-table-column prop="id" label="用户id" width="180" align="center" />
-      <el-table-column prop="phone" label="用户注册手机号" width="260" align="center" />
-      <el-table-column prop="date" label="用户注册时间" sortable width="260" align="center" />
-      <el-table-column label="操作" width="330" align="center">
-        <template #default>
-          <el-button size="small" @click="isOpenBasisDialog = true">移入黑名单</el-button>
+          <el-button
+            v-show="isViewBlackList"
+            link
+            size="small"
+            class="button-view-detail"
+            @click="viewDetail(props.row)"
+            >查看详情</el-button
+          >
         </template>
       </el-table-column>
     </el-table>
     <!-- 分页按钮 -->
-    <pagination :total="20" :page="1" :limit="10" @pagination="handlePageChange" />
-    <!-- 对话框 -->
-    <!-- 打回通知依据对话框 -->
-    <el-dialog v-model="isOpenBasisDialog" width="30%" :title="basisBoxTitle" class="basis-box">
-      <div class="basis">
-        <p>移入依据:</p>
-        <el-input
-          v-model="textualBasis"
-          type="textarea"
-          :resize="'none'"
-          :rows="4"
-          style="width: 92%; height: 100px; margin: 5px 0 10px"
-        />
-        <p>图片依据：</p>
-        <el-upload
-          v-model:file-list="fileList"
-          action="#"
-          list-type="picture-card"
-          :http-request="httpRequest"
-          :on-preview="handlePictureCardPreview"
-          :on-remove="handleRemove"
-        >
-          <el-icon><Plus /></el-icon>
-        </el-upload>
-
-        <el-dialog v-model="dialogVisible">
-          <img w-full :src="dialogImageUrl" alt="Preview Image" />
-        </el-dialog>
-      </div>
-      <template #footer>
-        <span class="dialog-footer">
-          <el-button @click="isOpenBasisDialog = false">取消</el-button>
-          <el-button type="primary" @click="showConfirmBox = true"> 确认 </el-button>
-        </span>
-      </template>
-    </el-dialog>
-    <!-- 确定对话框 -->
-    <div class="confirm-box">
-      <el-dialog v-model="showConfirmBox" width="30%" center>
-        <div>
-          <div class="deleteWaing-icon">
-            <img src="../../assets/icons/delete-waring.svg" alt="" />
-            <span
-              >{{ isBlackList ? '是否将此用户移出黑名单？' : '是否将此用户拉入黑名单？' }}
-            </span>
-          </div>
-        </div>
-        <template #footer>
-          <span class="dialog-footer">
-            <el-button @click="showConfirmBox = false">取消</el-button>
-            <el-button type="primary" @click="handleConfirm"> 确认 </el-button>
-          </span>
-        </template>
-      </el-dialog>
-    </div>
-
-    <div class="alert-box" v-show="showAlertBox">
-      <div class="content">
-        <p>{{ isBlackList ? '移出成功' : '拉入成功' }}</p>
-        <img src="../../assets/icons/delete-confirm.svg" alt="" />
-      </div>
-    </div>
+    <pagination
+      :total="isViewBlackList ? blacklistUserList.total : allUserMessage.total"
+      :page="isViewBlackList ? blacklistUserList.current : allUserMessage.current"
+      :limit="isViewBlackList ? blacklistUserList.size : allUserMessage.size"
+      @pagination="handlePageChange"
+    />
+    <!-- 拉入/移出确认对话框 -->
+    <ConfirmDialog ref="confirmDialogRef" @confirm="confirmOperation" />
+    <!-- 拉入/移出依据填写对话框 -->
+    <CallBackDialog
+      :dialog-title="isViewBlackList ? '移出依据' : '拉入依据'"
+      :comment-title="isViewBlackList ? '移出依据' : '拉入依据'"
+      ref="callBackDialogRef"
+      @confirm="openConfirmDialog"
+    />
+    <!-- 查看详情对话框 -->
+    <ViewDetailsDialog
+      dialog-title="拉入依据"
+      comment-title="拉入依据"
+      :blacklist-user-message="currentBlacklistUserInfo"
+      ref="viewDetailsDialogRef"
+    />
+    <!-- 消息提示框 -->
+    <Toast ref="toastRef" :prompt-message="toastMessage" />
   </div>
 </template>
 <script setup lang="ts">
-import { Search, Plus } from '@element-plus/icons-vue'
-import { ref, onMounted, computed } from 'vue'
-import { uploadPicture } from '@/utils/uploadFile/uploadPicture'
+import { ref, onMounted } from 'vue'
+import { storeToRefs } from 'pinia'
+import { Plus } from '@element-plus/icons-vue'
+import { useUserBlacklistStore } from '@/store/modules/userManagement/blacklist'
+import { moveInBlacklist, moveOutBlacklist } from '@/api/user'
+import type { IPageInfo } from '@/types/pageMessage'
+import type { IBlacklistUserInfo } from '@/types/user'
+import Header from '@/views/systemMessage/components/Header.vue'
+import Toast from '@/views/systemMessage/components/Toast.vue'
+import ConfirmDialog from '@/views/systemMessage/components/ConfirmDialog.vue'
+import CallBackDialog from '@/views/systemMessage/components/CallBackDialog.vue'
+import ViewDetailsDialog from '@/views/userMessage/components/ViewDetailsDialog.vue'
 
-// 表示当前所处状态：查看黑名单/待拉入黑名单
-let isBlackList = ref(true)
+const userBlacklistStore = useUserBlacklistStore()
 
-// 当前搜素框内容
-let searchInput = ref('')
+const { refreshUserList, updateUserList, refreshBlacklistUserList, updateBlacklistUserList } =
+  userBlacklistStore
+const { allUserMessage, blacklistUserList } = storeToRefs(userBlacklistStore)
 
-// 控制填写依据的对话框打开与否
-let isOpenBasisDialog = ref(false)
+// 获取callBackDialogRef实例
+const callBackDialogRef = ref<InstanceType<typeof CallBackDialog>>()
+// 获取confirmDialogRef实例
+const confirmDialogRef = ref<InstanceType<typeof ConfirmDialog>>()
+// 获取viewDetailsDialogRef实例
+const viewDetailsDialogRef = ref<InstanceType<typeof ViewDetailsDialog>>()
 
-// 控制确认对话框展示
-let showConfirmBox = ref(false)
+// 是否处于查看黑名单状态
+const isViewBlackList = ref(true)
 
-// 拉入/移除黑名单的文字依据
-let textualBasis = ref('')
+// 搜索关键词
+const searchKeyword = ref('')
 
-// 控制提示信息的展示与否
-let showAlertBox = ref(false)
+// 消息提示框内容
+const toastMessage = ref('')
 
-// 依据弹窗标题
-let basisBoxTitle = computed(() => {
-  if (isBlackList.value) {
-    return '移出依据'
-  } else {
-    return '拉入依据'
-  }
+// 移入/移出文字依据
+const blacklistComment = ref('')
+// 移入移出图片依据
+const blacklistImgList = ref<string[]>([])
+// 暂存当前通知Id（黑名单Id或者用户ID）
+const currentId = ref(0)
+
+// 当前黑名单用户详情
+const currentBlacklistUserInfo = ref<IBlacklistUserInfo>(blacklistUserList.value.records[0])
+
+// 页面参数
+const pageInfo = ref({
+  currentPage: 1,
+  pageLimit: 10
 })
 
-const tableData = [
-  {
-    date: '2016-05-03',
-    name: 'Tom',
-    id: 111,
-    phone: 19868715436
-  },
-  {
-    date: '2016-05-04',
-    name: 'bom',
-    id: 112,
-    phone: 19868715436
+onMounted(() => {
+  refreshUserList()
+  refreshBlacklistUserList()
+})
+
+// 打开确认弹窗
+const openConfirmDialog = (basis: string, imgUrlList: string[]) => {
+  blacklistComment.value = basis
+  blacklistImgList.value = imgUrlList
+  // 确认移入/移出黑名单逻辑
+  if (isViewBlackList.value) {
+    // 处于查看黑名单状态
+    confirmDialogRef.value?.openDialog('是否确认将用户移出黑名单', '移出成功')
+  } else {
+    confirmDialogRef.value?.openDialog('是否确认将用户移入黑名单', '移入成功')
   }
-]
+}
+
+// 点击移入/移出黑名单按钮
+const onClickBlacklistChange = (id: number) => {
+  currentId.value = id
+  callBackDialogRef.value?.openDialog()
+}
 
 // 搜索逻辑
-const searchUser = () => {}
-
-// 拉入/移出黑名单逻辑
-const handleConfirm = () => {
-  // 关闭确认对话框
-  showConfirmBox.value = false
-  // 关闭依据对话框
-  isOpenBasisDialog.value = false
-  // 根据isBlackList判断是拉入/移除黑名单操作
-  if (isBlackList.value) {
-    // 如果当前处于查看名单状态，则为拉出黑名单
+const searchUser = (keyword: string) => {
+  searchKeyword.value = keyword
+  if (isViewBlackList.value) {
+    updateBlacklistUserList(pageInfo.value.currentPage, pageInfo.value.pageLimit, keyword)
   } else {
-    // 如果当前处于待拉入黑名单状态，则为拉出黑名单
+    updateUserList(pageInfo.value.currentPage, pageInfo.value.pageLimit, keyword)
   }
-  // 展示提示信息
-  showAlertBox.value = true
-  // 3s后关闭提示窗
-  setTimeout(() => {
-    showAlertBox.value = false
-  }, 1500)
 }
 
-// 图片上传
-
-import type { UploadProps, UploadUserFile } from 'element-plus'
-
-const fileList = ref<UploadUserFile[]>([])
-
-const dialogImageUrl = ref('')
-const dialogVisible = ref(false)
-
-const handleRemove: UploadProps['onRemove'] = (uploadFile, uploadFiles) => {
-  console.log(uploadFile, uploadFiles)
+// 确认移入/移出黑名单逻辑
+const confirmOperation = async () => {
+  // 确认移入/移出黑名单逻辑
+  if (isViewBlackList.value) {
+    // 处于查看黑名单状态--移出黑名单
+    await moveOutBlacklist(currentId.value, blacklistComment.value, blacklistImgList.value)
+    updateUserList(pageInfo.value.currentPage, pageInfo.value.pageLimit, '')
+    updateBlacklistUserList(pageInfo.value.currentPage, pageInfo.value.pageLimit, '')
+  } else {
+    // 移入黑名单
+    await moveInBlacklist(currentId.value, blacklistComment.value, blacklistImgList.value)
+    updateUserList(pageInfo.value.currentPage, pageInfo.value.pageLimit, '')
+    updateBlacklistUserList(pageInfo.value.currentPage, pageInfo.value.pageLimit, '')
+  }
 }
 
-const handlePictureCardPreview: UploadProps['onPreview'] = (uploadFile) => {
-  dialogImageUrl.value = uploadFile.url!
-  dialogVisible.value = true
+// 查看黑名单用户详情
+const viewDetail = (data: IBlacklistUserInfo) => {
+  // 暂存黑名单用户信息
+  currentBlacklistUserInfo.value = data
+  // 打开详情弹窗
+  viewDetailsDialogRef.value?.openDialog()
 }
 
-const httpRequest = (params: any) => {
-  uploadPicture(params.file, 'blacklist/out')
-  console.log(params.file)
+// 页码改变
+const handlePageChange = (pageMessage: IPageInfo) => {
+  pageInfo.value = pageMessage
+  if (isViewBlackList.value) {
+    updateBlacklistUserList(pageMessage.currentPage, pageMessage.pageLimit, searchKeyword.value)
+  } else {
+    updateUserList(pageMessage.currentPage, pageMessage.pageLimit, searchKeyword.value)
+  }
 }
 </script>
 <style lang="scss" scoped>
-.box {
+// 父盒子
+.wrapper {
   margin: 10px 0 0 10px;
   background-color: #fff;
-}
-
-// 页面头部样式
-.button-deliver {
-  height: 38px;
-  padding: 8px 16px;
-  color: #fff;
-  font-family: Inter;
-  font-size: 15px;
-  font-style: normal;
-  font-weight: 400;
-  line-height: normal;
-  letter-spacing: 1.44px;
-}
-
-.header {
-  display: flex;
-  padding: 10px 40px;
-  justify-content: space-between;
-  align-self: center;
-}
-
-.search-box {
-  display: flex;
-  width: 378px;
-  height: 38px;
-}
-
-.search-button {
-  height: 38px;
-  color: #2f3367;
 }
 
 // 页面主体内容样式
@@ -262,84 +223,12 @@ const httpRequest = (params: any) => {
   background-color: #f2f3f7;
 }
 
-// 对话框样式修改
-:deep(.confirm-box .el-dialog) {
-  --el-dialog-margin-top: 30vh;
+.userInfoList {
+  width: 100%;
+  padding-left: 10px;
 }
 
-:deep(.confirm-box .el-dialog__body) {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  color: var(--2F3367, #2f3367);
-  text-align: center;
-  font-family: Inter;
-  font-size: 1.2rem;
-  font-style: normal;
-  font-weight: 500;
-  line-height: 122%; /* 29.28px */
-}
-
-:deep(.confirm-box .dialog-footer .el-button) {
-  background-color: #fff;
-  color: #8a8ea8;
-  border-color: #8a8ea8;
-}
-:deep(.confirm-box .dialog-footer .el-button--primary) {
-  margin-left: 64px;
-  color: #ff7676;
-  border-color: #ff7676;
-}
-
-:deep(.basis-box .dialog-footer .el-button--primary) {
-  margin-left: 20px;
-  color: #fff;
-  background-color: #8a8ea8;
-  border-color: #8a8ea8;
-}
-
-// 消息提示框
-.alert-box {
-  position: absolute;
-  top: 30%;
-  left: 30%;
-  width: 140px;
-  height: 140px;
-  border-radius: 8px;
-  background: var(--2F3367, #2f3367);
-  box-shadow: 0px 2px 8.1px 6px rgba(161, 166, 201, 0.35);
-  background-color: #2f3367;
-}
-.alert-box .content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-}
-.alert-box p {
-  margin: 16px;
-  color: #fff;
-  font-family: Inter;
-  font-size: 16px;
-  font-style: normal;
-  font-weight: 500;
-  line-height: normal;
-  letter-spacing: 1.28px;
-}
-
-.activeClass {
-  background-color: #fafafa;
-}
-
-:deep(.basis-box .el-dialog__header) {
-  margin-right: 0px;
-  text-align: center;
-  border-bottom: 1px solid #e3e3e3;
-}
-
-:deep(.basis-box .el-dialog__body) {
-  padding: 30px 40px 10px;
-  border-bottom: 1px solid #e3e3e3;
+.button-blacklist {
+  margin-right: 20px;
 }
 </style>
