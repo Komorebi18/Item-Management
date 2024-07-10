@@ -18,13 +18,13 @@ export const uploadPicture = (file: File, address: string) => {
   const currentTimestamp = new Date().getTime()
   // 获取文件后缀
   const extension = getFormatFromName(file.name)
-
-  cos.putObject({
-    Bucket: 'smart-management-1310045286' /* 填写自己的 bucket，必须字段 */,
-    Region: 'ap-guangzhou' /* 存储桶所在地域，必须字段 */,
-    Key: `${address}/${year}/${month}/${day}/${currentTimestamp}.${extension}` /* 存储在桶里的对象键（例如1.jpg，a/b/test.txt），必须字段 */,
-    Body: file // 上传文件对象
-  }),
+  cos.putObject(
+    {
+      Bucket: 'smart-management-1310045286' /* 填写自己的 bucket，必须字段 */,
+      Region: 'ap-guangzhou' /* 存储桶所在地域，必须字段 */,
+      Key: `${address}/${year}/${month}/${day}/${currentTimestamp}.${extension}` /* 存储在桶里的对象键（例如1.jpg，a/b/test.txt），必须字段 */,
+      Body: file // 上传文件对象
+    },
     function (err: any, data: any) {
       if (err) {
         console.log('上传失败')
@@ -35,4 +35,5 @@ export const uploadPicture = (file: File, address: string) => {
         console.log(key)
       }
     }
+  )
 }

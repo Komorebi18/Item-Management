@@ -16,7 +16,12 @@
               <el-icon style="transform: rotate(90deg); color: white"><Sort /></el-icon>
             </div>
             <div class="search">
-              <el-input style="width: 240px" placeholder="请输入内容" />
+              <el-input
+                v-model="inputValue"
+                style="width: 240px"
+                placeholder="请输入内容"
+                @change="searchUser"
+              />
               <div class="search-icon">
                 <el-icon style="color: white"><Search /></el-icon>
               </div>
@@ -24,68 +29,20 @@
           </div>
           <div class="body-below">
             <TableData
-              v-show="!isShow"
+              v-show="!tableChange"
               :tableData="userDetail"
-              @view-Log="OnViewLog()"
-              @viewFriend="OnViewFriend()"
+              @view-Log="OnViewLog"
+              @viewFriend="OnViewFriend"
             ></TableData>
-            <LogData v-show="isShow" :logData="userDetail" @view-Log="OnViewLog()" />
+            <LogData v-show="tableChange" :logData="userDetail" @view-Log="OnViewLog" />
           </div>
         </el-card>
       </div>
     </div>
-    <!-- 查看好友信息对话框 -->
-    <el-dialog v-model="dialogTableVisibleToLog" width="800">
-      <el-table :data="userDetail" style="width: 100%">
-        <el-table-column prop="ip" label="登录ip" width="180" align="center" />
-        <el-table-column prop="loginTime" label="操作时间" align="center">
-          <template #header>
-            <p class="datePick_header">操作时间</p>
-            <div class="datePick">
-              <div class="dataPicker">
-                <el-date-picker
-                  v-model="value1"
-                  style="width: 100px"
-                  prefix-icon="pre"
-                  type="date"
-                  size="small"
-                />
-                <p>至</p>
-                <el-date-picker
-                  v-model="value2"
-                  style="width: 100px"
-                  prefix-icon="pre"
-                  type="date"
-                  size="small"
-                />
-              </div>
-            </div>
-          </template>
-        </el-table-column>
-        <el-table-column prop="operation" label="操作" align="center" />
-      </el-table>
-    </el-dialog>
     <!-- 查看日志对话框 -->
-    <el-dialog v-model="dialogTableVisibleToFriend" width="800">
-      <div class="dialog-friend">
-        <el-table :data="friedDate" style="width: 100%">
-          <el-table-column prop="time" label="操作时间" width="180" align="center" />
-          <el-table-column
-            prop="group"
-            label="全部分组"
-            align="center"
-            :filters="[
-              { text: '未分组', value: '未分组' },
-              { text: '好友', value: '好友' },
-              { text: '亲人', value: '亲人' },
-              { text: '全部', value: '全部' }
-            ]"
-            :filter-method="filterHandler"
-          />
-          <el-table-column prop="friend" label="好友" align="center" />
-        </el-table>
-      </div>
-    </el-dialog>
+    <LogDialog ref="logDialogRef" :logUserId="logUserId" :isRefresh="isRefresh" />
+    <!-- 查看好友信息对话框 -->
+    <FriendDialog ref="FriendDialogRef" :groupLabel="groupLabel" :friendGroup="friendGroup" />
     <!-- 分页 -->
     <Pagination
       :total="userMessage?.total"
@@ -98,146 +55,99 @@
 </template>
 <script setup lang="ts">
 import { Sort, Search } from '@element-plus/icons-vue'
-import { TableColumnCtx } from 'element-plus'
-import { ref } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import TableData from './components/TableData.vue'
 import LogData from './components/LogData.vue'
-import { getUserMessageAPI } from '@/api/userMessage/userMessage'
+import LogDialog from './components/LogDialog.vue'
+import FriendDialog from './components/FriendDialog.vue'
 import { userMessageStore } from '@/store/modules/userMessage'
-import { pageInfo } from '@/types/pageMessage'
+import { IPageInfo } from '@/types/pageMessage'
 import { storeToRefs } from 'pinia'
-// 纪录某列状态
-const isShow = ref(false)
-
-// log对话框状态
-const dialogTableVisibleToLog = ref(false)
-
-// friend对话框状态
-const dialogTableVisibleToFriend = ref(false)
-// 时间选择器
-
-// 开始时间
-const value1 = ref('')
-// 结束时间
-const value2 = ref('')
+// 默认参数
+const DEFAULT_PARAMETER = {
+  offset: 0,
+  limit: 10,
+  content: ''
+}
 
 // 获取用户信息
 const Store = userMessageStore()
-const { userMessage, userDetail } = storeToRefs(Store)
-const { getUserMessage } = Store
-// 点击切换
+const { userMessage, userDetail, friendGroup, groupLabel } = storeToRefs(Store)
+const { getUserInfo, getUserLogById, getUserFriendById } = Store
+
+// 列表切换
+const tableChange = ref(false)
+
+// 获取 logDialog 实例
+const logDialogRef = ref<InstanceType<typeof LogDialog>>()
+
+// 获取 FriendDialog 实例
+const FriendDialogRef = ref<InstanceType<typeof FriendDialog>>()
+
+// 保存用户id
+const logUserId = ref<number>()
+
+// 是否刷新
+const isRefresh = ref<boolean>(true)
+
+// 搜索框
+const inputValue = ref<string>('')
+
+// 搜索逻辑
+const searchUser = async (query: string) => {
+  // 去除空格
+  if (!query.trim()) return
+  getUserInfo(DEFAULT_PARAMETER.offset, DEFAULT_PARAMETER.limit, query)
+}
+
+// 点击切换列表
 const OnChangeDetail = () => {
-  isShow.value = !isShow.value
+  tableChange.value = !tableChange.value
 }
 
 // 点击查看日志
-const OnViewLog = () => {
-  dialogTableVisibleToLog.value = true
+const OnViewLog = (userId: number) => {
+  // 保存id ，触底刷新使用
+  logUserId.value = userId
+  getUserLogById(userId, {
+    offset: 1,
+    limit: 10
+  })
+  // 打开弹窗
+  logDialogRef.value!.openDialog()
+  // 刷新标志
+  isRefresh.value = true
 }
 
 // 点击查看好友信息
-const OnViewFriend = () => {
-  dialogTableVisibleToFriend.value = true
+const OnViewFriend = (userId: number) => {
+  // 打开弹窗
+  FriendDialogRef.value?.openDialog()
+  getUserFriendById(userId)
 }
-
-// 好友信息筛选
-const filterHandler = (value: string, row: FriendData, column: TableColumnCtx<FriendData>) => {
-  // 将 property 强行定义未 FriendData
-  const property = column['property'] as keyof FriendData
-  return row[property] === (value as string)
-}
-
-// 好友信息
-interface FriendData {
-  time: string
-  group: string
-  friend: string
-}
-const friedDate = [
-  {
-    time: '2024.01.01 12:00:00',
-    group: '亲人',
-    friend: '好友1'
-  },
-  {
-    time: '2024.01.01 12:00:00',
-    group: '亲人',
-    friend: '好友2'
-  },
-  {
-    time: '2024.01.01 12:00:00',
-    group: '未分组',
-    friend: '好友3'
-  },
-  {
-    time: '2024.01.01 12:00:00',
-    group: '朋友',
-    friend: '好友4'
-  },
-  {
-    time: '2024.01.01 12:00:00',
-    group: '朋友',
-    friend: '好友4'
-  },
-  {
-    time: '2024.01.01 12:00:00',
-    group: '朋友',
-    friend: '好友4'
-  },
-  {
-    time: '2024.01.01 12:00:00',
-    group: '朋友',
-    friend: '好友4'
-  },
-  {
-    time: '2024.01.01 12:00:00',
-    group: '朋友',
-    friend: '好友4'
-  },
-  {
-    time: '2024.01.01 12:00:00',
-    group: '朋友',
-    friend: '好友4'
-  },
-  {
-    time: '2024.01.01 12:00:00',
-    group: '朋友',
-    friend: '好友4'
-  },
-  {
-    time: '2024.01.01 12:00:00',
-    group: '朋友',
-    friend: '好友4'
-  },
-  {
-    time: '2024.01.01 12:00:00',
-    group: '朋友',
-    friend: '好友4'
-  },
-  {
-    time: '2024.01.01 12:00:00',
-    group: '朋友',
-    friend: '好友4'
-  },
-  {
-    time: '2024.01.01 12:00:00',
-    group: '朋友',
-    friend: '好友4'
-  }
-]
-// 获取信息
-getUserMessage(0, 5)
 
 // 分页逻辑
-const clickToChange = async (pageMessage: pageInfo) => {
-  //更改页面信息
-  userMessage.value!.current = pageMessage.currentPage
-  userMessage.value!.size = pageMessage.pageLimit
-  // 请求数据
-  await getUserMessage(pageMessage.currentPage, pageMessage.pageLimit)
+const clickToChange = async (pageMessage: IPageInfo) => {
+  getUserInfo(pageMessage.currentPage, pageMessage.pageLimit)
 }
+
+// 监听输入框
+watch(inputValue, (newValue) => {
+  // 为空，请求数据
+  if (newValue === '') {
+    getUserInfo(0, 5)
+  }
+})
+
+onMounted(() => {
+  // 获取信息
+  getUserInfo(0, 5)
+})
 </script>
 <style lang="scss" scoped>
+body {
+  position: absolute;
+}
 .rough-userInfo {
   box-sizing: border-box;
   display: flex;
@@ -255,8 +165,7 @@ const clickToChange = async (pageMessage: pageInfo) => {
     border-radius: 5%;
   }
   .user-online {
-    width: 680px;
-    height: 240px;
+    flex: 1;
     border-radius: 25px;
   }
 }
@@ -327,5 +236,9 @@ const clickToChange = async (pageMessage: pageInfo) => {
   display: flex;
   justify-content: center;
   align-items: center;
+}
+.date-picker {
+  display: flex;
+  justify-content: center;
 }
 </style>

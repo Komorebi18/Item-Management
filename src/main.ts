@@ -6,7 +6,7 @@ import { setupDirective } from '@/directive'
 
 import '@/permission'
 
-// 本地SVG图标
+// 本地SVG图标fault-passive-events
 import 'virtual:svg-icons-register'
 
 // 国际化

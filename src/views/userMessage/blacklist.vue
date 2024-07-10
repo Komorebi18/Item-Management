@@ -213,8 +213,7 @@ const handlePictureCardPreview: UploadProps['onPreview'] = (uploadFile) => {
 
 const httpRequest = (params: any) => {
   uploadPicture(params.file, 'blacklist/out')
-  console.log(params)
-  console.log(fileList)
+  console.log(params.file)
 }
 </script>
 <style lang="scss" scoped>

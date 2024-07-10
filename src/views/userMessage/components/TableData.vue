@@ -1,42 +1,40 @@
 <template>
-  <el-table :data="tableData" style="width: 100%">
-    <el-table-column prop="name" label="用户名" width="180" align="center" />
+  <el-table :data="props.tableData" style="width: 100%">
+    <el-table-column prop="username" label="用户名" width="180" align="center" />
     <el-table-column prop="userId" label="用户id" width="180" align="center" />
     <el-table-column prop="phone" label="用户注册手机号" align="center" />
     <el-table-column :formatter="formatterTime" prop="regTime" label="登录时间" align="center" />
     <el-table-column prop="state" :formatter="judgeState" label="是否为特殊用户" align="center" />
-    <el-table-column label="操作" align="center">
+    <el-table-column label="操作" align="center" v-slot="scope">
       <div class="detail">
-        <a href="javascript:void(0);" @click="OnViewLog">查看日志</a>
-        <a href="javascript:void(0);" @click="OnViewFriend">查看好友信息</a>
+        <a href="javascript:void(0);" @click="OnViewLog(scope.row.userId)">查看日志</a>
+        <a href="javascript:void(0);" @click="OnViewFriend(scope.row.userId)">查看好友信息</a>
       </div>
     </el-table-column>
   </el-table>
 </template>
 <script setup lang="ts">
-import { ref, reactive } from 'vue'
 import { UserMessageDetail } from '@/types/userMessage'
 import dayjs from 'dayjs'
 // 接受参数
-const { tableData } = defineProps<{
+const props = defineProps<{
   tableData: UserMessageDetail[]
 }>()
 
 // 子掉父
 const emit = defineEmits<{
-  (e: 'view-Friend'): void
-  (e: 'view-Log'): void
+  (e: 'view-Friend', userId: number): void
+  (e: 'view-Log', userId: number): void
 }>()
 
 // 点击查看日志信息
-const OnViewLog = () => {
-  emit('view-Log')
+const OnViewLog = (userId: number) => {
+  emit('view-Log', userId)
 }
 
 // 点击查看好友信息
-const OnViewFriend = () => {
-  console.log('oosi')
-  emit('view-Friend')
+const OnViewFriend = (userId: number) => {
+  emit('view-Friend', userId)
 }
 
 // 判断是否为特殊用户

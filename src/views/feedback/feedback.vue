@@ -44,7 +44,7 @@
 import { ref, onMounted, computed } from 'vue'
 import { type TabsPaneContext } from 'element-plus'
 import { useFeedBackStore } from '@/store/modules/feedback'
-import { pageInfo } from '@/types/pageMessage'
+import { IPageInfo } from '@/types/pageMessage'
 import { storeToRefs } from 'pinia'
 import FeedBackTable from './components/FeedBackTable.vue'
 import FeedBackDialog from './components/FeedBackDialog.vue'
@@ -127,15 +127,15 @@ onMounted(() => {
   getAllFeedBacks(0, 10)
 })
 
-const onChangeAllPage = (pageMessage: pageInfo) => {
+const onChangeAllPage = (pageMessage: IPageInfo) => {
   getAllFeedBacks(pageMessage.currentPage, pageMessage.pageLimit)
 }
 
-const onChangeReadPage = async (pageMessage: pageInfo) => {
+const onChangeReadPage = async (pageMessage: IPageInfo) => {
   getReadFeedbacks(pageMessage.currentPage, pageMessage.pageLimit)
 }
 
-const onChangeUnReadPage = async (pageMessage: pageInfo) => {
+const onChangeUnReadPage = async (pageMessage: IPageInfo) => {
   getUnReadFeedbacks(pageMessage.currentPage, pageMessage.pageLimit)
 }
 </script>
