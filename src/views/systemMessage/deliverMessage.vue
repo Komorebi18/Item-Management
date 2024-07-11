@@ -1,5 +1,5 @@
 <template>
-  <div class="box">
+  <div class="message-wrapper">
     <!-- 页面顶部 -->
     <Header
       is-show-time-selection
@@ -30,7 +30,7 @@
             @view="handleViewIconClick"
             @edit="handleEditIconClick"
             @delete="handleDeleteIconClick"
-            @process="handleProcessIconClick"
+            @viewAuditOpinion="handleViewAuditOpinionClick"
             @publish="handlePublishIconClick"
           />
         </el-scrollbar>
@@ -44,20 +44,22 @@
       @pagination="handlePageChange"
     />
     <!-- 对话框 -->
-    <ConfirmDialog ref="toastRef" @confirm="handleConfirm(isDeleteConfirm)" />
+    <ConfirmDialog ref="confirmDialogRef" @confirm="handleConfirm(isDeleteConfirm)" />
+    <ViewAuditOpinionDialog ref="viewAuditOpinionDialogRef" />
   </div>
 </template>
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
 import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
+import { useDeliverNoticeStore } from '@/store/modules/notice/deliverNotice'
+import { Plus } from '@element-plus/icons-vue'
+import { deleteOwnNotice, publishNoticeToUser } from '@/api/notice'
 import type { IPageInfo } from '@/types/pageMessage'
 import Header from '@/views/systemMessage/components/Header.vue'
 import TabPane from '@/views/systemMessage/components/TabPane.vue'
 import ConfirmDialog from '@/views/systemMessage/components/ConfirmDialog.vue'
-import { useDeliverNoticeStore } from '@/store/modules/notice/deliverNotice'
-import { Plus } from '@element-plus/icons-vue'
-import { deleteOwnNotice, publishNoticeToUser } from '@/api/notice'
+import ViewAuditOpinionDialog from '@/views/systemMessage/components/ViewAuditOpinionDialog.vue'
 
 // store数据
 const deliverNoticeStore = useDeliverNoticeStore()
@@ -68,24 +70,32 @@ const { singleAdminNoticeList } = storeToRefs(deliverNoticeStore)
 
 // 当前展示的tab
 const activeTab = ref(0)
-
 // 选中的通知Id
 const chooseMessageId = ref(0)
-
 // 搜索关键词
 const searchKeyword = ref('')
-
 // 时间限制
 const timeLimit = ref(0)
-
 // 类型限制
 const typeLimit = ref(0)
-
 // 页面参数
 const pageInfo = ref({
   currentPage: 1,
   pageLimit: 10
 })
+
+// 待绑定滚动条组件
+const scrollbarRef = ref<HTMLElement | null>(null)
+// 确认弹窗信息
+const confirmationMessage = ref('')
+// 提示弹窗信息
+const promptMessage = ref('')
+// 是否是删除确认弹窗
+const isDeleteConfirm = ref(false)
+// 获取confirmDialog实例
+const confirmDialogRef = ref<InstanceType<typeof ConfirmDialog>>()
+// 获取viewAuditOpinionDialog实例
+const viewAuditOpinionDialogRef = ref<InstanceType<typeof ViewAuditOpinionDialog>>()
 
 // 选中的通知标题
 const chooseMessageTitle = computed(() => {
@@ -94,21 +104,6 @@ const chooseMessageTitle = computed(() => {
   )
   return res!.title
 })
-
-// 待绑定滚动条组件
-const scrollbarRef = ref<HTMLElement | null>(null)
-
-// 确认弹窗信息
-const confirmationMessage = ref('')
-
-// 提示弹窗信息
-const promptMessage = ref('')
-
-// 是否是删除确认弹窗
-const isDeleteConfirm = ref(false)
-
-// 获取toast实例
-const toastRef = ref<InstanceType<typeof ConfirmDialog>>()
 
 onMounted(() => {
   // 获取该管理员所有通知
@@ -153,13 +148,13 @@ const handleDeleteIconClick = (noticeId: number) => {
   // 打开确认弹窗
   confirmationMessage.value = `是否确认将此通知删除？`
   promptMessage.value = `已删除此通知`
-  toastRef.value!.openDialog(confirmationMessage.value, promptMessage.value)
+  confirmDialogRef.value!.openDialog(confirmationMessage.value, promptMessage.value)
 }
 
-// 点击process-icon
-const handleProcessIconClick = (noticeId: number) => {
-  chooseMessageId.value = noticeId
-  // 接下来的逻辑...
+// 点击viewAuditOpinion-icon
+const handleViewAuditOpinionClick = (comment: string, imgList: string[]) => {
+  // 打开查看审核依据详情对话框
+  viewAuditOpinionDialogRef.value!.openDialog(comment, imgList)
 }
 
 // 点击publish-icon
@@ -169,7 +164,7 @@ const handlePublishIconClick = (noticeId: number) => {
   // 打开确认弹窗
   confirmationMessage.value = `是否确认将此通知发布？`
   promptMessage.value = `已发布通知`
-  toastRef.value!.openDialog(confirmationMessage.value, promptMessage.value)
+  confirmDialogRef.value!.openDialog(confirmationMessage.value, promptMessage.value)
 }
 
 // 分页按钮点击触发
@@ -253,7 +248,7 @@ const deliverMessage = () => {
 </script>
 
 <style lang="scss" scoped>
-.box {
+.message-wrapper {
   margin: 15px 0 0 15px;
   background-color: #fff;
 }
@@ -355,16 +350,11 @@ const deliverMessage = () => {
 
 // 对话框样式修改
 :deep(.el-dialog) {
-  --el-dialog-margin-top: 30vh;
+  --el-dialog-margin-top: 25vh;
 }
 
 :deep(.el-dialog__body) {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
   color: var(--2F3367, #2f3367);
-  text-align: center;
   font-family: Inter;
   font-size: 1.2rem;
   font-style: normal;

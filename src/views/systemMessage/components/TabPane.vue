@@ -25,10 +25,26 @@
       <span class="deliver">{{ notice.adminName }}</span>
     </el-col>
     <el-col :span="3" class="notice-operation-container">
-      <el-tooltip effect="dark" content="查看" placement="top">
+      <el-tooltip
+        v-if="notice.state !== NOTICE_RELEASE_STATE.FAIL_THE_AUDIT"
+        effect="dark"
+        content="查看"
+        placement="top"
+      >
         <el-icon color="#2F3367" @click="emit('view', notice.noticeId)">
           <View />
         </el-icon>
+      </el-tooltip>
+      <el-tooltip
+        v-if="notice.state === NOTICE_RELEASE_STATE.FAIL_THE_AUDIT"
+        effect="dark"
+        content="审核意见"
+        placement="top"
+      >
+        <img
+          src="../../../assets/imgs/audit-process.png"
+          @click="emit('viewAuditOpinion', notice.comment, notice.imageUrls)"
+        />
       </el-tooltip>
       <el-tooltip
         v-if="
@@ -42,18 +58,6 @@
         <el-icon color="#2F3367" @click="emit('edit', notice.noticeId)">
           <EditPen />
         </el-icon>
-      </el-tooltip>
-
-      <el-tooltip
-        v-else-if="notice.state === NOTICE_RELEASE_STATE.WAIT_FOR_AUDIT"
-        effect="dark"
-        content="审核进程"
-        placement="top"
-      >
-        <img
-          src="../../../assets/imgs/audit-process.png"
-          @click="emit('process', notice.noticeId)"
-        />
       </el-tooltip>
       <el-tooltip
         v-else-if="notice.state === NOTICE_RELEASE_STATE.PASS_THE_AUDIT"
@@ -102,8 +106,8 @@ const emit = defineEmits<{
   edit: [noticeId: number]
   // 删除通知
   delete: [noticeId: number]
-  // 查看通知进度
-  process: [noticeId: number]
+  // 查看审核意见
+  viewAuditOpinion: [comment: string, imgList: string[]]
   // 正式发布通知
   publish: [noticeId: number]
 }>()

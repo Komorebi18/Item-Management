@@ -63,6 +63,7 @@ const onChangeTimeLimit = (time: number) => {
   justify-content: space-between;
   align-self: center;
 }
+
 .search-box {
   display: flex;
   height: 32px;
