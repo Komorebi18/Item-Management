@@ -1,6 +1,14 @@
 import http from '@/utils/request'
-import type { IUserGroup, IUserInformation, IBlacklistUserInfo } from '@/types/user'
+import type {
+  IUserGroup,
+  IUserInformation,
+  IBlacklistUserInfo,
+  IQueryParamsOfLog,
+  ILogTime,
+  IPersonalLogDetail
+} from '@/types/user'
 import type { IPagingData } from '@/types/index'
+import { PageMessage } from '@/types/userMessage'
 
 /**
  * 获取用户分组列表
@@ -101,5 +109,14 @@ export const moveOutBlacklist = (blacklistId: number, outReason: string, imageUr
       outReason,
       imageUrls
     }
+  })
+}
+
+export const getPersonalLog = (queryParams: IQueryParamsOfLog, data?: ILogTime) => {
+  return http<PageMessage<IPersonalLogDetail>>({
+    url: `/admin/logs/my`,
+    method: 'GET',
+    params: queryParams,
+    data
   })
 }

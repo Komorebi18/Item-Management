@@ -13,6 +13,7 @@ export interface IUserLoginInfo {
   adminId: number
   username: string
   roles: string[]
+  avatar: string
   accessToken: string
   refreshToken: string
   expiredTime: string

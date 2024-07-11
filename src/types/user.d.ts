@@ -128,3 +128,38 @@ export interface IUserGroup {
    */
   groupName: string
 }
+
+// 个人日志参数
+export interface IQueryParamsOfLog {
+  content?: string
+  limit: number
+  offset: number
+}
+
+// 个人日志的起始时间
+export interface ILogTime {
+  /**
+   * 截止时间
+   */
+  endTime?: null | string
+  /**
+   * 查询日志记录的起始时间
+   */
+  startTime?: null | string
+}
+
+export interface IPersonalLogDetail {
+  /**
+   * 操作的ip地址
+   */
+  address?: null | string
+  /**
+   * 操作日志内容
+   */
+  content?: null | string
+  id?: number | null
+  /**
+   * 操作对应的时间
+   */
+  modifyTime?: null | string
+}
