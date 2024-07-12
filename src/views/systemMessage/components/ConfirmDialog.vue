@@ -63,11 +63,13 @@ defineExpose({ openDialog })
   text-align: center;
   img {
     display: inline-block;
-    margin-right: 12px;
+    margin: 5px 12px 0 0;
     width: 32px;
     height: 32px;
   }
   span {
+    line-height: 1.6rem;
+    font-size: 1rem;
     white-space: pre-line;
   }
 }

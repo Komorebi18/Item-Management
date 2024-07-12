@@ -1,6 +1,6 @@
 <template>
   <div class="header">
-    <div class="left-header">
+    <div class="left-wrapper">
       <slot name="button"></slot>
       <div class="select-box">
         <TimeSelection v-if="props.isShowTimeSelection" @update-time-limit="onChangeTimeLimit" />
@@ -59,9 +59,10 @@ const onChangeTimeLimit = (time: number) => {
 <style lang="scss" scoped>
 .header {
   display: flex;
-  padding: 10px 10px 0 20px;
+  padding: 10px 10px 10px 40px;
   justify-content: space-between;
   align-self: center;
+  background-color: #fff;
 }
 
 .search-box {
@@ -88,7 +89,7 @@ const onChangeTimeLimit = (time: number) => {
 .select-box {
   display: flex;
   justify-content: space-between;
-  width: 13vw;
+  width: 15vw;
   border: none;
 }
 
