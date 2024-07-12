@@ -33,3 +33,25 @@ export interface IAdminPower {
    */
   status: number
 }
+
+/**
+ * 管理员操作日志
+ */
+export interface IAdminLog {
+  /**
+   * 本条日志的ID
+   */
+  id: number
+  /**
+   * 操作的ip地址
+   */
+  address: string
+  /**
+   * 操作日志内容
+   */
+  content: string
+  /**
+   * 操作对应的时间
+   */
+  modifyTime: string
+}
