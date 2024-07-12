@@ -24,19 +24,17 @@ export const getAllAdminMessage = (offset: number, limit: number, content: strin
 /**
  * 获取指定管理员日志
  * @param adminId  管理员ID
- * @param offset  当前页
- * @param limit   每页的数量
- * @param content 搜索关键词
+ * @param offset   请求的数据页码
  * return IAdminLog
  */
-export const getAdminLog = (adminId: number, offset: number, limit: number, content: string) => {
+export const getAdminLog = (adminId: number, offset: number) => {
   return http<IPagingData<IAdminLog>>({
     url: `/admin/logs/${adminId}`,
     method: 'GET',
     params: {
       offset,
-      limit,
-      content
+      limit: 10,
+      content: ''
     }
   })
 }
@@ -59,7 +57,7 @@ export const getAdminAuthority = (adminId: number) => {
  * return 权限字符串数组
  */
 export const addNewAdmin = (username: string, code: string, avatar: string) => {
-  return http<IPagingData<IAdminLog>>({
+  return http({
     url: `/admin/add`,
     method: 'POST',
     data: {

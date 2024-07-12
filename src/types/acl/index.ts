@@ -7,7 +7,7 @@ export interface IAdminMessage {
    */
   adminId: number
   /**
-   * 管理员角色VO列表
+   * 管理员权限列表
    */
   roles: IAdminPower[]
   /**
