@@ -14,7 +14,7 @@
       </template>
     </Header>
     <!-- 数据展示行 -->
-    <el-table :data="adminList" class="userInfoList">
+    <el-table :data="adminMessageList.records" class="userInfoList">
       <el-table-column prop="username" label="用户名" min-width="200" align="center" />
       <el-table-column label="管理员权限" min-width="300" align="center">
         <template #default="props">
@@ -22,7 +22,7 @@
             link
             size="small"
             class="operation-admin"
-            @click="viewPowerDialogRef?.openDialog()"
+            @click="onClickViewAdminPower(props.row)"
             >查看权限</el-button
           >
         </template>
@@ -33,14 +33,14 @@
             link
             size="small"
             class="operation-admin"
-            @click="viewOperationLogDialogRef?.openDialog()"
+            @click="onClickViewAdminLog(props.row)"
             >查看日志</el-button
           >
           <el-button
             link
             size="small"
             class="operation-admin"
-            @click="editAdminPowerDialogRef?.openDialog()"
+            @click="onClickEditAdminPower(props.row)"
             >编辑</el-button
           >
           <el-button
@@ -60,26 +60,47 @@
       <el-table-column label="" min-width="200"></el-table-column>
     </el-table>
     <!-- 分页按钮 -->
-    <pagination :total="20" :page="1" :limit="10" @pagination="handlePageChange" />
+    <pagination
+      :total="adminMessageList.total"
+      :page="adminMessageList.current"
+      :limit="adminMessageList.size"
+      @pagination="handlePageChange"
+    />
+    <!-- 对话框 -->
+    <!-- 查看管理员权限对话框 -->
+    <ViewPowerDialog :admin-message="currentAdminMessage" ref="viewPowerDialogRef" />
+    <!-- 查看管理员操作日志对话框 -->
+    <ViewOperationLogDialog
+      ref="viewOperationLogDialogRef"
+      :admin-log-list="adminLogList.records"
+      @load-more="loadMoreAdminLog"
+    />
+    <!-- 修改管理员权限对话框 -->
+    <EditAdminPowerDialog :admin-message="currentAdminMessage" ref="editAdminPowerDialogRef" />
+    <!-- 删除确认弹窗 -->
+    <ConfirmDialog ref="confirmDialogRef" />
   </div>
-  <!-- 对话框 -->
-  <!-- 查看管理员权限对话框 -->
-  <ViewPowerDialog ref="viewPowerDialogRef" />
-  <!-- 查看管理员操作日志对话框 -->
-  <ViewOperationLogDialog ref="viewOperationLogDialogRef" />
-  <!-- 修改管理员权限对话框 -->
-  <EditAdminPowerDialog ref="editAdminPowerDialogRef" />
-  <!-- 删除确认弹窗 -->
-  <ConfirmDialog ref="confirmDialogRef" />
 </template>
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { storeToRefs } from 'pinia'
+import { ref, onMounted, toRaw } from 'vue'
 import { Plus } from '@element-plus/icons-vue'
+import { useAdminAuthorityStore } from '@/store/modules/acl'
+import type { IAdminMessage, IAdminLog, IAdminPower } from '@/types/acl/index'
+import type { IPageInfo } from '@/types/pageMessage'
 import Header from '@/views/systemMessage/components/Header.vue'
 import ViewPowerDialog from '@/views/acl/components/ViewPowerDialog.vue'
 import ViewOperationLogDialog from '@/views/acl/components/ViewOperationLogDialog.vue'
 import EditAdminPowerDialog from '@/views/acl/components/EditAdminPowerDialog.vue'
 import ConfirmDialog from '@/views/systemMessage/components/ConfirmDialog.vue'
+
+const adminAuthorityStore = useAdminAuthorityStore()
+const { updateAdminMessageList, refreshAdminMessageList, getAdminLogList } = adminAuthorityStore
+const { adminMessageList, adminLogList } = storeToRefs(adminAuthorityStore)
+
+onMounted(() => {
+  refreshAdminMessageList()
+})
 
 // 获取viewPowerDialog实例
 const viewPowerDialogRef = ref<InstanceType<typeof ViewPowerDialog>>()
@@ -90,10 +111,61 @@ const editAdminPowerDialogRef = ref<InstanceType<typeof EditAdminPowerDialog>>()
 // 获取confirmDialog实例
 const confirmDialogRef = ref<InstanceType<typeof ConfirmDialog>>()
 
-const adminList = [{ username: 111 }, { username: 112 }]
+// 搜索关键词
+const searchKeyword = ref('')
+// 当前管理员的信息
+const currentAdminMessage = ref<IAdminMessage>({
+  adminId: 0,
+  username: '',
+  roles: []
+})
+
+// 暂存页码信息
+const page = ref<IPageInfo>({
+  currentPage: 1,
+  pageLimit: 10
+})
 
 // 搜索管理员
-const searchAdmin = (keyword: string) => {}
+const searchAdmin = (keyword: string) => {
+  searchKeyword.value = keyword
+  updateAdminMessageList(page.value.currentPage, page.value.pageLimit, searchKeyword.value)
+}
+
+// 页码改变
+const handlePageChange = (pageMessage: IPageInfo) => {
+  page.value = pageMessage
+  updateAdminMessageList(page.value.currentPage, page.value.pageLimit, searchKeyword.value)
+}
+
+// 查看管理员日志
+const onClickViewAdminLog = (data: IAdminMessage) => {
+  // 暂存当前管理员信息
+  currentAdminMessage.value = data
+  getAdminLogList(currentAdminMessage.value.adminId)
+  viewOperationLogDialogRef.value?.openDialog()
+}
+
+// 查看管理员权限
+const onClickViewAdminPower = (data: IAdminMessage) => {
+  // 暂存当前管理员信息
+  currentAdminMessage.value = data
+  viewPowerDialogRef.value?.openDialog()
+}
+
+// 编辑管理员的权限
+const onClickEditAdminPower = (data: IAdminMessage) => {
+  // 暂存当前管理员信息
+  currentAdminMessage.value = data
+  editAdminPowerDialogRef.value?.openDialog()
+}
+
+// 加载更多管理员日志
+const loadMoreAdminLog = () => {
+  if (adminLogList.value.current < adminLogList.value.pages) {
+    getAdminLogList(currentAdminMessage.value.adminId)
+  }
+}
 
 const isOpenDialog = ref(false)
 </script>

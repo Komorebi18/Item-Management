@@ -2,16 +2,21 @@
   <div class="wrapper">
     <el-dialog v-model="isOpenDialog" title="管理员权限" width="300" center>
       <div class="power-wrapper">
-        <span class="power-item">发布通知</span>
-        <span class="power-item">发布通知</span>
-        <span class="power-item">发布通知</span>
-        <span class="power-item">发布通知</span>
+        <template v-for="item in props.adminMessage.roles" :key="item.roleId">
+          <span class="power-item">发布通知</span>
+        </template>
       </div>
     </el-dialog>
   </div>
 </template>
 <script setup lang="ts">
 import { ref } from 'vue'
+import type { IAdminMessage, IAdminLog, IAdminPower } from '@/types/acl/index'
+
+const props = defineProps<{
+  // 管理员信息
+  adminMessage: IAdminMessage
+}>()
 
 // 控制对话框开关
 const isOpenDialog = ref(false)
