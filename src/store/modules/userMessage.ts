@@ -90,7 +90,8 @@ export const userMessageStore = defineStore('userMessage', () => {
       limit: 10
     })
     // 当前页
-    logMessage.value = res.data
+    logMessage.value.current = res.data.current
+    logMessage.value.pages = res.data.pages
     // push 新数据
     logMessageDetail.value.push(...res.data.records)
   }

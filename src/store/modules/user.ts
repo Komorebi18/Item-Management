@@ -2,11 +2,18 @@ import router from '@/router'
 import { defineStore } from 'pinia'
 import { useStorage } from '@vueuse/core'
 import { getLoginAPI, fetchTokenAPI } from '@/api/login'
-import { getUserGroupList, getUserPartialInformation } from '@/api/user'
+import { getPersonalLog, getUserGroupList, getUserPartialInformation } from '@/api/user'
 import type { IUserLoginInfo } from '@/types/login'
-import type { IUserGroup, IUserInformation } from '@/types/user'
+import type {
+  ILogTime,
+  IPersonalLogDetail,
+  IQueryParamsOfLog,
+  IUserGroup,
+  IUserInformation
+} from '@/types/user'
 import type { IPagingData } from '@/types/index'
 import { ref, reactive } from 'vue'
+import { PageMessage } from '@/types/userMessage'
 
 export const useUserStore = defineStore('user', () => {
   // 初始化用户数据
@@ -14,6 +21,7 @@ export const useUserStore = defineStore('user', () => {
     adminId: 0,
     roles: [],
     route: '',
+    avatar: '',
     accessToken: '',
     refreshToken: '',
     expiredTime: '',
@@ -28,6 +36,20 @@ export const useUserStore = defineStore('user', () => {
     pages: 0,
     records: []
   })
+
+  // 个人日志
+  const personalLog = ref<PageMessage<IPersonalLogDetail>>({
+    current: 1,
+    size: 10,
+    total: 0,
+    pages: 0,
+    records: []
+  })
+
+  const personalLogDetail = ref<IPersonalLogDetail[]>()
+
+  // 本地存储用户信息
+  const userInfo_Local = useStorage('userInfo_Local', userInfo.value)
 
   // 所有分组类型
   const userGroupList = ref<IUserGroup[]>([])
@@ -60,6 +82,7 @@ export const useUserStore = defineStore('user', () => {
     refreshToken.value = res.data.refreshToken
     refreshTime.value = res.data.expiredTime
     roles.value = res.data.roles
+    userInfo_Local.value = res.data
   }
 
   // 退出登录
@@ -81,6 +104,7 @@ export const useUserStore = defineStore('user', () => {
     accessTokenState.value = null
     refreshToken.value = null
     refreshTime.value = null
+    userInfo_Local.value = null
     // 重置路由
     router.replace({ path: '/login' })
   }
@@ -120,15 +144,39 @@ export const useUserStore = defineStore('user', () => {
       userPartialInformation.records.push(...(res.data.records as IUserInformation[]))
     }
   }
+
+  // 获取个人日志
+  const getMyLog = async (queryParams: IQueryParamsOfLog, data?: ILogTime) => {
+    const res = await getPersonalLog(queryParams, data)
+    personalLog.value = res.data
+    personalLogDetail.value = res.data.records
+  }
+
+  // 触底刷新
+  const getMyLogByScroll = async () => {
+    const res = await getPersonalLog({
+      offset: personalLog.value.current + 1,
+      limit: 10
+    })
+    personalLog.value.current = res.data.current
+    personalLog.value.pages = res.data.pages
+    personalLogDetail.value!.push(...res.data.records)
+  }
+
   return {
     userInfo,
     token,
     userGroupList,
     userPartialInformation,
+    userInfo_Local,
+    personalLogDetail,
+    personalLog,
     setLogin,
     outLogin,
     updateToken,
     getUserGroup,
-    getPartialUserInfo
+    getMyLogByScroll,
+    getPartialUserInfo,
+    getMyLog
   }
 })

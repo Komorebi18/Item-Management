@@ -7,8 +7,13 @@ import RightPanel from '@/components/RightPanel/index.vue'
 import Setting from '@/layout/components/Settings/index.vue'
 import { ref, onMounted, reactive } from 'vue'
 import { useWindowSize } from '@vueuse/core'
-import { SwitchButton } from '@element-plus/icons-vue'
-
+import { ArrowDown } from '@element-plus/icons-vue'
+import dayjs from 'dayjs'
+import { timeFormatting } from '@/utils/timeFormatting'
+import { throttle } from 'lodash'
+const Store = useUserStore()
+const { userInfo_Local, personalLogDetail, personalLog } = storeToRefs(Store)
+const { getMyLog, getMyLogByScroll } = Store
 const { width } = useWindowSize()
 onMounted(() => {
   window.addEventListener('resize', function handleResize() {
@@ -25,42 +30,62 @@ const { device } = storeToRefs(appStore) // 设备类型：desktop-宽屏设备 
 //打开个人日志
 const dialogTableVisible = ref(false)
 
-//表单数据
-const form = reactive({
-  name: '',
-  region: '',
-  date1: '',
-  date2: '',
-  delivery: false,
-  type: [],
-  resource: '',
-  desc: ''
-})
+// 日期选择器实例
+const timePickRef = ref()
 
-//个人日志数据
-const gridData = [
-  {
-    date: '2024.0.01 12:01',
-    device: '华为mate60',
-    operate:
-      '发布了很长的信息，发布了很长的信息,发布了很长的信息，发布了很长的信息，发布了很长的信息，发布了很长的信息，发布了很长的信息，发布了很长的信息'
-  },
-  {
-    date: '2024.0.01 12:01',
-    device: '华为mate60',
-    operate: '发布了很长的信息，发布了很长的信息'
-  },
-  {
-    date: '2024.0.01 12:01',
-    device: '华为mate60',
-    operate: '发布了很长的信息，发布了很长的信息'
-  },
-  {
-    date: '2024.0.01 12:01',
-    device: '华为mate60',
-    operate: '发布了很长的信息，发布了很长的信息'
+const dataValue = ref()
+
+// 是否触底刷新
+const isRefresh = ref<boolean>(false)
+
+// 图标点击
+const onIconShowPicker = () => {
+  if (timePickRef.value) {
+    timePickRef.value.handleOpen() // 直接显示日期选择面板
   }
-]
+}
+
+// 点击打开个人日志
+const onOpenPersonalLog = async () => {
+  isRefresh.value = true
+  dialogTableVisible.value = true
+  await getMyLog({
+    offset: 0,
+    limit: 10
+  })
+}
+
+// 格式化时间
+const formatterTime = (value: any) => {
+  const { regTime } = value
+  return dayjs(regTime).format('YYYY-MM-DD HH:mm:ss')
+}
+
+// 触底加载更多
+const loadMore = throttle(() => {
+  if (isRefresh.value && personalLog.value.current < personalLog.value.pages) {
+    getMyLogByScroll()
+  } else {
+    return
+  }
+}, 2000)
+
+// 获取用户选择日期
+const getDateValue = (time: string) => {
+  // 格式化日期
+  const { newStartTime, newEndTime } = timeFormatting(time[0], time[1])
+  getMyLog(
+    {
+      offset: 0,
+      limit: 50
+    },
+    {
+      startTime: newStartTime,
+      endTime: newEndTime
+    }
+  )
+}
+
 // 设置面板
 const show = ref(false)
 </script>
@@ -74,42 +99,28 @@ const show = ref(false)
     <div class="flex items-center">
       <div v-if="device !== 'mobile'" class="flex items-center">
         <screenfull class="navbar-setting-item screenfull" />
-        <!-- <el-tooltip content="布局大小" effect="dark" placement="bottom">
-          <size-select class="navbar-setting-item" />
-        </el-tooltip> -->
-
         <lang-select class="navbar-setting-item" />
         <el-dropdown trigger="click" class="dropdown">
           <span class="el-dropdown-link navbar-bg-hover select-none">
-            <img src="https://pic3.zhimg.com/80/v2-738a80bf6bfd7adc2a30afc1b3937f34_r.jpg" />
-            <p class="out">admin</p>
+            <img :src="userInfo_Local.avatar" />
+            <p class="out">{{ userInfo_Local.username }}</p>
           </span>
           <template #dropdown>
             <div class="my-dropdown">
               <div class="front_part">
                 <div class="front_part_img">
-                  <div class="front_part_title">peter</div>
+                  <el-image :src="userInfo_Local.avatar" fit="cover" class="avatar-img"> </el-image>
+                  <div class="front_part_title">{{ userInfo_Local.username }}</div>
                 </div>
               </div>
               <div class="end_part">
                 <div class="person">
-                  <a href="javascript:void(0);" @click="dialogTableVisible = true">查看个人日志</a>
+                  <a href="javascript:void(0);" @click="onOpenPersonalLog">查看个人日志</a>
                 </div>
                 <div class="logout_btn">
                   <el-button @click="userStore.outLogin(false)"> 退出登录 </el-button>
                 </div>
               </div>
-              <!-- <el-dropdown-menu class="logout">
-                <el-dropdown-item>
-                  <div class="test">99ba</div>
-                </el-dropdown-item>
-                <el-dropdown-item @click="userStore.outLogin(false)">
-                  <el-icon>
-                    <SwitchButton />
-                  </el-icon>
-                  退出系统
-                </el-dropdown-item>
-              </el-dropdown-menu> -->
             </div>
           </template>
         </el-dropdown>
@@ -122,12 +133,36 @@ const show = ref(false)
   <RightPanel v-model:show="show">
     <Setting></Setting>
   </RightPanel>
-  <el-dialog v-model="dialogTableVisible" title="个人日志" :center="true">
-    <el-table :data="gridData">
-      <el-table-column property="device" label="登录设备" width="150" align="center" />
-      <el-table-column property="date" label="登录时间" width="200" align="center" />
-      <el-table-column property="operate" label="操作" align="center" />
-    </el-table>
+  <!-- 查看日志对话框 -->
+  <el-dialog v-model="dialogTableVisible" width="800">
+    <div v-infinite-scroll="loadMore" infinite-scroll-disabled="false" class="infinite-list">
+      <el-table :data="personalLogDetail" style="width: 100%">
+        <el-table-column prop="address" label="登录ip" width="180" align="center" />
+        <el-table-column
+          :formatter="formatterTime"
+          prop="modifyTime"
+          label="操作时间"
+          align="center"
+        >
+          <template #header>
+            操作时间
+            <el-icon @click="onIconShowPicker"><ArrowDown /></el-icon>
+            <div class="date-picker">
+              <el-date-picker
+                v-model="dataValue"
+                size="small"
+                @change="getDateValue"
+                type="datetimerange"
+                ref="timePickRef"
+                style="visibility: hidden"
+              >
+              </el-date-picker>
+            </div>
+          </template>
+        </el-table-column>
+        <el-table-column prop="content" label="操作" align="center" />
+      </el-table>
+    </div>
   </el-dialog>
 </template>
 
@@ -245,8 +280,9 @@ const show = ref(false)
       height: 40px;
       flex-shrink: 0;
       border-radius: 40px;
-      background: url(https://pic3.zhimg.com/80/v2-738a80bf6bfd7adc2a30afc1b3937f34_r.jpg);
-      // lightgray 50% / cover no-repeat;
+      .avatar-img {
+        border-radius: 40px;
+      }
       .front_part_title {
         position: absolute;
         width: 43px;
@@ -297,5 +333,10 @@ const show = ref(false)
   width: 1077px;
   height: 926px;
   flex-shrink: 0;
+}
+.infinite-list {
+  height: 400px;
+  overflow: auto;
+  overflow-anchor: none;
 }
 </style>

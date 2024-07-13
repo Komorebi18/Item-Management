@@ -91,5 +91,6 @@ defineExpose({
 .infinite-list {
   height: 400px;
   overflow: auto;
+  overflow-anchor: none;
 }
 </style>
