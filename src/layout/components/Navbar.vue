@@ -99,10 +99,6 @@ const show = ref(false)
     <div class="flex items-center">
       <div v-if="device !== 'mobile'" class="flex items-center">
         <screenfull class="navbar-setting-item screenfull" />
-        <!-- <el-tooltip content="布局大小" effect="dark" placement="bottom">
-          <size-select class="navbar-setting-item" />
-        </el-tooltip> -->
-
         <lang-select class="navbar-setting-item" />
         <el-dropdown trigger="click" class="dropdown">
           <span class="el-dropdown-link navbar-bg-hover select-none">
@@ -168,13 +164,6 @@ const show = ref(false)
       </el-table>
     </div>
   </el-dialog>
-  <!-- <el-dialog v-model="dialogTableVisible" title="个人日志" :center="true">
-    <el-table :data="gridData">
-      <el-table-column property="device" label="登录设备" width="150" align="center" />
-      <el-table-column property="date" label="登录时间" width="200" align="center" />
-      <el-table-column property="operate" label="操作" align="center" />
-    </el-table>
-  </el-dialog> -->
 </template>
 
 <style lang="scss" scoped>
@@ -348,5 +337,6 @@ const show = ref(false)
 .infinite-list {
   height: 400px;
   overflow: auto;
+  overflow-anchor: none;
 }
 </style>
