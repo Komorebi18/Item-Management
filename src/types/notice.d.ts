@@ -84,6 +84,10 @@ export interface INoticeItem {
    * 用户名列表，userId=1时有效
    */
   usernames: string[]
+  /**
+   * 审核不通过图片依据
+   */
+  imageUrls: string[]
 }
 
 /**

@@ -151,7 +151,7 @@ body {
 .rough-userInfo {
   box-sizing: border-box;
   display: flex;
-  margin: 1cap 20px 10px 20px;
+  margin: 10px 20px 10px 20px;
   .user-count {
     width: 257px;
     height: 240px;

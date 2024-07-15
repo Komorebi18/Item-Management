@@ -115,24 +115,16 @@ Mock.mock('/test', 'get', {
       component: 'Layout',
       name: 'acl',
       meta: {
-        title: '权限管理',
-        icon: 'acl',
         roles: ['ROOT'],
         hidden: false,
         keepAlive: true
       },
       children: [
         {
-          path: 'admin-info',
-          name: 'admin-info',
-          component: 'acl/adminMessage',
-          meta: { title: '管理员信息', icon: '', hidden: false, keepAlive: true, roles: ['ROOT'] }
-        },
-        {
-          path: 'management',
+          path: '',
           name: 'management',
           component: 'acl/powerManagement',
-          meta: { title: '权限分配', icon: '', hidden: false, keepAlive: true, roles: ['ROOT'] }
+          meta: { title: '权限管理', icon: 'acl', hidden: false, keepAlive: true, roles: ['ROOT'] }
         }
       ]
     },

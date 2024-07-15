@@ -133,15 +133,15 @@ export const useUserStore = defineStore('user', () => {
 
   // 获取用户ID和昵称
   const getPartialUserInfo = async () => {
-    const res = await getUserPartialInformation(userPartialInformation.current as number, 20)
+    const res = await getUserPartialInformation(userPartialInformation.current, 20)
     // 页码递增
-    userPartialInformation.current = (res.data.current as number) + 1
+    userPartialInformation.current = res.data.current + 1
     // 更新其他数据
     userPartialInformation.size = res.data.size
     userPartialInformation.total = res.data.total
     userPartialInformation.pages = res.data.pages
     if (userPartialInformation.records) {
-      userPartialInformation.records.push(...(res.data.records as IUserInformation[]))
+      userPartialInformation.records.push(...res.data.records)
     }
   }
 
