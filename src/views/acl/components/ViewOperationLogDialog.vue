@@ -23,7 +23,7 @@
 </template>
 <script setup lang="ts">
 import { ref } from 'vue'
-import type { IAdminMessage, IAdminLog, IAdminPower } from '@/types/acl/index'
+import type { IAdminLog } from '@/types/acl/index'
 
 const props = defineProps<{
   adminLogList: IAdminLog[]

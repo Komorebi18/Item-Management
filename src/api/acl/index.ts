@@ -1,5 +1,5 @@
 import http from '@/utils/request'
-import { IAdminMessage, IAdminLog } from '@/types/acl/index'
+import { IAdminMessage, IAdminLog, IAdminRole } from '@/types/acl/index'
 import { IPagingData } from '@/types/index'
 
 /**
@@ -77,5 +77,19 @@ export const deleteAdmin = (adminId: number) => {
   return http({
     url: `/admin/delete/${adminId}`,
     method: 'DELETE'
+  })
+}
+
+/**
+ * 修改管理员权限
+ * @param adminId  管理员Id
+ * @param roles  管理员角色
+ * return 成功与否
+ */
+export const modifyAdminAuthority = (adminId: number, roles: IAdminRole[]) => {
+  return http({
+    url: `/admin/modify/${adminId}`,
+    method: 'PUT',
+    data: roles
   })
 }

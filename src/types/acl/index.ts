@@ -55,3 +55,17 @@ export interface IAdminLog {
    */
   modifyTime: string
 }
+
+/**
+ * 管理员权限
+ */
+export interface IAdminRole {
+  /**
+   * 权限id
+   */
+  roleId: number
+  /**
+   * 权限状态，0为不拥有，1为拥有
+   */
+  status: number
+}

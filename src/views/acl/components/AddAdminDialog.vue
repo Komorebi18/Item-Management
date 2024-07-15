@@ -6,12 +6,13 @@
           <img src="../../../assets/logo.png" />
         </div>
         <div class="admin-name">
-          <span>用户名： {{ props.adminMessage.username }}</span>
+          <span>用户名：</span>
+          <el-input v-model="adminAccount" placeholder="请输入管理员账号" />
         </div>
-        <!-- <div class="admin-password">
+        <div class="admin-password">
           <span>密码：</span>
           <el-input v-model="adminPassword" placeholder="请输入管理员密码" />
-        </div> -->
+        </div>
       </div>
       <div class="power-list">
         <div
@@ -19,7 +20,7 @@
           :key="item.roleId"
           :class="{ activeFont: item.status === 1 }"
         >
-          <span>{{ matchRoleName(item.content) }}</span>
+          <span></span>
           <el-switch
             :active-value="1"
             :inactive-value="0"
@@ -41,56 +42,11 @@
 </template>
 <script setup lang="ts">
 import { ref, watch } from 'vue'
-import type { IAdminMessage } from '@/types/acl/index'
-
-const props = defineProps<{
-  // 管理员信息
-  adminMessage: IAdminMessage
-}>()
+import type { IAdminMessage, IAdminLog, IAdminPower } from '@/types/acl/index'
 
 const emit = defineEmits<{
-  confirm: [adminMessage: IAdminMessage]
+  confirm: []
 }>()
-
-// 拷贝一份副本，防止直接修改props
-const adminMessageCopy = ref<IAdminMessage>({ ...props.adminMessage })
-
-// 确保副本初始化赋值成功,同时使用深拷贝
-watch(
-  () => props.adminMessage,
-  (newValue) => {
-    adminMessageCopy.value = JSON.parse(JSON.stringify(newValue))
-  }
-)
-
-// 改变管理员权限
-const changeStatus = (newValue: number, index: number) => {
-  // 实时修改权限
-  adminMessageCopy.value.roles[index].status = newValue
-}
-
-// 根据角色映射对应名称
-const matchRoleName = (roleName: string) => {
-  if (roleName === 'ITEM') {
-    return '物品管理'
-  } else if (roleName === 'USER') {
-    return '用户管理'
-  } else if (roleName === 'NOTICE') {
-    return '系统通知'
-  } else if (roleName === 'FEEDBACK') {
-    return '用户反馈'
-  } else if (roleName === 'NOTICE_AUDIT') {
-    return '通知审核'
-  } else {
-    return '模块未命名'
-  }
-}
-
-// 确认修改管理员权限
-const handleClickConfirm = () => {
-  emit('confirm', adminMessageCopy.value)
-  isOpenDialog.value = false
-}
 
 // 控制对话框开关
 const isOpenDialog = ref(false)
@@ -103,6 +59,7 @@ const openDialog = () => {
 // 向父组件暴露打开对话框方法
 defineExpose({ openDialog })
 </script>
+
 <style lang="scss" scoped>
 .power-list {
   display: flex;

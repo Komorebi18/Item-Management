@@ -43,16 +43,7 @@
             @click="onClickEditAdminPower(props.row)"
             >编辑</el-button
           >
-          <el-button
-            link
-            size="small"
-            class="operation-admin"
-            @click="
-              confirmDialogRef?.openDialog(
-                '是否确认将此管理员删除?\n删除后将无法恢复。',
-                '删除管理员成功'
-              )
-            "
+          <el-button link size="small" class="operation-admin" @click="onClickDeleteBtn(props.row)"
             >删除</el-button
           >
         </template>
@@ -76,16 +67,21 @@
       @load-more="loadMoreAdminLog"
     />
     <!-- 修改管理员权限对话框 -->
-    <EditAdminPowerDialog :admin-message="currentAdminMessage" ref="editAdminPowerDialogRef" />
+    <EditAdminPowerDialog
+      :admin-message="currentAdminMessage"
+      ref="editAdminPowerDialogRef"
+      @confirm="editAdminPower"
+    />
     <!-- 删除确认弹窗 -->
-    <ConfirmDialog ref="confirmDialogRef" />
+    <ConfirmDialog ref="confirmDialogRef" @confirm="deleteAdminAccount" />
   </div>
 </template>
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
-import { ref, onMounted, toRaw } from 'vue'
+import { ref, onMounted } from 'vue'
 import { Plus } from '@element-plus/icons-vue'
 import { useAdminAuthorityStore } from '@/store/modules/acl'
+import { deleteAdmin, addNewAdmin, modifyAdminAuthority } from '@/api/acl'
 import type { IAdminMessage, IAdminLog, IAdminPower } from '@/types/acl/index'
 import type { IPageInfo } from '@/types/pageMessage'
 import Header from '@/views/systemMessage/components/Header.vue'
@@ -138,7 +134,7 @@ const handlePageChange = (pageMessage: IPageInfo) => {
   updateAdminMessageList(page.value.currentPage, page.value.pageLimit, searchKeyword.value)
 }
 
-// 查看管理员日志
+// 点击查看管理员日志按钮
 const onClickViewAdminLog = (data: IAdminMessage) => {
   // 暂存当前管理员信息
   currentAdminMessage.value = data
@@ -146,18 +142,28 @@ const onClickViewAdminLog = (data: IAdminMessage) => {
   viewOperationLogDialogRef.value?.openDialog()
 }
 
-// 查看管理员权限
+// 点击查看管理员权限按钮
 const onClickViewAdminPower = (data: IAdminMessage) => {
   // 暂存当前管理员信息
   currentAdminMessage.value = data
   viewPowerDialogRef.value?.openDialog()
 }
 
-// 编辑管理员的权限
+// 点击编辑管理员的权限按钮
 const onClickEditAdminPower = (data: IAdminMessage) => {
   // 暂存当前管理员信息
   currentAdminMessage.value = data
   editAdminPowerDialogRef.value?.openDialog()
+}
+
+// 点击删除管理员账号按钮
+const onClickDeleteBtn = (data: IAdminMessage) => {
+  // 暂存当前管理员信息
+  currentAdminMessage.value = data
+  confirmDialogRef.value?.openDialog(
+    '是否确认将此管理员删除?\n删除后将无法恢复。',
+    '删除管理员成功'
+  )
 }
 
 // 加载更多管理员日志
@@ -165,6 +171,23 @@ const loadMoreAdminLog = () => {
   if (adminLogList.value.current < adminLogList.value.pages) {
     getAdminLogList(currentAdminMessage.value.adminId)
   }
+}
+
+// 修改管理员权限
+const editAdminPower = async (adminMsg: IAdminMessage) => {
+  const roles = adminMsg.roles.map((role) => {
+    // 使用解构赋值时，通过排除掉要删除的属性名来创建新对象
+    const { content: _, ...newRoles } = role
+    return newRoles // 返回不包含指定属性的新对象
+  })
+  await modifyAdminAuthority(currentAdminMessage.value.adminId, roles)
+  refreshAdminMessageList()
+}
+
+// 删除管理员账号
+const deleteAdminAccount = async () => {
+  await deleteAdmin(currentAdminMessage.value.adminId)
+  refreshAdminMessageList()
 }
 
 const isOpenDialog = ref(false)
@@ -175,6 +198,6 @@ const isOpenDialog = ref(false)
 }
 
 :deep(.el-dialog__body) {
-  padding: 0px 25px;
+  padding: 5px 25px;
 }
 </style>
