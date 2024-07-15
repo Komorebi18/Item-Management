@@ -41,7 +41,7 @@
 </template>
 <script setup lang="ts">
 import { ref, watch } from 'vue'
-import type { IAdminMessage } from '@/types/acl/index'
+import type { IAdminMessage, IAdminPower } from '@/types/acl/index'
 
 const props = defineProps<{
   // 管理员信息
@@ -49,7 +49,7 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
-  confirm: [adminMessage: IAdminMessage]
+  confirm: [adminMessage: IAdminPower[]]
 }>()
 
 // 拷贝一份副本，防止直接修改props
@@ -88,7 +88,7 @@ const matchRoleName = (roleName: string) => {
 
 // 确认修改管理员权限
 const handleClickConfirm = () => {
-  emit('confirm', adminMessageCopy.value)
+  emit('confirm', adminMessageCopy.value.roles)
   isOpenDialog.value = false
 }
 

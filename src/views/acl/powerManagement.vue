@@ -7,7 +7,7 @@
           :icon="Plus"
           class="remove-notice-btn"
           color="#2F3367"
-          @click="editAdminPowerDialogRef?.openDialog()"
+          @click="addAdminDialogRef?.openDialog()"
         >
           添加管理员
         </el-button>
@@ -58,6 +58,8 @@
       @pagination="handlePageChange"
     />
     <!-- 对话框 -->
+    <!-- 新增管理员弹窗 -->
+    <AddAdminDialog ref="addAdminDialogRef" @confirm="addNewAdminAccount" />
     <!-- 查看管理员权限对话框 -->
     <ViewPowerDialog :admin-message="currentAdminMessage" ref="viewPowerDialogRef" />
     <!-- 查看管理员操作日志对话框 -->
@@ -74,6 +76,8 @@
     />
     <!-- 删除确认弹窗 -->
     <ConfirmDialog ref="confirmDialogRef" @confirm="deleteAdminAccount" />
+    <!-- 消息提示框 -->
+    <Toast ref="toastRef" :prompt-message="promptMessage" />
   </div>
 </template>
 <script setup lang="ts">
@@ -88,7 +92,9 @@ import Header from '@/views/systemMessage/components/Header.vue'
 import ViewPowerDialog from '@/views/acl/components/ViewPowerDialog.vue'
 import ViewOperationLogDialog from '@/views/acl/components/ViewOperationLogDialog.vue'
 import EditAdminPowerDialog from '@/views/acl/components/EditAdminPowerDialog.vue'
+import AddAdminDialog from '@/views/acl/components/AddAdminDialog.vue'
 import ConfirmDialog from '@/views/systemMessage/components/ConfirmDialog.vue'
+import Toast from '@/views/systemMessage/components/Toast.vue'
 
 const adminAuthorityStore = useAdminAuthorityStore()
 const { updateAdminMessageList, refreshAdminMessageList, getAdminLogList } = adminAuthorityStore
@@ -98,6 +104,8 @@ onMounted(() => {
   refreshAdminMessageList()
 })
 
+// 获取addAdminDialog实例
+const addAdminDialogRef = ref<InstanceType<typeof AddAdminDialog>>()
 // 获取viewPowerDialog实例
 const viewPowerDialogRef = ref<InstanceType<typeof ViewPowerDialog>>()
 // 获取viewOperationLogDialog实例
@@ -106,9 +114,13 @@ const viewOperationLogDialogRef = ref<InstanceType<typeof ViewOperationLogDialog
 const editAdminPowerDialogRef = ref<InstanceType<typeof EditAdminPowerDialog>>()
 // 获取confirmDialog实例
 const confirmDialogRef = ref<InstanceType<typeof ConfirmDialog>>()
+// 获取toast实例
+const toastRef = ref<InstanceType<typeof Toast>>()
 
 // 搜索关键词
 const searchKeyword = ref('')
+// 消息提示框信息
+const promptMessage = ref('')
 // 当前管理员的信息
 const currentAdminMessage = ref<IAdminMessage>({
   adminId: 0,
@@ -174,23 +186,38 @@ const loadMoreAdminLog = () => {
 }
 
 // 修改管理员权限
-const editAdminPower = async (adminMsg: IAdminMessage) => {
-  const roles = adminMsg.roles.map((role) => {
+const editAdminPower = async (adminRoles: IAdminPower[]) => {
+  const roles = adminRoles.map((role) => {
     // 使用解构赋值时，通过排除掉要删除的属性名来创建新对象
     const { content: _, ...newRoles } = role
     return newRoles // 返回不包含指定属性的新对象
   })
   await modifyAdminAuthority(currentAdminMessage.value.adminId, roles)
-  refreshAdminMessageList()
+  showToast('修改管理员权限成功')
 }
 
 // 删除管理员账号
 const deleteAdminAccount = async () => {
   await deleteAdmin(currentAdminMessage.value.adminId)
-  refreshAdminMessageList()
+  showToast('删除管理员成功')
 }
 
-const isOpenDialog = ref(false)
+// 新增管理员账号
+const addNewAdminAccount = async (account: string, password: string, roles: IAdminPower[]) => {
+  // 先注册账号
+  await addNewAdmin(account, password, '')
+  // 再修改权限
+  await editAdminPower(roles)
+  showToast('成功添加管理员')
+}
+
+// 修改数据后续操作
+const showToast = (toastMsg: string) => {
+  promptMessage.value = toastMsg
+  toastRef.value?.openToast()
+  // 筛选列表数据
+  refreshAdminMessageList()
+}
 </script>
 <style lang="scss" scoped>
 .operation-admin {

@@ -57,9 +57,9 @@ export interface IAdminLog {
 }
 
 /**
- * 管理员权限
+ * 管理员拥有权限
  */
-export interface IAdminRole {
+export interface IPossessedAuthority {
   /**
    * 权限id
    */
@@ -68,4 +68,18 @@ export interface IAdminRole {
    * 权限状态，0为不拥有，1为拥有
    */
   status: number
+}
+
+/**
+ * 查询管理员权限
+ */
+export interface IAllAuthority {
+  /**
+   * 权限id
+   */
+  roleId: number
+  /**
+   * 权限字段
+   */
+  content: string
 }
