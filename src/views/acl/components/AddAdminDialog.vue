@@ -23,7 +23,7 @@
       </div>
       <div class="power-list">
         <div
-          v-for="(item, index) in authorityList"
+          v-for="(item, index) in adminAuthorityCopy"
           :key="item.roleId"
           :class="{ activeFont: item.status === 1 }"
         >
@@ -48,28 +48,29 @@
   </div>
 </template>
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import { getAllAuthority } from '@/api/acl'
+import { ref, watch } from 'vue'
 import type { IAdminPower } from '@/types/acl/index'
 
-const emit = defineEmits<{
-  confirm: [adminAccount: string, adminPassword: string, authorityList: IAdminPower[]]
+const props = defineProps<{
+  // 管理员权限
+  adminAuthority: IAdminPower[]
 }>()
 
-// 初始化所有权限
-onMounted(async () => {
-  const res = await getAllAuthority()
-  authorityList.value = res.data.map((roles) => {
-    return {
-      ...roles, // 展开原对象的属性
-      status: 0 // 添加新属性
-    }
-  })
-  // 剔除超级管理员
-  authorityList.value.shift()
-})
-// 管理员权限
-const authorityList = ref<IAdminPower[]>([])
+const emit = defineEmits<{
+  confirm: [adminAccount: string, adminPassword: string, authorityIdList: number[]]
+}>()
+
+// 拷贝一份副本，防止直接修改props
+const adminAuthorityCopy = ref<IAdminPower[]>([])
+
+// 确保副本初始化赋值成功,同时使用深拷贝
+watch(
+  () => props.adminAuthority,
+  (newValue) => {
+    adminAuthorityCopy.value = JSON.parse(JSON.stringify(newValue))
+  }
+)
+
 // 管理员账号
 const adminAccount = ref('')
 // 管理员密码
@@ -78,6 +79,8 @@ const adminPassword = ref('')
 const isOpenDialog = ref(false)
 // 控制提示文字显示与否
 const isShowToast = ref(false)
+// 管理员权限ID列表
+const authorityIdList = ref<number[]>([])
 
 // 根据角色映射对应名称
 const matchRoleName = (roleName: string) => {
@@ -99,7 +102,7 @@ const matchRoleName = (roleName: string) => {
 // 改变管理员权限
 const changeStatus = (newValue: number, index: number) => {
   // 实时修改权限
-  authorityList.value[index].status = newValue
+  adminAuthorityCopy.value[index].status = newValue
 }
 
 // 确认新增管理员
@@ -108,10 +111,16 @@ const handleClickConfirm = () => {
     return
   } else {
     // 密码最小长度为8位
-    emit('confirm', adminAccount.value, adminPassword.value, authorityList.value)
+    // 筛选出选择权限的ID
+    adminAuthorityCopy.value.forEach((roles) => {
+      if (roles.status === 1) {
+        authorityIdList.value.push(roles.roleId)
+      }
+    })
+    emit('confirm', adminAccount.value, adminPassword.value, authorityIdList.value)
     isOpenDialog.value = false
     // 清空数据
-    authorityList.value = []
+    adminAuthorityCopy.value = []
     adminAccount.value = ''
     adminPassword.value = ''
   }

@@ -53,16 +53,20 @@ export const getAdminAuthority = (adminId: number) => {
 
 /**
  * 添加新管理员
- * @param adminId  管理员Id
+ * @param username  管理员账号名
+ * @param code  管理员密码
+ * @param roles  管理员权限列表
+ * @param avatar  管理员头像
  * return 权限字符串数组
  */
-export const addNewAdmin = (username: string, code: string, avatar: string) => {
+export const addNewAdmin = (username: string, code: string, roles: number[], avatar: string) => {
   return http({
     url: `/admin/add`,
     method: 'POST',
     data: {
       username,
       code,
+      roles,
       avatar
     }
   })

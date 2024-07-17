@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
-import type { IAdminMessage, IAdminLog } from '@/types/acl/index'
+import type { IAdminMessage, IAdminLog, IAdminPower } from '@/types/acl/index'
 import type { IPagingData } from '@/types/index'
-import { getAllAdminMessage, getAdminLog } from '@/api/acl/index'
+import { getAllAdminMessage, getAdminLog, getAllAuthority } from '@/api/acl/index'
 
 // 搜索关键词
 const searchKeyword = ref('')
@@ -33,6 +33,15 @@ export const useAdminAuthorityStore = defineStore('acl', () => {
     pages: 0,
     records: []
   })
+
+  // 管理员权限
+  const adminAuthority = ref<IAdminPower[]>([
+    {
+      roleId: 0,
+      content: '',
+      status: 0
+    }
+  ])
 
   // 更新管理员信息
   const updateAdminMessageList = async (offset: number, limit: number, content: string) => {
@@ -73,11 +82,26 @@ export const useAdminAuthorityStore = defineStore('acl', () => {
     formatLog(adminLogList.value.records)
   }
 
+  // 获取管理员所有权限
+  const getAllAdminAuthority = async () => {
+    const res = await getAllAuthority()
+    adminAuthority.value = res.data.map((roles) => {
+      return {
+        ...roles, // 展开原对象的属性
+        status: 0 // 添加新属性
+      }
+    })
+    // 剔除超级管理员
+    adminAuthority.value.shift()
+  }
+
   return {
     adminMessageList,
     adminLogList,
+    adminAuthority,
     updateAdminMessageList,
     refreshAdminMessageList,
-    getAdminLogList
+    getAdminLogList,
+    getAllAdminAuthority
   }
 })
