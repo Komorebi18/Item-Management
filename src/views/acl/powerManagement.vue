@@ -59,7 +59,11 @@
     />
     <!-- 对话框 -->
     <!-- 新增管理员弹窗 -->
-    <AddAdminDialog ref="addAdminDialogRef" @confirm="addNewAdminAccount" />
+    <AddAdminDialog
+      :admin-authority="adminAuthority"
+      ref="addAdminDialogRef"
+      @confirm="addNewAdminAccount"
+    />
     <!-- 查看管理员权限对话框 -->
     <ViewPowerDialog :admin-message="currentAdminMessage" ref="viewPowerDialogRef" />
     <!-- 查看管理员操作日志对话框 -->
@@ -97,11 +101,13 @@ import ConfirmDialog from '@/views/systemMessage/components/ConfirmDialog.vue'
 import Toast from '@/views/systemMessage/components/Toast.vue'
 
 const adminAuthorityStore = useAdminAuthorityStore()
-const { updateAdminMessageList, refreshAdminMessageList, getAdminLogList } = adminAuthorityStore
-const { adminMessageList, adminLogList } = storeToRefs(adminAuthorityStore)
+const { updateAdminMessageList, refreshAdminMessageList, getAdminLogList, getAllAdminAuthority } =
+  adminAuthorityStore
+const { adminMessageList, adminLogList, adminAuthority } = storeToRefs(adminAuthorityStore)
 
 onMounted(() => {
   refreshAdminMessageList()
+  getAllAdminAuthority()
 })
 
 // 获取addAdminDialog实例
@@ -172,10 +178,7 @@ const onClickEditAdminPower = (data: IAdminMessage) => {
 const onClickDeleteBtn = (data: IAdminMessage) => {
   // 暂存当前管理员信息
   currentAdminMessage.value = data
-  confirmDialogRef.value?.openDialog(
-    '是否确认将此管理员删除?\n删除后将无法恢复。',
-    '删除管理员成功'
-  )
+  confirmDialogRef.value?.openDialog('是否确认将此管理员删除?\n删除后将无法恢复。', '删除成功')
 }
 
 // 加载更多管理员日志
@@ -203,11 +206,8 @@ const deleteAdminAccount = async () => {
 }
 
 // 新增管理员账号
-const addNewAdminAccount = async (account: string, password: string, roles: IAdminPower[]) => {
-  // 先注册账号
-  await addNewAdmin(account, password, '')
-  // 再修改权限
-  await editAdminPower(roles)
+const addNewAdminAccount = async (account: string, password: string, authorityIdList: number[]) => {
+  await addNewAdmin(account, password, authorityIdList, '')
   showToast('成功添加管理员')
 }
 
