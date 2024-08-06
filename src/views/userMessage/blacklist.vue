@@ -69,13 +69,6 @@
     />
     <!-- 拉入/移出确认对话框 -->
     <ConfirmDialog ref="confirmDialogRef" @confirm="confirmOperation" />
-    <!-- 拉入/移出依据填写对话框 -->
-    <CallBackDialog
-      :dialog-title="isViewBlackList ? '移出依据' : '拉入依据'"
-      :comment-title="isViewBlackList ? '移出依据' : '拉入依据'"
-      ref="callBackDialogRef"
-      @confirm="openConfirmDialog"
-    />
     <!-- 查看详情对话框 -->
     <ViewDetailsDialog
       dialog-title="拉入依据"
@@ -93,6 +86,7 @@ import { storeToRefs } from 'pinia'
 import { Plus } from '@element-plus/icons-vue'
 import { useUserBlacklistStore } from '@/store/modules/userManagement/blacklist'
 import { moveInBlacklist, moveOutBlacklist } from '@/api/user'
+import { useModal } from '@/hook/useModal'
 import type { IPageInfo } from '@/types/pageMessage'
 import type { IBlacklistUserInfo } from '@/types/user'
 import Header from '@/views/systemMessage/components/Header.vue'
@@ -106,9 +100,8 @@ const userBlacklistStore = useUserBlacklistStore()
 const { refreshUserList, updateUserList, refreshBlacklistUserList, updateBlacklistUserList } =
   userBlacklistStore
 const { allUserMessage, blacklistUserList } = storeToRefs(userBlacklistStore)
+const { showModal } = useModal()
 
-// 获取callBackDialogRef实例
-const callBackDialogRef = ref<InstanceType<typeof CallBackDialog>>()
 // 获取confirmDialogRef实例
 const confirmDialogRef = ref<InstanceType<typeof ConfirmDialog>>()
 // 获取viewDetailsDialogRef实例
@@ -160,7 +153,11 @@ const openConfirmDialog = (basis: string, imgUrlList: string[]) => {
 // 点击移入/移出黑名单按钮
 const onClickBlacklistChange = (id: number) => {
   currentId.value = id
-  callBackDialogRef.value?.openDialog()
+  showModal(CallBackDialog, {
+    dialogTitle: isViewBlackList.value ? '移出依据' : '拉入依据',
+    commentTitle: isViewBlackList.value ? '移出依据' : '拉入依据',
+    onConfirm: openConfirmDialog
+  })
 }
 
 // 搜索逻辑

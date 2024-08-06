@@ -1,4 +1,7 @@
 import { createRouter, createWebHashHistory, RouteRecordRaw } from 'vue-router'
+import { useModal } from '@/hook/useModal'
+
+const { clearComponentList } = useModal()
 
 export const Layout = () => import('@/layout/index.vue')
 // 静态路由
@@ -65,6 +68,11 @@ const router = createRouter({
   routes: constantRoutes as RouteRecordRaw[],
   // 刷新时，滚动条位置还原
   scrollBehavior: () => ({ left: 0, top: 0 })
+})
+
+// 全局前置守卫
+router.afterEach(() => {
+  clearComponentList()
 })
 
 /**

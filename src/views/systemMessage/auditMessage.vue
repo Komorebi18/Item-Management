@@ -42,7 +42,7 @@
                   src="../../assets/icons/repulse.svg"
                   alt=""
                   class="tooltip-audit"
-                  @click="callBackDialogRef!.openDialog()"
+                  @click="openCallBackDialog"
               /></el-tooltip>
             </div>
             <div class="date">{{ notice.publishTime }}</div>
@@ -62,13 +62,6 @@
     <NoticeDetailWrapper :current-notice-detail="currentNoticeDetail" />
     <!-- 审核通过对话框 -->
     <ConfirmDialog ref="confirmDialogRef" @confirm="passPendingAuditNotice" />
-    <!-- 打回通知对话框 -->
-    <CallBackDialog
-      dialog-title="打回依据"
-      comment-title="审核意见"
-      ref="callBackDialogRef"
-      @confirm="repulseNotice"
-    />
     <!-- 消息提示框 -->
     <Toast ref="toastRef" :prompt-message="toastMessage" />
   </div>
@@ -79,6 +72,7 @@ import { storeToRefs } from 'pinia'
 import { ref, onMounted, computed, watch, toRaw } from 'vue'
 import { useAuditNoticeStore } from '@/store/modules/notice/auditNotice'
 import { useUserStore } from '@/store/modules/user'
+import { useModal } from '@/hook/useModal'
 import { updateNoticeStateToPass, rejectNotice } from '@/api/notice'
 import type { IPageInfo } from '@/types/pageMessage'
 import Header from '@/views/systemMessage/components/Header.vue'
@@ -93,13 +87,12 @@ const userStore = useUserStore()
 
 const { refreshPendingAuditNotice, updatePendingAuditNotice } = auditNoticeStore
 const { pendingAuditNotice } = storeToRefs(auditNoticeStore)
+const { showModal } = useModal()
 
 // 待绑定滚动条组件
 const scrollbarRef = ref<HTMLElement | null>(null)
 // 获取confirmDialog实例
 const confirmDialogRef = ref<InstanceType<typeof ConfirmDialog>>()
-// 获取callBackDialogRef实例
-const callBackDialogRef = ref<InstanceType<typeof CallBackDialog>>()
 // 获取toast实例
 const toastRef = ref<InstanceType<typeof Toast>>()
 // 消息提示框提示信息
@@ -216,6 +209,15 @@ const onChangeTypeLimit = (type: number) => {
     typeLimit.value,
     timeLimit.value
   )
+}
+
+// 打开打回弹窗
+const openCallBackDialog = () => {
+  showModal(CallBackDialog, {
+    dialogTitle: '打回依据',
+    commentTitle: '审核意见',
+    onConfirm: repulseNotice
+  })
 }
 </script>
 
