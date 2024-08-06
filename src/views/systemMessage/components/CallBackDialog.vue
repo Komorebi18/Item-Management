@@ -1,5 +1,12 @@
 <template>
-  <el-dialog v-model="repulseState" width="30%" :title="props.dialogTitle" class="basis-box" center>
+  <el-dialog
+    v-model="repulseState"
+    width="30%"
+    :title="props.dialogTitle"
+    class="basis-box"
+    center
+    @close="emit('close')"
+  >
     <div class="basis">
       <p>{{ props.commentTitle }}:</p>
       <el-input v-model="comment" type="textarea" :resize="'none'" :rows="4" class="basis-input" />
@@ -41,10 +48,12 @@ const props = defineProps<{
 const emit = defineEmits<{
   // 确认按钮点击事件
   confirm: [callbackBasis: string, imgUrlList: string[]]
+  // 关闭弹窗
+  close: []
 }>()
 
 // 控制对话框的开关
-const repulseState = ref(false)
+const repulseState = ref(true)
 
 // 打回通知依据
 const comment = ref('')
@@ -81,11 +90,6 @@ const handleRepulseNotice = async () => {
   fileList.value = []
 }
 
-// 打开对话框
-const openDialog = () => {
-  repulseState.value = true
-}
-
 // 覆盖默认的上传行为
 const httpRequest = async () => {
   // 啥也不做，文件上传腾讯云放到确认后
@@ -96,9 +100,6 @@ const handlePictureCardPreview: UploadProps['onPreview'] = (uploadFile) => {
   dialogImageUrl.value = uploadFile.url!
   dialogVisible.value = true
 }
-
-// 向父组件暴露打开对话框方法
-defineExpose({ openDialog })
 </script>
 <style lang="scss" scoped>
 .basis {
