@@ -86,13 +86,13 @@ import { storeToRefs } from 'pinia'
 import { Plus } from '@element-plus/icons-vue'
 import { useUserBlacklistStore } from '@/store/modules/userManagement/blacklist'
 import { moveInBlacklist, moveOutBlacklist } from '@/api/user'
-import { useModal } from '@/hook/useModal'
+import { showModal } from '@/utils/modal'
 import type { IPageInfo } from '@/types/pageMessage'
 import type { IBlacklistUserInfo } from '@/types/user'
 import Header from '@/views/systemMessage/components/Header.vue'
 import Toast from '@/views/systemMessage/components/Toast.vue'
 import ConfirmDialog from '@/views/systemMessage/components/ConfirmDialog.vue'
-import CallBackDialog from '@/views/systemMessage/components/CallBackDialog.vue'
+import CallBackDialog from '@/views/systemMessage/components/callbackModal'
 import ViewDetailsDialog from '@/views/userMessage/components/ViewDetailsDialog.vue'
 
 const userBlacklistStore = useUserBlacklistStore()
@@ -100,7 +100,6 @@ const userBlacklistStore = useUserBlacklistStore()
 const { refreshUserList, updateUserList, refreshBlacklistUserList, updateBlacklistUserList } =
   userBlacklistStore
 const { allUserMessage, blacklistUserList } = storeToRefs(userBlacklistStore)
-const { showModal } = useModal()
 
 // 获取confirmDialogRef实例
 const confirmDialogRef = ref<InstanceType<typeof ConfirmDialog>>()

@@ -1,7 +1,5 @@
 import { createRouter, createWebHashHistory, RouteRecordRaw } from 'vue-router'
-import { useModal } from '@/hook/useModal'
-
-const { clearComponentList } = useModal()
+import { clearComponentList } from '@/utils/modal'
 
 export const Layout = () => import('@/layout/index.vue')
 // 静态路由

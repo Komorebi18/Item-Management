@@ -41,6 +41,7 @@ declare module '@vue/runtime-core' {
     IEpCloseBold: typeof import('~icons/ep/close-bold')['default']
     IEpSetting: typeof import('~icons/ep/setting')['default']
     LangSelect: typeof import('./../components/LangSelect/index.vue')['default']
+    LoadingModal: typeof import('./../components/LoadingModal/index.vue')['default']
     ModalContainer: typeof import('./../components/ModalContainer/index.vue')['default']
     ModalWrapper: typeof import('./../components/ModalContainer/components/ModalWrapper.vue')['default']
     Pagination: typeof import('./../components/Pagination/index.vue')['default']
