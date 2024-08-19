@@ -72,14 +72,14 @@ import { storeToRefs } from 'pinia'
 import { ref, onMounted, computed, watch, toRaw } from 'vue'
 import { useAuditNoticeStore } from '@/store/modules/notice/auditNotice'
 import { useUserStore } from '@/store/modules/user'
-import { useModal } from '@/hook/useModal'
 import { updateNoticeStateToPass, rejectNotice } from '@/api/notice'
+import { showModal } from '@/utils/modal'
 import type { IPageInfo } from '@/types/pageMessage'
 import Header from '@/views/systemMessage/components/Header.vue'
 import ConfirmDialog from '@/views/systemMessage/components/ConfirmDialog.vue'
 import NoticeDetailWrapper from '@/views/systemMessage/components/NoticeDetailWrapper.vue'
 import Toast from '@/views/systemMessage/components/Toast.vue'
-import CallBackDialog from '@/views/systemMessage/components/CallBackDialog.vue'
+import CallBackModal from '@/views/systemMessage/components/callbackModal'
 
 // store数据
 const auditNoticeStore = useAuditNoticeStore()
@@ -87,7 +87,6 @@ const userStore = useUserStore()
 
 const { refreshPendingAuditNotice, updatePendingAuditNotice } = auditNoticeStore
 const { pendingAuditNotice } = storeToRefs(auditNoticeStore)
-const { showModal } = useModal()
 
 // 待绑定滚动条组件
 const scrollbarRef = ref<HTMLElement | null>(null)
@@ -213,7 +212,7 @@ const onChangeTypeLimit = (type: number) => {
 
 // 打开打回弹窗
 const openCallBackDialog = () => {
-  showModal(CallBackDialog, {
+  showModal(CallBackModal, {
     dialogTitle: '打回依据',
     commentTitle: '审核意见',
     onConfirm: repulseNotice
